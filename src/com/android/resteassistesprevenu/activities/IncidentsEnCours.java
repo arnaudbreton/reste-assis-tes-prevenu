@@ -17,7 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.android.resteassistesprevenu.model.IncidentModel;
-import com.android.resteassistesprevenu.model.adapters.IncidentModelAdapter;
+import com.android.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
 
 public class IncidentsEnCours extends ListActivity {
 
@@ -40,7 +40,7 @@ public class IncidentsEnCours extends ListActivity {
 			e.printStackTrace();
 		}
 		
-		setListAdapter(new IncidentModelAdapter(this, android.R.layout.simple_list_item_1, incidents));
+		setListAdapter(new IncidentModelArrayAdapter(this, android.R.layout.simple_list_item_1, incidents));
 	}
 
 	private String getIncidentsEnCours() throws JSONException {
