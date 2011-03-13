@@ -17,6 +17,13 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 	private ArrayList<IncidentModel> incidents;
 	
 	public IncidentModelArrayAdapter(Context context,
+			int textViewResourceId) {
+		super(context,textViewResourceId);
+
+		this.incidents = new ArrayList<IncidentModel>();
+	}
+	
+	public IncidentModelArrayAdapter(Context context,
 			int textViewResourceId, List<IncidentModel> objects) {
 		super(context,textViewResourceId, objects);
 
@@ -43,4 +50,8 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
              }
              return v;
      }
+	 
+	 public void addIncidents(List<IncidentModel> newIncidents) {
+		 this.incidents.addAll(newIncidents);
+	 }
 }
