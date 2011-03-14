@@ -7,7 +7,7 @@ import android.widget.TabHost;
 
 import com.android.resteassistesprevenu.R;
 
-public class Main extends TabActivity {
+public class HomeActivity extends TabActivity {
 
 	/**
 	 * Référence au TabHost
@@ -24,9 +24,9 @@ public class Main extends TabActivity {
 
 		mTabHost.addTab(mTabHost.newTabSpec("tab_test1")
 				.setIndicator("Incidents en cours")
-				.setContent(new Intent(this, IncidentsEnCours.class)));
+				.setContent(new Intent(this, IncidentsEnCoursActivity.class)));
 		mTabHost.addTab(mTabHost.newTabSpec("tab_test2")
-				.setIndicator("Lignes favorites").setContent(new Intent(this, IncidentsEnCours.class)));
+				.setIndicator("Lignes favorites").setContent(new Intent(this, IncidentsEnCoursActivity.class)));
 
 		mTabHost.setCurrentTab(0);
 	}
