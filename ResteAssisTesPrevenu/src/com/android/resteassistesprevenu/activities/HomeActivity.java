@@ -45,6 +45,7 @@ public class HomeActivity extends TabActivity {
 		setContentView(R.layout.main);
 
 		mTabHost = getTabHost();
+		startService(new Intent(".IncidentsBackgroundService.ACTION"));
 
 		mTabHost.addTab(mTabHost.newTabSpec("tab_test1")
 				.setIndicator("Incidents en cours")
@@ -52,66 +53,6 @@ public class HomeActivity extends TabActivity {
 		mTabHost.addTab(mTabHost.newTabSpec("tab_test2")
 				.setIndicator("Lignes favorites").setContent(new Intent(this, IncidentsEnCoursActivity.class)));
 
-		mTabHost.setCurrentTab(0);
-		
-		startService(new Intent(this, IncidentsBackgroundService.class));
+		mTabHost.setCurrentTab(0);		
 	}
-	
-//	private class LoadIncidentsAsyncTask extends AsyncTask<Void, Void, Void> 
-//	{
-//		private String serviceURLBase = "http://openreact.alwaysdata.net";
-//		private String serviceURLByHour = "/api/incidents.json/hour";
-//		private String serviceURLRunning = "/api/incidents.json/current";
-//
-//		private Context c; 
-//		private ProgressDialog pd;
-//		
-//		public LoadIncidentsAsyncTask(Context c) {
-//			this.c = c;
-//		}
-//		
-//		@Override
-//		protected void onPreExecute() {
-//			super.onPreExecute();
-//			pd = ProgressDialog.show(c, "", "Chargement des incidents en cours");
-//		}
-//		
-//		@Override
-//		protected void onPostExecute(Void result) {
-//			mIncidentsEnCours.	
-//			pd.dismiss();		   
-//		}		
-//		
-//		@Override
-//		protected Void doInBackground(Void... params) {
-//			try {
-//				incidents = IncidentModel.deserializeFromArray(getIncidentsEnCours());
-//			} catch (JSONException e) {
-//				return null;
-//			} catch (ParseException e) {
-//				return null;
-//			}			
-//			
-//			return null;
-//		}
-//		
-//		private String getIncidentsEnCours() throws JSONException {
-//			HttpClient httpclient = new DefaultHttpClient();
-//			HttpGet request = new HttpGet(this.serviceURLBase + this.serviceURLRunning);
-//			String result = null; 		
-//			
-//			ResponseHandler<String> handler = new BasicResponseHandler();
-//			try {
-//				result = httpclient.execute(request, handler);
-//			} catch (ClientProtocolException e) {
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//			httpclient.getConnectionManager().shutdown();
-//			Log.i("ResteAssisTesPrevenu : ", result);
-//			
-//			return result;
-//		}	
-//	}
 }

@@ -18,6 +18,7 @@ public class IncidentModel {
 	private int voteEnded;
 	private String reason;
 	private Date lastModifiedTime;
+	private TypeLigne typeLigne;
 	
 	public IncidentModel() {
 		this.statut = "";
@@ -48,7 +49,8 @@ public class IncidentModel {
 		
 		incidentModel.id = incidentJSON.getInt("uid");
 		incidentModel.statut = incidentJSON.getString("status");
-		incidentModel.ligne = incidentJSON.getString("line_id");
+		incidentModel.typeLigne = getType(incidentJSON.getString("line").split(" ")[0]);
+		incidentModel.ligne = incidentJSON.getString("line").split(" ")[1];;
 		incidentModel.reason = incidentJSON.getString("reason");
 		incidentModel.votePlus = incidentJSON.getInt("vote_plus");
 		incidentModel.voteMinus = incidentJSON.getInt("vote_minus");
@@ -56,6 +58,18 @@ public class IncidentModel {
 		incidentModel.lastModifiedTime = sdf.parse(incidentJSON.getString("last_modified_time"));
 		
 		return incidentModel;
+	}
+
+	private static TypeLigne getType(String typeLigne) {
+		if(typeLigne.equals("RER")) {
+			return TypeLigne.RER;
+		}
+		else if(typeLigne.equals("Metro")) {
+			return TypeLigne.METRO;
+		}
+		else {
+			return TypeLigne.TRANSILIEN;
+		}
 	}
 
 	/**
@@ -168,5 +182,13 @@ public class IncidentModel {
 	 */
 	public void setLigne(String ligne) {
 		this.ligne = ligne;
+	}
+
+	public TypeLigne getTypeLigne() {
+		return typeLigne;
+	}
+
+	public void setTypeLigne(TypeLigne typeLigne) {
+		this.typeLigne = typeLigne;
 	}
 }

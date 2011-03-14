@@ -3,6 +3,7 @@ package com.android.resteassistesprevenu.services;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -20,21 +21,18 @@ import android.util.Log;
 
 import com.android.resteassistesprevenu.model.IncidentModel;
 
-public class IncidentsBackgroundService extends Service {
+public class IncidentsBackgroundService extends Service implements IIncidentsBackgroundService {
+
+	private static final String CURRENT = "current";
+
+	private static final Object HOUR = "hour";
 
 	private ArrayList<IncidentModel> incidents;
 	
 	private String serviceURLBase = "http://openreact.alwaysdata.net";
-	private String serviceURLByHour = "/api/incidents.json/hour";
-	private String serviceURLRunning = "/api/incidents.json/current";
-	
-	private IncidentsBackgroundServiceBinder mBinder;
-	
-	public class IncidentsBackgroundServiceBinder extends Binder {
-		public IncidentsBackgroundService getService() {
-            return IncidentsBackgroundService.this;
-        }
-	}
+	private String jsonURL = "/api/incidents.json/";
+
+	private IncidentBackgroundServiceBinder mBinder;
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -44,22 +42,12 @@ public class IncidentsBackgroundService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		this.mBinder = new IncidentsBackgroundServiceBinder();
+		this.mBinder = new IncidentBackgroundServiceBinder(this);
 	}
 	
 	  @Override
 	    public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
-		
-		try {
-			this.incidents = IncidentModel.deserializeFromArray(getIncidentsEnCours());
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		return START_STICKY;
 	}
@@ -70,9 +58,10 @@ public class IncidentsBackgroundService extends Service {
 		super.onDestroy();
 	}
 	
-	private String getIncidentsEnCours() throws JSONException {
+	private String getIncidentsEnCoursFromService(String scope) {
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpGet request = new HttpGet(this.serviceURLBase + this.serviceURLRunning);
+
+		HttpGet request = new HttpGet(this.serviceURLBase + this.jsonURL + scope);
 		String result = null; 		
 		
 		ResponseHandler<String> handler = new BasicResponseHandler();
@@ -88,11 +77,49 @@ public class IncidentsBackgroundService extends Service {
 		
 		return result;
 	}
+	
+	public ArrayList<IncidentModel> getIncidentsEnCours() {
+		try {
+			return IncidentModel.deserializeFromArray(getIncidentsEnCoursFromService(CURRENT));
+		} catch (Exception e) {
+			Log.e("IncidentsBackgroundService","Erreur au chargement des incidents : " + e.getMessage());
+			return new ArrayList<IncidentModel>();
+		}	
+	}
 
-	/**
-	 * @return the incidents
-	 */
-	public ArrayList<IncidentModel> getIncidents() {
-		return incidents;
-	}	
+	
+	private void setIncidents(ArrayList<IncidentModel> incidents) {
+		if(this.incidents == null) {
+			this.incidents = new ArrayList<IncidentModel>();
+		}
+		
+		this.incidents.clear();
+		this.incidents.addAll(incidents);
+	}
+
+	private List<IIncidentsBackgroundServiceListener> listeners = null; 
+	 
+	// Ajout d'un listener 
+	public void addListener(IIncidentsBackgroundServiceListener listener) { 
+	    if(listeners == null){ 
+	        listeners = new ArrayList<IIncidentsBackgroundServiceListener>(); 
+	    } 
+	    listeners.add(listener); 
+	} 
+	 
+	// Suppression d'un listener 
+	public void removeListener(IIncidentsBackgroundServiceListener listener) { 
+	    if(listeners != null){ 
+	        listeners.remove(listener); 
+	    } 
+	} 
+	 
+	// Notification des listeners 
+	private void fireDataChanged(Object data){ 
+	    if(listeners != null){ 
+	        for(IIncidentsBackgroundServiceListener listener: listeners){ 
+	            listener.dataChanged(data); 
+	        } 
+	    } 
+	}
 }
