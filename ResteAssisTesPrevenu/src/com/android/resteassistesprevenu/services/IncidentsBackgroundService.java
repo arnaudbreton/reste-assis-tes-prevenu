@@ -12,12 +12,13 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 
-import com.android.resteassistesprevenu.model.IncidentModel;
-
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.android.resteassistesprevenu.model.IncidentModel;
 
 public class IncidentsBackgroundService extends Service {
 
@@ -27,20 +28,28 @@ public class IncidentsBackgroundService extends Service {
 	private String serviceURLByHour = "/api/incidents.json/hour";
 	private String serviceURLRunning = "/api/incidents.json/current";
 	
+	private IncidentsBackgroundServiceBinder mBinder;
+	
+	public class IncidentsBackgroundServiceBinder extends Binder {
+		public IncidentsBackgroundService getService() {
+            return IncidentsBackgroundService.this;
+        }
+	}
+	
 	@Override
 	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.mBinder;
 	}
 
 	@Override
 	public void onCreate() {
-		super.onCreate();		
+		super.onCreate();
+		this.mBinder = new IncidentsBackgroundServiceBinder();
 	}
 	
-	@Override
-	public void onStart(Intent intent, int startId) {
-		super.onStart(intent, startId);
+	  @Override
+	    public int onStartCommand(Intent intent, int flags, int startId) {
+		super.onStartCommand(intent, flags, startId);
 		
 		try {
 			this.incidents = IncidentModel.deserializeFromArray(getIncidentsEnCours());
@@ -51,6 +60,8 @@ public class IncidentsBackgroundService extends Service {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		return START_STICKY;
 	}
 	
 	@Override
@@ -76,5 +87,12 @@ public class IncidentsBackgroundService extends Service {
 		Log.i("ResteAssisTesPrevenu : ", result);
 		
 		return result;
+	}
+
+	/**
+	 * @return the incidents
+	 */
+	public ArrayList<IncidentModel> getIncidents() {
+		return incidents;
 	}	
 }
