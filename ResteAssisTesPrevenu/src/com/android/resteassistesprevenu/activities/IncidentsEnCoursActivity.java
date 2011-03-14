@@ -23,7 +23,7 @@ import com.android.resteassistesprevenu.R;
 import com.android.resteassistesprevenu.model.IncidentModel;
 import com.android.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
 
-public class IncidentsEnCours extends ListActivity {	
+public class IncidentsEnCoursActivity extends ListActivity {	
 	
 	private ProgressDialog pd; 
 	private ArrayList<IncidentModel> incidents;
@@ -62,7 +62,7 @@ public class IncidentsEnCours extends ListActivity {
 			pd.dismiss();
 			
 		    setListAdapter(new IncidentModelArrayAdapter(  
-                    IncidentsEnCours.this, R.layout.incident_item_view, incidents));  
+                    IncidentsEnCoursActivity.this, R.layout.incident_item_view, incidents));  
 		}		
 		
 		@Override
