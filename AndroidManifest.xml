@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.android.resteassistesprevenu"
-      android:versionCode="1"
-      android:versionName="1.0">
-      <uses-permission
-        android:name="android.permission.INTERNET" />
-        <uses-permission
-        android:name="android.permission." />
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <activity android:name=".activities.Main"
-                  android:label="@string/app_name"
-                  android:configChanges="keyboardHidden|orientation">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-		        <activity android:name=".activities.IncidentsEnCours"
-                  android:label="@string/app_name"
-                  android:configChanges="keyboardHidden|orientation">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <service android:name=".IncidentsBackgroundService" /> 
-    </application>
-
-
-
-
+	package="com.android.resteassistesprevenu" android:versionCode="1"
+	android:versionName="1.0">
+	<uses-permission android:name="android.permission.INTERNET" />
+	<application android:icon="@drawable/icon" android:label="@string/app_name">
+		<activity android:name=".activities.HomeActivity"
+			android:label="@string/app_name" android:configChanges="keyboardHidden|orientation">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity android:name=".activities.IncidentsEnCoursActivity"
+			android:label="@string/app_name" android:configChanges="keyboardHidden|orientation">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<service android:name=".services.IncidentsBackgroundService">
+			<intent-filter>
+				<action android:name=".IncidentsBackgroundService.ACTION" />
+			</intent-filter>
+		</service>
+	</application>
 </manifest> 
