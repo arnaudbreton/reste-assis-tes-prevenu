@@ -1,11 +1,9 @@
 package com.android.resteassistesprevenu.activities;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,28 +45,35 @@ public class IncidentsEnCoursActivity extends Activity {
 		
 		mBtnEnCours = (Button) this.findViewById(R.id.radioEnCours);
 		mBtnHeure = (Button) this.findViewById(R.id.radioHeure);
-		mBtnMinute = (Button) this.findViewById(R.id.radioMinute);
+		mBtnMinute = (Button) this.findViewById(R.id.radioMinute);		
 		
-		View.OnClickListener loadingIncidentsClickListener = new View.OnClickListener() {			
+		mBtnEnCours.setOnClickListener(new View.OnClickListener() {			
 			@Override
 			public void onClick(View v) {
-				if(mBoundService != null) {
-					loadingDialog = ProgressDialog.show(IncidentsEnCoursActivity.this, "", "Chargement des incidents en cours...");
-					mBoundService.startGetIncidentsEnCoursAsync();
-				}
+				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
 			}
-		};		
+		});
 		
-		mBtnEnCours.setOnClickListener(loadingIncidentsClickListener);
-		mBtnHeure.setOnClickListener(loadingIncidentsClickListener);
-		mBtnMinute.setOnClickListener(loadingIncidentsClickListener);
+		mBtnHeure.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_HOUR);
+			}
+		});
+		
+		mBtnMinute.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_MINUTE);
+			}
+		});
 		
 		ServiceConnection connection = new ServiceConnection() {
 		    public void onServiceConnected(ComponentName className, IBinder service) {
 		        Log.i("BackgroundService", "Connected!"); 
 		    	mBoundService = ((IncidentBackgroundServiceBinder)service).getService();
 		    	
-		    	mBoundService.startGetIncidentsEnCoursAsync();
+		    	startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
 		    	
 		        mBoundService.addListener(new IIncidentsBackgroundServiceListener() {			
 					@Override
@@ -97,7 +102,7 @@ public class IncidentsEnCoursActivity extends Activity {
 	 */
 	public List<IncidentModel> getIncidents() {
 		return incidents;
-	}
+	}	
 
 	/**
 	 * @param incidents the incidents to set
@@ -110,5 +115,10 @@ public class IncidentsEnCoursActivity extends Activity {
 		this.incidents.clear();		
 		this.incidents.addAll(incidents);
 		mAdapter.notifyDataSetChanged();
+	}
+	
+	private void startGetIncidentsFromServiceAsync(String scope) {
+		loadingDialog = ProgressDialog.show(IncidentsEnCoursActivity.this, "", "Chargement des incidents en cours...");
+		mBoundService.startGetIncidentsAsync(scope);
 	}
 }

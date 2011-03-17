@@ -20,6 +20,21 @@ public class IncidentModel {
 	private Date lastModifiedTime;
 	private TypeLigne typeLigne;
 	
+	/**
+	 * Scope "current" du WebService : incidents en cours
+	 */
+	public static final String SCOPE_CURRENT = "current";
+
+	/**
+	 * Scope "hour" du WebService : incidents en cours de l'heure
+	 */
+	public static final String SCOPE_HOUR = "hour";
+	
+	/**
+	 * Scope "hour" du WebService : incidents en cours des dernières minutes
+	 */
+	public static final String SCOPE_MINUTE = "minute";
+	
 	public IncidentModel() {
 		this.statut = "";
 		id = -1;
