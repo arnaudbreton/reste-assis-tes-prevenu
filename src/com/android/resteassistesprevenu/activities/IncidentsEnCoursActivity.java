@@ -18,64 +18,39 @@ import android.widget.Button;
 import com.android.resteassistesprevenu.R;
 import com.android.resteassistesprevenu.model.IncidentModel;
 import com.android.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
-import com.android.resteassistesprevenu.services.IIncidentsBackgroundService;
-import com.android.resteassistesprevenu.services.IIncidentsBackgroundServiceListener;
-import com.android.resteassistesprevenu.services.IncidentBackgroundServiceBinder;
+import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
+import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
+import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundServiceListener;
+import com.android.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
 
 public class IncidentsEnCoursActivity extends Activity {
 	
 	private List<IncidentModel> incidents;
 	private IncidentModelArrayAdapter mAdapter;	
-	private IIncidentsBackgroundService mBoundService;
+	private IIncidentsTransportsBackgroundService mBoundService;
 	
 	private Button mBtnEnCours;
 	private Button mBtnHeure;
 	private Button mBtnMinute;
+	private Button mBtnAddIncident;
 	
 	private ProgressDialog loadingDialog;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.incidents_en_cours_view);
+		setContentView(R.layout.incidents_en_cours_view);		
 		
-		this.incidents = new ArrayList<IncidentModel>();
-		this.mAdapter = new IncidentModelArrayAdapter(IncidentsEnCoursActivity.this, R.id.listViewIncidentEnCours, this.incidents);
-		((android.widget.ListView) this.findViewById(R.id.listViewIncidentEnCours)).setAdapter(mAdapter);		
-		
-		mBtnEnCours = (Button) this.findViewById(R.id.radioEnCours);
-		mBtnHeure = (Button) this.findViewById(R.id.radioHeure);
-		mBtnMinute = (Button) this.findViewById(R.id.radioMinute);		
-		
-		mBtnEnCours.setOnClickListener(new View.OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
-			}
-		});
-		
-		mBtnHeure.setOnClickListener(new View.OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_HOUR);
-			}
-		});
-		
-		mBtnMinute.setOnClickListener(new View.OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_MINUTE);
-			}
-		});
+		initialize();
 		
 		ServiceConnection connection = new ServiceConnection() {
 		    public void onServiceConnected(ComponentName className, IBinder service) {
 		        Log.i("BackgroundService", "Connected!"); 
-		    	mBoundService = ((IncidentBackgroundServiceBinder)service).getService();
+		    	mBoundService = ((IncidentsTransportsBackgroundServiceBinder)service).getService();
 		    	
 		    	startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
 		    	
-		        mBoundService.addListener(new IIncidentsBackgroundServiceListener() {			
+		        mBoundService.addListener(new IIncidentsTransportsBackgroundServiceListener() {			
 					@Override
 					public void dataChanged(Object o) {
 						try {
@@ -90,11 +65,51 @@ public class IncidentsEnCoursActivity extends Activity {
 		        });
 		    }
 
-		    public void onServiceDisconnected(ComponentName className) {		
+		    public void onServiceDisconnected(ComponentName className) 
+		    {		
 		    }
 		};
 		
 		getApplicationContext().bindService(new Intent(".IncidentsBackgroundService.ACTION"), connection, Context.BIND_AUTO_CREATE);
+	}
+	
+	private void initialize() {
+		this.mBtnEnCours = (Button) this.findViewById(R.id.radioEnCours);
+		this.mBtnHeure = (Button) this.findViewById(R.id.radioHeure);
+		this.mBtnMinute = (Button) this.findViewById(R.id.radioMinute);		
+		this.mBtnAddIncident = (Button) this.findViewById(R.id.btnAjouterIncident);		
+
+		this.incidents = new ArrayList<IncidentModel>();
+		this.mAdapter = new IncidentModelArrayAdapter(IncidentsEnCoursActivity.this, R.id.listViewIncidentEnCours, this.incidents);
+		((android.widget.ListView) this.findViewById(R.id.listViewIncidentEnCours)).setAdapter(mAdapter);		
+		
+		this.mBtnAddIncident.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(IncidentsEnCoursActivity.this, NewIncidentActivity.class));
+			}
+		});
+		
+		this.mBtnEnCours.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
+			}
+		});
+		
+		this.mBtnHeure.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_HOUR);
+			}
+		});
+		
+		this.mBtnMinute.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_MINUTE);
+			}
+		});
 	}
 	
 	/**
