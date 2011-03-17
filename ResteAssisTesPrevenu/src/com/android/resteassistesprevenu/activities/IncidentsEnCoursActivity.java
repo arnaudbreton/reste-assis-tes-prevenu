@@ -1,10 +1,12 @@
 package com.android.resteassistesprevenu.activities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +31,10 @@ public class IncidentsEnCoursActivity extends Activity {
 	private IIncidentsBackgroundService mBoundService;
 	
 	private Button mBtnEnCours;
+	private Button mBtnHeure;
+	private Button mBtnMinute;
+	
+	private ProgressDialog loadingDialog;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,36 +43,44 @@ public class IncidentsEnCoursActivity extends Activity {
 		
 		this.incidents = new ArrayList<IncidentModel>();
 		this.mAdapter = new IncidentModelArrayAdapter(IncidentsEnCoursActivity.this, R.id.listViewIncidentEnCours, this.incidents);
-		((android.widget.ListView) this.findViewById(R.id.listViewIncidentEnCours)).setAdapter(mAdapter);
+		((android.widget.ListView) this.findViewById(R.id.listViewIncidentEnCours)).setAdapter(mAdapter);		
 		
-		mBtnEnCours = (Button) this.findViewById(R.id.radio0);
-		mBtnEnCours.setOnClickListener(new View.OnClickListener() {
-			
+		mBtnEnCours = (Button) this.findViewById(R.id.radioEnCours);
+		mBtnHeure = (Button) this.findViewById(R.id.radioHeure);
+		mBtnMinute = (Button) this.findViewById(R.id.radioMinute);
+		
+		View.OnClickListener loadingIncidentsClickListener = new View.OnClickListener() {			
 			@Override
 			public void onClick(View v) {
 				if(mBoundService != null) {
-					setIncidents(mBoundService.getIncidentsEnCours());
-			    	mAdapter.notifyDataSetChanged();	
+					loadingDialog = ProgressDialog.show(IncidentsEnCoursActivity.this, "", "Chargement des incidents en cours...");
+					mBoundService.startGetIncidentsEnCoursAsync();
 				}
 			}
-		});
+		};		
 		
-
+		mBtnEnCours.setOnClickListener(loadingIncidentsClickListener);
+		mBtnHeure.setOnClickListener(loadingIncidentsClickListener);
+		mBtnMinute.setOnClickListener(loadingIncidentsClickListener);
 		
 		ServiceConnection connection = new ServiceConnection() {
 		    public void onServiceConnected(ComponentName className, IBinder service) {
 		        Log.i("BackgroundService", "Connected!"); 
 		    	mBoundService = ((IncidentBackgroundServiceBinder)service).getService();
 		    	
-		    	setIncidents(mBoundService.getIncidentsEnCours());
-		    	mAdapter.notifyDataSetChanged();
+		    	mBoundService.startGetIncidentsEnCoursAsync();
 		    	
 		        mBoundService.addListener(new IIncidentsBackgroundServiceListener() {			
 					@Override
 					public void dataChanged(Object o) {
-						incidents.clear();					
-						incidents.addAll((ArrayList<IncidentModel>) o);		
-						mAdapter.notifyDataSetChanged();
+						try {
+							ArrayList<IncidentModel> incidentsService = (ArrayList<IncidentModel>) o;
+							setIncidents(incidentsService);
+							loadingDialog.dismiss();
+						}
+						catch(Exception e) {
+							Log.e("ResteAssisTesPrevenu : ", "Problème de conversion en retour du service", e);
+						}						
 					}
 		        });
 		    }
@@ -89,7 +103,12 @@ public class IncidentsEnCoursActivity extends Activity {
 	 * @param incidents the incidents to set
 	 */
 	public void setIncidents(List<IncidentModel> incidents) {
+		if(this.incidents == null) {
+			this.incidents = new ArrayList<IncidentModel>();
+		}
+		
 		this.incidents.clear();		
 		this.incidents.addAll(incidents);
+		mAdapter.notifyDataSetChanged();
 	}
 }

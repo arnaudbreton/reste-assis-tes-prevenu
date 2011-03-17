@@ -15,7 +15,7 @@ import org.json.JSONException;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -23,11 +23,44 @@ import com.android.resteassistesprevenu.model.IncidentModel;
 
 public class IncidentsBackgroundService extends Service implements IIncidentsBackgroundService {
 
-	private static final String CURRENT = "current";
+	/**
+	 * Scope "current" du WebService : incidents en cours
+	 */
+	private static final String SCOPE_CURRENT = "current";
 
-	private static final Object HOUR = "hour";
+	/**
+	 * Scope "hour" du WebService : incidents en cours de l'heure
+	 */
+	private static final String SCOPE_HOUR = "hour";
+	
+	/**
+	 * Scope "hour" du WebService : incidents en cours des dernières minutes
+	 */
+	private static final String SCOPE_MINUTE = "minute";
 
-	private ArrayList<IncidentModel> incidents;
+	/**
+	 * AsyncTask de récupération des incidents
+	 *
+	 */
+	private class LoadIncidentsAsyncTask extends AsyncTask<String, Void, List<IncidentModel>> {
+
+		@Override
+		protected List<IncidentModel> doInBackground(String... params) {		
+			try {			
+				return IncidentModel.deserializeFromArray(getIncidentsEnCoursFromService(params[0]));
+			} catch (Exception e) {
+				Log.e("ResteAssisTesPrevenu", "Erreur au chargement des incidents par le service", e);
+				return new ArrayList<IncidentModel>();
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(List<IncidentModel> result) {
+			super.onPostExecute(result);
+			fireDataChanged(result);
+		}
+	}
+
 	
 	private String serviceURLBase = "http://openreact.alwaysdata.net";
 	private String jsonURL = "/api/incidents.json/";
@@ -54,9 +87,8 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 	
 	@Override
 	public void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
-	}
+	}		
 	
 	private String getIncidentsEnCoursFromService(String scope) {
 		HttpClient httpclient = new DefaultHttpClient();
@@ -78,23 +110,19 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 		return result;
 	}
 	
-	public ArrayList<IncidentModel> getIncidentsEnCours() {
-		try {
-			return IncidentModel.deserializeFromArray(getIncidentsEnCoursFromService(CURRENT));
-		} catch (Exception e) {
-			Log.e("IncidentsBackgroundService","Erreur au chargement des incidents : " + e.getMessage());
-			return new ArrayList<IncidentModel>();
-		}	
+	@Override
+	public void startGetIncidentsEnCoursAsync() {				
+		new LoadIncidentsAsyncTask().execute(SCOPE_CURRENT);
+	}
+	
+	@Override
+	public void startGetIncidentsMinuteAsync() {
+		new LoadIncidentsAsyncTask().execute(SCOPE_MINUTE);		
 	}
 
-	
-	private void setIncidents(ArrayList<IncidentModel> incidents) {
-		if(this.incidents == null) {
-			this.incidents = new ArrayList<IncidentModel>();
-		}
-		
-		this.incidents.clear();
-		this.incidents.addAll(incidents);
+	@Override
+	public void startGetIncidentsHeureAsync() {
+		new LoadIncidentsAsyncTask().execute(SCOPE_HOUR);				
 	}
 
 	private List<IIncidentsBackgroundServiceListener> listeners = null; 
@@ -122,4 +150,6 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 	        } 
 	    } 
 	}
+
+
 }
