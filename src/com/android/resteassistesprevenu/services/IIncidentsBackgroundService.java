@@ -1,12 +1,22 @@
 package com.android.resteassistesprevenu.services;
 
-import java.util.List;
-
-import com.android.resteassistesprevenu.model.IncidentModel;
-
 public interface IIncidentsBackgroundService {
-	 public void addListener(IIncidentsBackgroundServiceListener listener); 
-	 public void removeListener(IIncidentsBackgroundServiceListener listener);
-	 
-	 public List<IncidentModel> getIncidentsEnCours();
+	public void addListener(IIncidentsBackgroundServiceListener listener);
+
+	public void removeListener(IIncidentsBackgroundServiceListener listener);
+
+	/**
+	 * Recherche des incidents en cours, asynchrone
+	 */
+	public void startGetIncidentsEnCoursAsync();
+
+	/**
+	 * Recherche des incidents des dernières minutes, asynchrone
+	 */
+	public void startGetIncidentsMinuteAsync();
+
+	/**
+	 * Recherche des incidents de l'heure, asynchrone
+	 */
+	public void startGetIncidentsHeureAsync();
 }
