@@ -19,7 +19,7 @@ import android.util.Log;
 
 import com.android.resteassistesprevenu.model.IncidentModel;
 
-public class IncidentsBackgroundService extends Service implements IIncidentsBackgroundService {
+public class IncidentsTransportsBackgroundService extends Service implements IIncidentsTransportsBackgroundService {
 
 	/**
 	 * AsyncTask de récupération des incidents
@@ -43,12 +43,35 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 			fireDataChanged(result);
 		}
 	}
-
 	
-	private String serviceURLBase = "http://openreact.alwaysdata.net";
-	private String jsonURL = "/api/incidents.json/";
+	/**
+	 * AsyncTask de récupération des incidents
+	 *
+	 */
+	private class LoadLignesAsyncTask extends AsyncTask<Void, Void, List<String>> {
 
-	private IncidentBackgroundServiceBinder mBinder;
+		@Override
+		protected List<String> doInBackground(Void... params) {		
+			try {			
+				return new ArrayList<String>();
+			} catch (Exception e) {
+				Log.e("ResteAssisTesPrevenu", "Erreur au chargement des incidents par le service", e);
+				return new ArrayList<String>();
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(List<String> result) {
+			super.onPostExecute(result);
+			fireDataChanged(result);
+		}
+	}
+	
+	private static String SERVICE_PRE_PRODUCTION_URL_BASE = "http://openreact.alwaysdata.net/api";
+	private static String INCIDENTS_JSON_URL = "/incidents.json/";
+	private static String LIGNES_JSON_URL = "/ligne";
+
+	private IncidentsTransportsBackgroundServiceBinder mBinder;
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -58,7 +81,7 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		this.mBinder = new IncidentBackgroundServiceBinder(this);
+		this.mBinder = new IncidentsTransportsBackgroundServiceBinder(this);
 	}
 	
 	  @Override
@@ -74,9 +97,16 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 	}		
 	
 	private String getIncidentsEnCoursFromService(String scope) {
+		return getFromService(new HttpGet(SERVICE_PRE_PRODUCTION_URL_BASE + INCIDENTS_JSON_URL));
+	}
+	
+	private String getLignesFromService() {
+		return getFromService(new HttpGet(SERVICE_PRE_PRODUCTION_URL_BASE + LIGNES_JSON_URL));
+	}
+	
+	private String getFromService(HttpGet request) {
 		HttpClient httpclient = new DefaultHttpClient();
 
-		HttpGet request = new HttpGet(this.serviceURLBase + this.jsonURL + scope);
 		String result = null; 		
 		
 		ResponseHandler<String> handler = new BasicResponseHandler();
@@ -98,18 +128,18 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 		new LoadIncidentsAsyncTask().execute(scope);				
 	}
 
-	private List<IIncidentsBackgroundServiceListener> listeners = null; 
+	private List<IIncidentsTransportsBackgroundServiceListener> listeners = null; 
 	 
 	// Ajout d'un listener 
-	public void addListener(IIncidentsBackgroundServiceListener listener) { 
+	public void addListener(IIncidentsTransportsBackgroundServiceListener listener) { 
 	    if(listeners == null){ 
-	        listeners = new ArrayList<IIncidentsBackgroundServiceListener>(); 
+	        listeners = new ArrayList<IIncidentsTransportsBackgroundServiceListener>(); 
 	    } 
 	    listeners.add(listener); 
 	} 
 	 
 	// Suppression d'un listener 
-	public void removeListener(IIncidentsBackgroundServiceListener listener) { 
+	public void removeListener(IIncidentsTransportsBackgroundServiceListener listener) { 
 	    if(listeners != null){ 
 	        listeners.remove(listener); 
 	    } 
@@ -118,10 +148,16 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 	// Notification des listeners 
 	private void fireDataChanged(Object data){ 
 	    if(listeners != null){ 
-	        for(IIncidentsBackgroundServiceListener listener: listeners){ 
+	        for(IIncidentsTransportsBackgroundServiceListener listener: listeners){ 
 	            listener.dataChanged(data); 
 	        } 
 	    } 
+	}
+
+	@Override
+	public void startGetLignesAsync() {
+		// TODO Auto-generated method stub
+		
 	}
 
 
