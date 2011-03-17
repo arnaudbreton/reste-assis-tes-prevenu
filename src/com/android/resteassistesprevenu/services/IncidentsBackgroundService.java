@@ -1,7 +1,6 @@
 package com.android.resteassistesprevenu.services;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
 
 import android.app.Service;
 import android.content.Intent;
@@ -22,21 +20,6 @@ import android.util.Log;
 import com.android.resteassistesprevenu.model.IncidentModel;
 
 public class IncidentsBackgroundService extends Service implements IIncidentsBackgroundService {
-
-	/**
-	 * Scope "current" du WebService : incidents en cours
-	 */
-	private static final String SCOPE_CURRENT = "current";
-
-	/**
-	 * Scope "hour" du WebService : incidents en cours de l'heure
-	 */
-	private static final String SCOPE_HOUR = "hour";
-	
-	/**
-	 * Scope "hour" du WebService : incidents en cours des dernières minutes
-	 */
-	private static final String SCOPE_MINUTE = "minute";
 
 	/**
 	 * AsyncTask de récupération des incidents
@@ -109,20 +92,10 @@ public class IncidentsBackgroundService extends Service implements IIncidentsBac
 		
 		return result;
 	}
-	
-	@Override
-	public void startGetIncidentsEnCoursAsync() {				
-		new LoadIncidentsAsyncTask().execute(SCOPE_CURRENT);
-	}
-	
-	@Override
-	public void startGetIncidentsMinuteAsync() {
-		new LoadIncidentsAsyncTask().execute(SCOPE_MINUTE);		
-	}
 
 	@Override
-	public void startGetIncidentsHeureAsync() {
-		new LoadIncidentsAsyncTask().execute(SCOPE_HOUR);				
+	public void startGetIncidentsAsync(String scope) {
+		new LoadIncidentsAsyncTask().execute(scope);				
 	}
 
 	private List<IIncidentsBackgroundServiceListener> listeners = null; 
