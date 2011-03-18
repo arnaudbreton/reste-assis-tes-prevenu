@@ -25,10 +25,11 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<service android:name=".services.IncidentsBackgroundService">
+		<service android:name=".services.IncidentsTransportsBackgroundService">
 			<intent-filter>
 				<action android:name=".IncidentsBackgroundService.ACTION" />
 			</intent-filter>
 		</service>
+		<provider android:name=".content_provider.DefaultContentProvider" android:authorities="com.android.resteassistesprevenu.content_provider" />		
 	</application>
 </manifest> 
