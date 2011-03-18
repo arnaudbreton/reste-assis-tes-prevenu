@@ -19,9 +19,8 @@ import com.android.resteassistesprevenu.R;
 import com.android.resteassistesprevenu.model.IncidentModel;
 import com.android.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
 import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundServiceListener;
 import com.android.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 
 public class IncidentsEnCoursActivity extends Activity {
 	
@@ -50,11 +49,10 @@ public class IncidentsEnCoursActivity extends Activity {
 		    	
 		    	startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
 		    	
-		        mBoundService.addListener(new IIncidentsTransportsBackgroundServiceListener() {			
+		        mBoundService.addGetIncidentsListener(new IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener() {			
 					@Override
-					public void dataChanged(Object o) {
+					public void dataChanged(List<IncidentModel> incidentsService) {
 						try {
-							ArrayList<IncidentModel> incidentsService = (ArrayList<IncidentModel>) o;
 							setIncidents(incidentsService);
 							loadingDialog.dismiss();
 						}

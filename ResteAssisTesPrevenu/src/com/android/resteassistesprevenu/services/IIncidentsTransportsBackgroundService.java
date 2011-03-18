@@ -1,8 +1,14 @@
 package com.android.resteassistesprevenu.services;
 
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
+
 public interface IIncidentsTransportsBackgroundService {	
-	public void addListener(IIncidentsTransportsBackgroundServiceListener listener);
-	public void removeListener(IIncidentsTransportsBackgroundServiceListener listener);
+	public void addGetIncidentsListener(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener);
+	public void removeGetIncidentsListener(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener);
+	
+	public void addGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener);
+	public void removeGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener);
 
 	/**
 	 * Recherche des incidents, asynchrone

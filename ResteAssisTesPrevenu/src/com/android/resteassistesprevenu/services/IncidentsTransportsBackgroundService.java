@@ -18,6 +18,9 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.android.resteassistesprevenu.model.IncidentModel;
+import com.android.resteassistesprevenu.model.LigneModel;
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 
 public class IncidentsTransportsBackgroundService extends Service implements IIncidentsTransportsBackgroundService {
 
@@ -40,7 +43,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		@Override
 		protected void onPostExecute(List<IncidentModel> result) {
 			super.onPostExecute(result);
-			fireDataChanged(result);
+			fireIncidentsChanged(result);
 		}
 	}
 	
@@ -48,22 +51,22 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	 * AsyncTask de récupération des incidents
 	 *
 	 */
-	private class LoadLignesAsyncTask extends AsyncTask<Void, Void, List<String>> {
+	private class LoadLignesAsyncTask extends AsyncTask<Void, Void, List<LigneModel>> {
 
 		@Override
-		protected List<String> doInBackground(Void... params) {		
+		protected List<LigneModel> doInBackground(Void... params) {		
 			try {			
-				return new ArrayList<String>();
+				return LigneModel.deserializeArray(getLignesFromService());
 			} catch (Exception e) {
 				Log.e("ResteAssisTesPrevenu", "Erreur au chargement des incidents par le service", e);
-				return new ArrayList<String>();
+				return new ArrayList<LigneModel>();
 			}
 		}
 		
 		@Override
-		protected void onPostExecute(List<String> result) {
+		protected void onPostExecute(List<LigneModel> result) {
 			super.onPostExecute(result);
-			fireDataChanged(result);
+			fireLignesChanged(result);
 		}
 	}
 	
@@ -94,6 +97,8 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		
+		this.mBinder = null;
 	}		
 	
 	private String getIncidentsEnCoursFromService(String scope) {
@@ -128,27 +133,53 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		new LoadIncidentsAsyncTask().execute(scope);				
 	}
 
-	private List<IIncidentsTransportsBackgroundServiceListener> listeners = null; 
+	private List<IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener> getIncidentslisteners = null; 
 	 
 	// Ajout d'un listener 
-	public void addListener(IIncidentsTransportsBackgroundServiceListener listener) { 
-	    if(listeners == null){ 
-	        listeners = new ArrayList<IIncidentsTransportsBackgroundServiceListener>(); 
+	public void addGetIncidentsListener(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener) { 
+	    if(getIncidentslisteners == null){ 
+	    	getIncidentslisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener>(); 
 	    } 
-	    listeners.add(listener); 
+	    getIncidentslisteners.add(listener); 
 	} 
 	 
 	// Suppression d'un listener 
-	public void removeListener(IIncidentsTransportsBackgroundServiceListener listener) { 
-	    if(listeners != null){ 
-	        listeners.remove(listener); 
+	public void removeGetIncidentsListener(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener) { 
+	    if(getIncidentslisteners != null){ 
+	    	getIncidentslisteners.remove(listener); 
 	    } 
 	} 
 	 
 	// Notification des listeners 
-	private void fireDataChanged(Object data){ 
-	    if(listeners != null){ 
-	        for(IIncidentsTransportsBackgroundServiceListener listener: listeners){ 
+	private void fireIncidentsChanged(List<IncidentModel> data){ 
+	    if(getIncidentslisteners != null){ 
+	        for(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener: getIncidentslisteners){ 
+	            listener.dataChanged(data); 
+	        } 
+	    } 
+	}
+	
+	private List<IIncidentsTransportsBackgroundServiceGetLignesListener> getLigneslisteners = null; 
+	 
+	// Ajout d'un listener 
+	public void addGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener) { 
+	    if(getLigneslisteners == null){ 
+	    	getLigneslisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetLignesListener>(); 
+	    } 
+	    getLigneslisteners.add(listener); 
+	} 
+	 
+	// Suppression d'un listener 
+	public void removeGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener) { 
+	    if(getLigneslisteners != null){ 
+	    	getLigneslisteners.remove(listener); 
+	    } 
+	} 
+	 
+	// Notification des listeners 
+	private void fireLignesChanged(List<LigneModel> data){ 
+	    if(getLigneslisteners != null){ 
+	        for(IIncidentsTransportsBackgroundServiceGetLignesListener listener: getLigneslisteners){ 
 	            listener.dataChanged(data); 
 	        } 
 	    } 
@@ -156,8 +187,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 
 	@Override
 	public void startGetLignesAsync() {
-		// TODO Auto-generated method stub
-		
+		new LoadLignesAsyncTask().execute();		
 	}
 
 
