@@ -13,6 +13,7 @@ import com.android.resteassistesprevenu.R;
 import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
 import com.android.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
 import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
 
 import java.util.List;
 import com.android.resteassistesprevenu.model.LigneModel;
@@ -29,15 +30,16 @@ public class NewIncidentActivity extends Activity {
 		    public void onServiceConnected(ComponentName className, IBinder service) {
 		        Log.i("IncidentsTransportsBackgroundService", "Connected!");
 		        
-		    	mBoundService = ((IncidentsTransportsBackgroundServiceBinder)service).getService();		    
-		    	
-		        mBoundService.addGetLignesListener(new IIncidentsTransportsBackgroundServiceGetLignesListener() {
+		    	mBoundService = ((IncidentsTransportsBackgroundServiceBinder)service).getService();   
+		    	mBoundService.addGetTypeLignesListener(new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
 					
 					@Override
-					public void dataChanged(List<LigneModel> data) {
-						// TODO Auto-generated method stub						
+					public void dataChanged(List<String> data) {
+						
 					}
 				});
+		        
+		        mBoundService.startGetLignesAsync();
 		    }
 
 		    public void onServiceDisconnected(ComponentName className) 

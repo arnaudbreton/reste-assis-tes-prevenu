@@ -8,19 +8,28 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.android.resteassistesprevenu.model.IncidentModel;
 import com.android.resteassistesprevenu.model.LigneModel;
+import com.android.resteassistesprevenu.model.TypeLigne;
+import com.android.resteassistesprevenu.provider.DefaultContentProvider;
+import com.android.resteassistesprevenu.provider.LigneBaseColumns;
+import com.android.resteassistesprevenu.provider.TypeLigneBaseColumns;
 import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
 
 public class IncidentsTransportsBackgroundService extends Service implements IIncidentsTransportsBackgroundService {
 
@@ -51,22 +60,22 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	 * AsyncTask de récupération des incidents
 	 *
 	 */
-	private class LoadLignesAsyncTask extends AsyncTask<Void, Void, List<LigneModel>> {
+	private class LoadTypeLignesAsyncTask extends AsyncTask<Void, Void, List<String>> {
 
 		@Override
-		protected List<LigneModel> doInBackground(Void... params) {		
+		protected List<String> doInBackground(Void... params) {		
 			try {			
-				return LigneModel.deserializeArray(getLignesFromService());
+				return getTypeLignesFromService();
 			} catch (Exception e) {
 				Log.e("ResteAssisTesPrevenu", "Erreur au chargement des incidents par le service", e);
-				return new ArrayList<LigneModel>();
+				return new ArrayList<String>();
 			}
 		}
 		
 		@Override
-		protected void onPostExecute(List<LigneModel> result) {
+		protected void onPostExecute(List<String> result) {
 			super.onPostExecute(result);
-			fireLignesChanged(result);
+			fireTypeLignesChanged(result);
 		}
 	}
 	
@@ -105,8 +114,18 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		return getFromService(new HttpGet(SERVICE_PRE_PRODUCTION_URL_BASE + INCIDENTS_JSON_URL));
 	}
 	
-	private String getLignesFromService() {
-		return getFromService(new HttpGet(SERVICE_PRE_PRODUCTION_URL_BASE + LIGNES_JSON_URL));
+	private List<String> getTypeLignesFromService() {
+		ContentResolver cr = getContentResolver();
+		String[] projection = new String[] { TypeLigneBaseColumns.TYPE_LIGNE };
+		Cursor c = cr.query(Uri.parse(DefaultContentProvider.CONTENT_URI + "/type_lignes"), projection, null, null, null);
+		
+		ArrayList<String> lignes = new ArrayList<String>();
+		if(c.moveToFirst()) {
+			do {
+				lignes.add(c.getString(c.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)));
+			}while(c.moveToNext());
+		}
+		return lignes;
 	}
 	
 	private String getFromService(HttpGet request) {
@@ -159,27 +178,27 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	    } 
 	}
 	
-	private List<IIncidentsTransportsBackgroundServiceGetLignesListener> getLigneslisteners = null; 
+	private List<IIncidentsTransportsBackgroundServiceGetTypeLignesListener> getTypeLigneslisteners = null; 
 	 
 	// Ajout d'un listener 
-	public void addGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener) { 
-	    if(getLigneslisteners == null){ 
-	    	getLigneslisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetLignesListener>(); 
+	public void addGetTypeLignesListener(IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener) { 
+	    if(getTypeLigneslisteners == null){ 
+	    	getTypeLigneslisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetTypeLignesListener>(); 
 	    } 
-	    getLigneslisteners.add(listener); 
+	    getTypeLigneslisteners.add(listener); 
 	} 
 	 
 	// Suppression d'un listener 
-	public void removeGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener) { 
-	    if(getLigneslisteners != null){ 
-	    	getLigneslisteners.remove(listener); 
+	public void removeGetTypeLignesListener(IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener) { 
+	    if(getTypeLigneslisteners != null){ 
+	    	getTypeLigneslisteners.remove(listener); 
 	    } 
 	} 
 	 
 	// Notification des listeners 
-	private void fireLignesChanged(List<LigneModel> data){ 
-	    if(getLigneslisteners != null){ 
-	        for(IIncidentsTransportsBackgroundServiceGetLignesListener listener: getLigneslisteners){ 
+	private void fireTypeLignesChanged(List<String> data){ 
+	    if(getTypeLigneslisteners != null){ 
+	        for(IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener: getTypeLigneslisteners){ 
 	            listener.dataChanged(data); 
 	        } 
 	    } 
@@ -187,7 +206,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 
 	@Override
 	public void startGetLignesAsync() {
-		new LoadLignesAsyncTask().execute();		
+		new LoadTypeLignesAsyncTask().execute();		
 	}
 
 

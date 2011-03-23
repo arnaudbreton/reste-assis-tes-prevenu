@@ -18,12 +18,14 @@ public class DefaultContentProvider extends ContentProvider {
 	public static final String PROVIDER_NAME = "com.android.resteassistesprevenu.provider";
 	public static final String CONTENT_URI = "content://" + PROVIDER_NAME;
 
-	private static final int LIGNES = 1;
-	private static final int LIGNES_ID = 2;
+	private static final int TYPE_LIGNES = 1;
+	private static final int LIGNES = 2;
+	private static final int LIGNES_ID = 3;
 
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+		uriMatcher.addURI(PROVIDER_NAME, "type_lignes", TYPE_LIGNES);
 		uriMatcher.addURI(PROVIDER_NAME, "lignes", LIGNES);
 		uriMatcher.addURI(PROVIDER_NAME, "lignes/#", LIGNES_ID);
 	}
@@ -69,11 +71,14 @@ public class DefaultContentProvider extends ContentProvider {
 		SQLiteDatabase db = this.dbHelper.getReadableDatabase();
 
 		switch (uriMatcher.match(uri)) {
+		case TYPE_LIGNES:
+			qb.setTables("type_ligne");
+			break;
 		case LIGNES:
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.type_ligne=type_ligne.id)");
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.id)");
 			break;
 		case LIGNES_ID:
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.type_ligne=type_ligne.id)");
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.id)");
 			qb.appendWhere("lignes.id = " + uri.getPathSegments().get(1));
 			break;
 		}

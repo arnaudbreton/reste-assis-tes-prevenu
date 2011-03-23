@@ -30,6 +30,6 @@
 				<action android:name=".IncidentsBackgroundService.ACTION" />
 			</intent-filter>
 		</service>
-		<provider android:name=".content_provider.DefaultContentProvider" android:authorities="com.android.resteassistesprevenu.provider" />		
+		<provider android:name=".provider.DefaultContentProvider" android:authorities="com.android.resteassistesprevenu.provider" />		
 	</application>
 </manifest> 
