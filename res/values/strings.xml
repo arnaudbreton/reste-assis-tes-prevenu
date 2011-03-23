@@ -1,5 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Reste Assis T\'es Prévenu</string>
-    <string name="ligne_prompt">Ligne :</string>
+	<string name="app_name">Reste Assis T\'es Prévenu</string>
+	<string name="ligne_prompt">Ligne :</string>
+	<string name="req_create_table_type_ligne">
+		CREATE TABLE type_ligne
+		(id INTEGER PRIMARY KEY
+		AUTOINCREMENT,
+		type_ligne
+		VARCHAR NOT NULL);
+	</string>
+	<string name="req_create_table_lignes">
+		CREATE TABLE lignes
+		(id INTEGER PRIMARY KEY
+		AUTOINCREMENT,
+		nom VARCHAR NOT NULL,
+		type_ligne INTEGER REFERENCES
+		type_ligne(id));
+	</string>
+	<string name="req_create_table_terminus">
+		CREATE TABLE terminus
+		(id INTEGER PRIMARY KEY AUTOINCREMENT,
+		id_ligne INTEGER REFERENCES lignes(id),
+		terminus VARCHAR2 NOT NULL);
+	</string>
+	<string name="req_insert_type_ligne">
+		INSERT INTO type_ligne(type_ligne)
+		VALUES(\'RER\');
+		INSERT INTO type_ligne(type_ligne)
+		VALUES(\'Métro\');
+		INSERT INTO type_ligne(type_ligne)
+		VALUES(\'Transilien\');
+		INSERT INTO type_ligne(type_ligne)
+		VALUES(\'Bus\');
+		INSERT INTO type_ligne(type_ligne)
+		VALUES(\'Tramway\');
+	</string>
+	<string name="req_insert_lignes">
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'A\',1);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'B\',1);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'C\',1);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'D\',1);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'E\',1);
+		
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'1\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'2\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'3\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'3bis\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'4\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'5\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'6\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'7\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'7bis\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'8\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'9\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'10\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'11\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'12\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'13\',2);
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'14\',2);	
+		
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'1\',5);	
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'2\',5);	
+		INSERT INTO lignes(nom,type_ligne)
+		VALUES(\'3\',5);		
+	</string>
 </resources>
