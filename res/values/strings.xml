@@ -14,7 +14,7 @@
 		(id INTEGER PRIMARY KEY
 		AUTOINCREMENT,
 		nom VARCHAR NOT NULL,
-		type_ligne INTEGER REFERENCES
+		id_type_ligne INTEGER REFERENCES
 		type_ligne(id));
 	</string>
 	<string name="req_create_table_terminus">
@@ -36,15 +36,15 @@
 		VALUES(\'Tramway\');
 	</string>
 	<string name="req_insert_lignes">
-		INSERT INTO lignes(nom,type_ligne)
+		INSERT INTO lignes(nom,id_type_ligne)
 		VALUES(\'A\',1);
-		INSERT INTO lignes(nom,type_ligne)
+		INSERT INTO lignes(nom,id_type_ligne)
 		VALUES(\'B\',1);
-		INSERT INTO lignes(nom,type_ligne)
+		INSERT INTO lignes(nom,id_type_ligne)
 		VALUES(\'C\',1);
-		INSERT INTO lignes(nom,type_ligne)
+		INSERT INTO lignes(nom,id_type_ligne)
 		VALUES(\'D\',1);
-		INSERT INTO lignes(nom,type_ligne)
+		INSERT INTO lignes(nom,id_type_ligne)
 		VALUES(\'E\',1);
 		
 		INSERT INTO lignes(nom,type_ligne)
