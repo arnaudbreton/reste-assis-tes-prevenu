@@ -10,6 +10,9 @@ public interface IIncidentsTransportsBackgroundService {
 	
 	public void addGetTypeLignesListener(IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener);
 	public void removeGetTypeLignesListener(IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener);
+	
+	public void addGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener);
+	public void removeGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener);
 
 	/**
 	 * Recherche des incidents, asynchrone
@@ -17,7 +20,14 @@ public interface IIncidentsTransportsBackgroundService {
 	public void startGetIncidentsAsync(String scope);
 	
 	/**
+	 * Récupération des type de lignes, asynchrone
+	 */
+	public void startGetTypeLignesAsync();
+	
+	/**
 	 * Récupération des lignes, asynchrone
 	 */
-	public void startGetLignesAsync();
+	public void startGetLignesAsync(String typeLigne);
+	
+	public void startReportIncident(String typeLigne,String numLigne, String raison);
 }
