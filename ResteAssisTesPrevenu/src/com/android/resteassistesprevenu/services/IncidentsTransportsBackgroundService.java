@@ -8,7 +8,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -22,8 +21,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.android.resteassistesprevenu.model.IncidentModel;
-import com.android.resteassistesprevenu.model.LigneModel;
-import com.android.resteassistesprevenu.model.TypeLigne;
 import com.android.resteassistesprevenu.provider.DefaultContentProvider;
 import com.android.resteassistesprevenu.provider.LigneBaseColumns;
 import com.android.resteassistesprevenu.provider.TypeLigneBaseColumns;
@@ -57,7 +54,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	}
 	
 	/**
-	 * AsyncTask de récupération des incidents
+	 * AsyncTask de récupération des types de lignes
 	 *
 	 */
 	private class LoadTypeLignesAsyncTask extends AsyncTask<Void, Void, List<String>> {
@@ -79,9 +76,54 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		}
 	}
 	
+	/**
+	 * AsyncTask de récupération des types de lignes
+	 *
+	 */
+	private class LoadLignesAsyncTask extends AsyncTask<String, Void, List<String>> {
+
+		@Override
+		protected List<String> doInBackground(String... params) {		
+			try {			
+				return getLignesFromService(params[0]);
+			} catch (Exception e) {
+				Log.e("ResteAssisTesPrevenu", "Erreur au chargement des lignes du type " + params[0] + " par le service.", e);
+				return new ArrayList<String>();
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(List<String> result) {
+			super.onPostExecute(result);
+			fireLignesChanged(result);
+		}
+	}
+	
+	/**
+	 * AsyncTask de report d'un incident
+	 *
+	 */
+	private class ReportIncidentAsyncTask extends AsyncTask<String, Void, Void> {
+
+		@Override
+		protected Void doInBackground(String... params) {		
+			try {			
+				return null;
+			} catch (Exception e) {
+				Log.e("ResteAssisTesPrevenu", "Erreur lors de la création de l'incident", e);
+				return null;
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			//fireLignesChanged(result);
+		}
+	}
+	
 	private static String SERVICE_PRE_PRODUCTION_URL_BASE = "http://openreact.alwaysdata.net/api";
 	private static String INCIDENTS_JSON_URL = "/incidents.json/";
-	private static String LIGNES_JSON_URL = "/ligne";
 
 	private IncidentsTransportsBackgroundServiceBinder mBinder;
 	
@@ -123,6 +165,21 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		if(c.moveToFirst()) {
 			do {
 				lignes.add(c.getString(c.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)));
+			}while(c.moveToNext());
+		}
+		return lignes;
+	}
+	
+	private List<String> getLignesFromService(String typeLigne) {
+		ContentResolver cr = getContentResolver();
+		String[] projection = new String[] { LigneBaseColumns.NOM_LIGNE };
+		String selection = "type_ligne = '" + typeLigne + "'";
+		Cursor c = cr.query(Uri.parse(DefaultContentProvider.CONTENT_URI + "/lignes"), projection, selection, null, null);
+		
+		ArrayList<String> lignes = new ArrayList<String>();
+		if(c.moveToFirst()) {
+			do {
+				lignes.add(c.getString(c.getColumnIndex(LigneBaseColumns.NOM_LIGNE)));
 			}while(c.moveToNext());
 		}
 		return lignes;
@@ -178,6 +235,11 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	    } 
 	}
 	
+	@Override
+	public void startGetTypeLignesAsync() {
+		new LoadTypeLignesAsyncTask().execute();		
+	}
+	
 	private List<IIncidentsTransportsBackgroundServiceGetTypeLignesListener> getTypeLigneslisteners = null; 
 	 
 	// Ajout d'un listener 
@@ -203,10 +265,41 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	        } 
 	    } 
 	}
+	
+	private List<IIncidentsTransportsBackgroundServiceGetLignesListener> getLigneslisteners = null; 
+	 
+	// Ajout d'un listener 
+	public void addGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener) { 
+	    if(getLigneslisteners == null){ 
+	    	getLigneslisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetLignesListener>(); 
+	    } 
+	    getLigneslisteners.add(listener); 
+	} 
+	 
+	// Suppression d'un listener 
+	public void removeGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener) { 
+	    if(getLigneslisteners != null){ 
+	    	getLigneslisteners.remove(listener); 
+	    } 
+	} 
+	 
+	// Notification des listeners 
+	private void fireLignesChanged(List<String> data){ 
+	    if(getLigneslisteners != null){ 
+	        for(IIncidentsTransportsBackgroundServiceGetLignesListener listener: getLigneslisteners){ 
+	            listener.dataChanged(data); 
+	        } 
+	    } 
+	}
 
 	@Override
-	public void startGetLignesAsync() {
-		new LoadTypeLignesAsyncTask().execute();		
+	public void startGetLignesAsync(String typeLigne) {
+		new LoadLignesAsyncTask().execute(typeLigne);		
+	}
+
+	@Override
+	public void startReportIncident(String typeLigne, String numLigne,
+			String raison) {		
 	}
 
 

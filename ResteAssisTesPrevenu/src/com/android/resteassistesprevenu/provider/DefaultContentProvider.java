@@ -113,9 +113,15 @@ public class DefaultContentProvider extends ContentProvider {
 		}
 
 		private void initializeData(SQLiteDatabase db) {
-			db.execSQL(getContext().getString(R.string.req_insert_type_ligne));
-
-			db.execSQL(getContext().getString(R.string.req_insert_lignes));
+			String[] reqsInsertTypeLignes = getContext().getString(R.string.req_insert_type_ligne).split(";");			
+			for(String reqInsertTypeLigne : reqsInsertTypeLignes) {
+				db.execSQL(reqInsertTypeLigne);
+			}
+			
+			String[] reqsInsertLignes = getContext().getString(R.string.req_insert_lignes).split(";");			
+			for(String reqInsertLigne : reqsInsertLignes) {
+				db.execSQL(reqInsertLigne);
+			}
 		}
 
 		private void createTables(SQLiteDatabase db) {
