@@ -54,7 +54,7 @@ public class NewIncidentActivity extends Activity {
 		 
 		mSpinLignes = (Spinner)this.findViewById(R.id.spinnerNumeroLigne);	
 		 
-		mBtnRapporter = (Button)this.findViewById(R.id.btnAjouterIncident);
+		mBtnRapporter = (Button)this.findViewById(R.id.btnRapporterIncident);
 		mBtnRapporter.setOnClickListener(new OnClickListener() {
 			
 			@Override

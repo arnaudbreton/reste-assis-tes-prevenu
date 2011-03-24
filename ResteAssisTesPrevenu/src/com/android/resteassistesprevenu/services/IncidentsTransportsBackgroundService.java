@@ -1,15 +1,21 @@
 package com.android.resteassistesprevenu.services;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 
 import android.app.Service;
 import android.content.ContentResolver;
@@ -103,12 +109,12 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	 * AsyncTask de report d'un incident
 	 *
 	 */
-	private class ReportIncidentAsyncTask extends AsyncTask<String, Void, Void> {
+	private class ReportIncidentAsyncTask extends AsyncTask<String, Void, Boolean> {
 
 		@Override
-		protected Void doInBackground(String... params) {		
+		protected Boolean doInBackground(String... params) {		
 			try {			
-				return null;
+				return createIncident(params[0], params[1], params[2]);
 			} catch (Exception e) {
 				Log.e("ResteAssisTesPrevenu", "Erreur lors de la création de l'incident", e);
 				return null;
@@ -116,7 +122,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		}
 		
 		@Override
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 			//fireLignesChanged(result);
 		}
@@ -185,6 +191,21 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		return lignes;
 	}
 	
+	private boolean createIncident(String typeLigne, String numLigne, String raison) throws UnsupportedEncodingException {
+		HttpPost request = new HttpPost(SERVICE_PRE_PRODUCTION_URL_BASE + "/incident");
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		
+		params.add(new BasicNameValuePair("line_name", typeLigne + " " + numLigne));
+		params.add(new BasicNameValuePair("reason", raison));
+		params.add(new BasicNameValuePair("source", "ResteAssisTesPrevenu"));
+		
+		request.setEntity(new UrlEncodedFormEntity(params,HTTP.UTF_8));
+		
+		String result = postToService(request);
+		Log.i("ResteAssisTesPrevenu", result);
+		return true;
+	}
+	
 	private String getFromService(HttpGet request) {
 		HttpClient httpclient = new DefaultHttpClient();
 
@@ -198,6 +219,26 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		httpclient.getConnectionManager().shutdown();
+		Log.i("ResteAssisTesPrevenu : ", result);
+		
+		return result;
+	}
+	
+	private String postToService(HttpPost request) {
+		HttpClient httpclient = new DefaultHttpClient();
+
+		String result = null; 		
+		
+		ResponseHandler<String> handler = new BasicResponseHandler();
+		try {
+			result = httpclient.execute(request, handler);
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		httpclient.getConnectionManager().shutdown();
 		Log.i("ResteAssisTesPrevenu : ", result);
 		
@@ -299,7 +340,8 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 
 	@Override
 	public void startReportIncident(String typeLigne, String numLigne,
-			String raison) {		
+			String raison) {	
+		new ReportIncidentAsyncTask().execute(typeLigne, numLigne, raison);
 	}
 
 
