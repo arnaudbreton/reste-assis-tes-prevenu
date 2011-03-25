@@ -149,7 +149,6 @@ public class IncidentsEnCoursActivity extends Activity {
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
-
 		}
 	}
 
@@ -158,11 +157,10 @@ public class IncidentsEnCoursActivity extends Activity {
 			
 			@Override
 			public void serveurChanged(boolean isProduction) {
-				mBoundService.setProduction(isProduction);				
+				mBoundService.setProduction(isProduction);
+				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
 		}, mBoundService.isProduction());
-		dialog.setContentView(R.layout.choose_serveur_dialog);
-		dialog.setTitle("Choix du serveur");
 		dialog.show();
 	}
 

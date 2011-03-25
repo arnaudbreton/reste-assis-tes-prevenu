@@ -34,10 +34,10 @@ public class ChooseServeurDialog extends Dialog {
 		this.mRadioPreProduction = (RadioButton) findViewById(R.id.radioPreProduction);
 		
 		if(this.isProduction) {
-			this.mRadioProduction.setSelected(true);
+			this.mRadioProduction.setChecked(true);
 		}
 		else {
-			this.mRadioPreProduction.setSelected(true);
+			this.mRadioPreProduction.setChecked(true);
 		}
 
 		this.mRadioProduction.setOnClickListener(new View.OnClickListener() {
@@ -46,6 +46,7 @@ public class ChooseServeurDialog extends Dialog {
 				if (mListener != null) {
 					mListener.serveurChanged(true);
 				}
+				dismiss();
 			}
 		});
 
@@ -55,6 +56,7 @@ public class ChooseServeurDialog extends Dialog {
 				if (mListener != null) {
 					mListener.serveurChanged(false);
 				}
+				dismiss();
 			}
 		});
 	}
