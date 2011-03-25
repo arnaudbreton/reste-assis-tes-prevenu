@@ -18,7 +18,7 @@ public class IncidentModel {
 	private int voteEnded;
 	private String reason;
 	private Date lastModifiedTime;
-	private TypeLigne typeLigne;
+	private String typeLigne;
 	
 	/**
 	 * Scope "current" du WebService : incidents en cours
@@ -64,7 +64,7 @@ public class IncidentModel {
 		
 		incidentModel.id = incidentJSON.getInt("uid");
 		incidentModel.statut = incidentJSON.getString("status");
-		incidentModel.typeLigne = getType(incidentJSON.getString("line").split(" ")[0]);
+		incidentModel.typeLigne = incidentJSON.getString("line").split(" ")[0];
 		incidentModel.ligne = incidentJSON.getString("line").split(" ")[1];;
 		incidentModel.reason = incidentJSON.getString("reason");
 		incidentModel.votePlus = incidentJSON.getInt("vote_plus");
@@ -73,18 +73,6 @@ public class IncidentModel {
 		incidentModel.lastModifiedTime = sdf.parse(incidentJSON.getString("last_modified_time"));
 		
 		return incidentModel;
-	}
-
-	private static TypeLigne getType(String typeLigne) {
-		if(typeLigne.equals("RER")) {
-			return TypeLigne.RER;
-		}
-		else if(typeLigne.equals("Metro")) {
-			return TypeLigne.METRO;
-		}
-		else {
-			return TypeLigne.TRANSILIEN;
-		}
 	}
 
 	/**
@@ -199,11 +187,11 @@ public class IncidentModel {
 		this.ligne = ligne;
 	}
 
-	public TypeLigne getTypeLigne() {
+	public String getTypeLigne() {
 		return typeLigne;
 	}
 
-	public void setTypeLigne(TypeLigne typeLigne) {
+	public void setTypeLigne(String typeLigne) {
 		this.typeLigne = typeLigne;
 	}
 }

@@ -93,4 +93,6 @@
 	<string name="msg_report_new_incident_OK">Votre incident a été crée sous le numéro %s</string>
 	<string name="msg_report_new_incident_KO_no_reason">Veuillez saisir une raison svp.</string>
 	<string name="msg_report_new_incident_reporting_incident">Report d\'un nouvel incident en cours...</string>
+	
+	<string name="title_choose_serveur">Choix du serveur</string>
 </resources>
