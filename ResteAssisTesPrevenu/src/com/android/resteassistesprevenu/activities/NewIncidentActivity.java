@@ -3,8 +3,10 @@ package com.android.resteassistesprevenu.activities;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -53,6 +55,7 @@ public class NewIncidentActivity extends Activity {
 	        });	    
 		 
 		mSpinLignes = (Spinner)this.findViewById(R.id.spinnerNumeroLigne);	
+		mTxtRaison = (EditText)this.findViewById(R.id.txtRaison);
 		 
 		mBtnRapporter = (Button)this.findViewById(R.id.btnRapporterIncident);
 		mBtnRapporter.setOnClickListener(new OnClickListener() {
@@ -75,10 +78,21 @@ public class NewIncidentActivity extends Activity {
 					raison = mTxtRaison.getText().toString();
 				}
 				
-				if(raison == null || raison == "") {
+				if(raison != null && numLigne != null && typeLigne != null && !raison.equals("") && !numLigne.equals("") && !typeLigne.equals("")) {
+					mBoundService.startReportIncident(typeLigne, numLigne, raison);
+				}	
+				else {
+					if(raison == null || raison.equals("")) {
+						AlertDialog.Builder builder = new AlertDialog.Builder(NewIncidentActivity.this);
+						builder.setMessage("Veuillez saisir une raison svp.")
+						       .setCancelable(false)
+						       .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+						           public void onClick(DialogInterface dialog, int id) {			                
+						           }
+						       });
+						builder.create();
+					}
 				}
-				
-				mBoundService.startReportIncident(typeLigne, numLigne, raison);
 			}
 		});
 		
