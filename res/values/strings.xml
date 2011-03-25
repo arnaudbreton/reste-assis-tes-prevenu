@@ -87,4 +87,10 @@
 		INSERT INTO lignes(nom,id_type_ligne)
 		VALUES(\'3\',5);		
 	</string>
+	
+	<string name="msg_incident_en_cours_list_loading_incidents">Chargement des incidents en cours...</string>
+	
+	<string name="msg_report_new_incident_OK">Votre incident a été crée sous le numéro %s</string>
+	<string name="msg_report_new_incident_KO_no_reason">Veuillez saisir une raison svp.</string>
+	<string name="msg_report_new_incident_reporting_incident">Report d\'un nouvel incident en cours...</string>
 </resources>

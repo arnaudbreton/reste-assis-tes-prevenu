@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,6 +26,7 @@ import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundS
 import com.android.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
 import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
 
 public class NewIncidentActivity extends Activity {	
 	private IIncidentsTransportsBackgroundService mBoundService;
@@ -35,6 +37,8 @@ public class NewIncidentActivity extends Activity {
 	private EditText mTxtRaison;
 	
 	private Button mBtnRapporter;
+	
+	ProgressDialog mPdRapporter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,18 +83,19 @@ public class NewIncidentActivity extends Activity {
 				}
 				
 				if(raison != null && numLigne != null && typeLigne != null && !raison.equals("") && !numLigne.equals("") && !typeLigne.equals("")) {
+					mPdRapporter = ProgressDialog.show(NewIncidentActivity.this, "", getString(R.string.msg_report_new_incident_reporting_incident));
 					mBoundService.startReportIncident(typeLigne, numLigne, raison);
 				}	
 				else {
 					if(raison == null || raison.equals("")) {
 						AlertDialog.Builder builder = new AlertDialog.Builder(NewIncidentActivity.this);
-						builder.setMessage("Veuillez saisir une raison svp.")
+						builder.setMessage(getString(R.string.msg_report_new_incident_KO_no_reason))
 						       .setCancelable(false)
 						       .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 						           public void onClick(DialogInterface dialog, int id) {			                
 						           }
 						       });
-						builder.create();
+						builder.show();
 					}
 				}
 			}
@@ -122,6 +127,24 @@ public class NewIncidentActivity extends Activity {
 					            android.R.layout.simple_spinner_item, data.toArray(new String[data.size()]));
 						adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 						spinTypeLigne.setAdapter(adapter);
+					}
+				});
+		    	
+		    	mBoundService.addReportNewIncidentListener(new IIncidentsTransportsBackgroundServiceReportNewIncidentListener() {					
+					@Override
+					public void dataChanged(String idIncident) {
+						mPdRapporter.dismiss();
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(NewIncidentActivity.this);
+						builder.setMessage(String.format(getString(R.string.msg_report_new_incident_OK), idIncident))
+						       .setCancelable(false)
+						       .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+						           public void onClick(DialogInterface dialog, int id) {		
+						        	   NewIncidentActivity.this.setResult(RESULT_OK, null);
+						        	   NewIncidentActivity.this.finish();
+						           }
+						       });
+						builder.show();
 					}
 				});
 		        

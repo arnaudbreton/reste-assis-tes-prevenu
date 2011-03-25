@@ -5,18 +5,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,6 +32,7 @@ import com.android.resteassistesprevenu.provider.TypeLigneBaseColumns;
 import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
+import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
 
 public class IncidentsTransportsBackgroundService extends Service implements IIncidentsTransportsBackgroundService {
 
@@ -127,7 +124,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		@Override
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
-			//fireNewIncidentChanged(result);
+			fireReportNewIncidentChanged(result);
 		}
 	}
 	
@@ -207,7 +204,8 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		
 		request.setHeader("Accept", "application/json");
 		
-		String result = postToService(request);
+		//String result = postToService(request);
+		String result="300";
 		Log.i("ResteAssisTesPrevenu", result);
 		
 		return result;
@@ -351,14 +349,29 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		new ReportIncidentAsyncTask().execute(typeLigne, numLigne, raison);
 	}
 	
+	private List<IIncidentsTransportsBackgroundServiceReportNewIncidentListener> getReportNewIncidentlisteners = null; 
+	 
+	// Ajout d'un listener 
+	public void addReportNewIncidentListener(IIncidentsTransportsBackgroundServiceReportNewIncidentListener listener) { 
+	    if(getReportNewIncidentlisteners == null){ 
+	    	getReportNewIncidentlisteners = new ArrayList<IIncidentsTransportsBackgroundServiceReportNewIncidentListener>(); 
+	    } 
+	    getReportNewIncidentlisteners.add(listener); 
+	} 
+	 
+	// Suppression d'un listener 
+	public void removeReportNewIncidentListener(IIncidentsTransportsBackgroundServiceReportNewIncidentListener listener) { 
+	    if(getReportNewIncidentlisteners != null){ 
+	    	getReportNewIncidentlisteners.remove(listener); 
+	    } 
+	} 
+	 
 	// Notification des listeners 
-//	private void fireNewIncidentChanged(List<String> data){ 
-//	    if(getLigneslisteners != null){ 
-//	        for(IIncidentsTransportsBackgroundServiceGetLignesListener listener: get){ 
-//	            listener.dataChanged(data); 
-//	        } 
-//	    } 
-//	}
-
-
+	private void fireReportNewIncidentChanged(String data){ 
+	    if(getReportNewIncidentlisteners != null){ 
+	        for(IIncidentsTransportsBackgroundServiceReportNewIncidentListener listener: getReportNewIncidentlisteners){ 
+	            listener.dataChanged(data); 
+	        } 
+	    } 
+	}
 }

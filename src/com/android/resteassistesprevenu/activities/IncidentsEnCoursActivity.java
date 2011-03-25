@@ -35,6 +35,8 @@ public class IncidentsEnCoursActivity extends Activity {
 	
 	private ProgressDialog loadingDialog;
 	
+	private String mCurrentScope;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -78,19 +80,21 @@ public class IncidentsEnCoursActivity extends Activity {
 		this.mBtnAddIncident = (Button) this.findViewById(R.id.btnAjouterIncident);		
 
 		this.incidents = new ArrayList<IncidentModel>();
+		this.mCurrentScope = IncidentModel.SCOPE_CURRENT;
 		this.mAdapter = new IncidentModelArrayAdapter(IncidentsEnCoursActivity.this, R.id.listViewIncidentEnCours, this.incidents);
 		((android.widget.ListView) this.findViewById(R.id.listViewIncidentEnCours)).setAdapter(mAdapter);		
 		
 		this.mBtnAddIncident.setOnClickListener(new View.OnClickListener() {			
 			@Override
-			public void onClick(View v) {
-				startActivity(new Intent(IncidentsEnCoursActivity.this, NewIncidentActivity.class));
+			public void onClick(View v) {				
+				IncidentsEnCoursActivity.this.startActivityForResult(new Intent(IncidentsEnCoursActivity.this, NewIncidentActivity.class), 1);
 			}
 		});
 		
 		this.mBtnEnCours.setOnClickListener(new View.OnClickListener() {			
 			@Override
 			public void onClick(View v) {
+				mCurrentScope = IncidentModel.SCOPE_CURRENT;
 				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
 			}
 		});
@@ -98,6 +102,7 @@ public class IncidentsEnCoursActivity extends Activity {
 		this.mBtnHeure.setOnClickListener(new View.OnClickListener() {			
 			@Override
 			public void onClick(View v) {
+				mCurrentScope = IncidentModel.SCOPE_HOUR;
 				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_HOUR);
 			}
 		});
@@ -105,6 +110,7 @@ public class IncidentsEnCoursActivity extends Activity {
 		this.mBtnMinute.setOnClickListener(new View.OnClickListener() {			
 			@Override
 			public void onClick(View v) {
+				mCurrentScope = IncidentModel.SCOPE_MINUTE;
 				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_MINUTE);
 			}
 		});
@@ -131,7 +137,14 @@ public class IncidentsEnCoursActivity extends Activity {
 	}
 	
 	private void startGetIncidentsFromServiceAsync(String scope) {
-		loadingDialog = ProgressDialog.show(IncidentsEnCoursActivity.this, "", "Chargement des incidents en cours...");
+		loadingDialog = ProgressDialog.show(IncidentsEnCoursActivity.this, "", getString(R.string.msg_incident_en_cours_list_loading_incidents));
 		mBoundService.startGetIncidentsAsync(scope);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(resultCode == Activity.RESULT_OK) {
+			startGetIncidentsFromServiceAsync(mCurrentScope);
+		}
 	}
 }
