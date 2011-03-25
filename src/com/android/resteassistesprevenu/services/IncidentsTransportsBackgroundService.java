@@ -130,6 +130,9 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	}
 	
 	private String urlService;
+	
+	private final static String SERVICE_URL_BASE_PRE_PRODUCTION = "http://openreact.alwaysdata.net/api";
+	private final static String SERVICE_URL_BASE_PRODUCTION = "http://www.incidents-transports.com/api";
 	private static String INCIDENTS_JSON_URL = "/incidents.json/";
 
 	private IncidentsTransportsBackgroundServiceBinder mBinder;
@@ -149,7 +152,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	    public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 		
-		//this.urlService = getApplicationContext().getString(R.string.url_base_production);
+		this.urlService = SERVICE_URL_BASE_PRODUCTION;
 		
 		return START_STICKY;
 	}
@@ -380,16 +383,16 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 
 	@Override
 	public boolean isProduction() {
-		return this.urlService.equals(getString(R.string.url_base_production));
+		return this.urlService.equals(SERVICE_URL_BASE_PRODUCTION);
 	}
 
 	@Override
 	public void setProduction(boolean isProduction) {
 		if(isProduction) {
-			this.urlService = getString(R.string.url_base_production);
+			this.urlService = SERVICE_URL_BASE_PRODUCTION;
 		}
 		else {
-			this.urlService = getString(R.string.url_base_pre_production);
+			this.urlService = SERVICE_URL_BASE_PRE_PRODUCTION;
 		}		
 	}
 }
