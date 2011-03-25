@@ -34,4 +34,8 @@ public interface IIncidentsTransportsBackgroundService {
 	public void startGetLignesAsync(String typeLigne);
 	
 	public void startReportIncident(String typeLigne,String numLigne, String raison);
+	
+	public boolean isProduction();
+	
+	public void setProduction(boolean isProduction);
 }

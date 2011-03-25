@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -18,8 +17,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 
 import com.android.resteassistesprevenu.R;
+import com.android.resteassistesprevenu.activities.listeners.ChooseServeurListener;
 import com.android.resteassistesprevenu.model.IncidentModel;
 import com.android.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
 import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
@@ -32,9 +33,9 @@ public class IncidentsEnCoursActivity extends Activity {
 	private IncidentModelArrayAdapter mAdapter;
 	private IIncidentsTransportsBackgroundService mBoundService;
 
-	private Button mBtnEnCours;
-	private Button mBtnHeure;
-	private Button mBtnMinute;
+	private RadioButton mBtnEnCours;
+	private RadioButton mBtnHeure;
+	private RadioButton mBtnMinute;
 	private Button mBtnAddIncident;
 
 	private ProgressDialog loadingDialog;
@@ -84,9 +85,9 @@ public class IncidentsEnCoursActivity extends Activity {
 	}
 
 	private void initialize() {
-		this.mBtnEnCours = (Button) this.findViewById(R.id.radioEnCours);
-		this.mBtnHeure = (Button) this.findViewById(R.id.radioHeure);
-		this.mBtnMinute = (Button) this.findViewById(R.id.radioMinute);
+		this.mBtnEnCours = (RadioButton) this.findViewById(R.id.radioEnCours);
+		this.mBtnHeure = (RadioButton) this.findViewById(R.id.radioHeure);
+		this.mBtnMinute = (RadioButton) this.findViewById(R.id.radioMinute);
 		this.mBtnAddIncident = (Button) this
 				.findViewById(R.id.btnAjouterIncident);
 
@@ -153,7 +154,13 @@ public class IncidentsEnCoursActivity extends Activity {
 	}
 
 	private void chooseServeur() {
-		Dialog dialog = new Dialog(this);
+		ChooseServeurDialog dialog = new ChooseServeurDialog(this, new ChooseServeurListener() {
+			
+			@Override
+			public void serveurChanged(boolean isProduction) {
+				mBoundService.setProduction(isProduction);				
+			}
+		}, mBoundService.isProduction());
 		dialog.setContentView(R.layout.choose_serveur_dialog);
 		dialog.setTitle("Choix du serveur");
 		dialog.show();

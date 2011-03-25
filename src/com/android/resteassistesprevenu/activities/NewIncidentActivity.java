@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.android.resteassistesprevenu.R;
 import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
@@ -115,7 +116,9 @@ public class NewIncidentActivity extends Activity {
 					            android.R.layout.simple_spinner_item, data.toArray(new String[data.size()]));
 						adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 						spinTypeLigne.setAdapter(adapter);
-						mBoundService.startGetLignesAsync(spinTypeLigne.getSelectedItem().toString());
+						if(spinTypeLigne.getSelectedItem() != null) {
+							mBoundService.startGetLignesAsync(spinTypeLigne.getSelectedItem().toString());
+						}						
 					}
 				});
 		    	
@@ -135,16 +138,9 @@ public class NewIncidentActivity extends Activity {
 					public void dataChanged(String idIncident) {
 						mPdRapporter.dismiss();
 						
-						AlertDialog.Builder builder = new AlertDialog.Builder(NewIncidentActivity.this);
-						builder.setMessage(String.format(getString(R.string.msg_report_new_incident_OK), idIncident))
-						       .setCancelable(false)
-						       .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-						           public void onClick(DialogInterface dialog, int id) {		
-						        	   NewIncidentActivity.this.setResult(RESULT_OK, null);
-						        	   NewIncidentActivity.this.finish();
-						           }
-						       });
-						builder.show();
+						Toast.makeText(NewIncidentActivity.this, String.format(getString(R.string.msg_report_new_incident_OK, idIncident)), 500);
+						NewIncidentActivity.this.setResult(RESULT_OK);
+						NewIncidentActivity.this.finish();
 					}
 				});
 		        

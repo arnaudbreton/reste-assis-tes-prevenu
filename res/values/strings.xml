@@ -95,4 +95,7 @@
 	<string name="msg_report_new_incident_reporting_incident">Report d\'un nouvel incident en cours...</string>
 	
 	<string name="title_choose_serveur">Choix du serveur</string>
+	
+	<string name="url_base_pre_production">http://openreact.alwaysdata.net/api</string>
+	<string name="url_base_production">http://www.incidents-transports.com/api</string>
 </resources>

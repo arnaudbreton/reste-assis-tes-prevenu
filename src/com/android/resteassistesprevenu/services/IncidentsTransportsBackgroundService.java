@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.android.resteassistesprevenu.R;
 import com.android.resteassistesprevenu.model.IncidentModel;
 import com.android.resteassistesprevenu.provider.DefaultContentProvider;
 import com.android.resteassistesprevenu.provider.LigneBaseColumns;
@@ -128,7 +129,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 		}
 	}
 	
-	private static String SERVICE_PRE_PRODUCTION_URL_BASE = "http://openreact.alwaysdata.net/api";
+	private String urlService;
 	private static String INCIDENTS_JSON_URL = "/incidents.json/";
 
 	private IncidentsTransportsBackgroundServiceBinder mBinder;
@@ -141,12 +142,14 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		this.mBinder = new IncidentsTransportsBackgroundServiceBinder(this);
+		this.mBinder = new IncidentsTransportsBackgroundServiceBinder(this);		
 	}
 	
 	  @Override
 	    public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
+		
+		//this.urlService = getApplicationContext().getString(R.string.url_base_production);
 		
 		return START_STICKY;
 	}
@@ -159,7 +162,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	}		
 	
 	private String getIncidentsEnCoursFromService(String scope) {
-		return getFromService(new HttpGet(SERVICE_PRE_PRODUCTION_URL_BASE + INCIDENTS_JSON_URL + scope));
+		return getFromService(new HttpGet(this.urlService + INCIDENTS_JSON_URL + scope));
 	}
 	
 	private List<String> getTypeLignesFromService() {
@@ -192,7 +195,7 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	}
 	
 	private String createIncident(String typeLigne, String numLigne, String raison) throws UnsupportedEncodingException, JSONException {
-		HttpPost request = new HttpPost(SERVICE_PRE_PRODUCTION_URL_BASE + "/incident");
+		HttpPost request = new HttpPost(this.urlService + "/incident");
 
 		JSONObject json = new JSONObject();
 		json.put("line_name", typeLigne + " " + numLigne);
@@ -373,5 +376,20 @@ public class IncidentsTransportsBackgroundService extends Service implements IIn
 	            listener.dataChanged(data); 
 	        } 
 	    } 
+	}
+
+	@Override
+	public boolean isProduction() {
+		return this.urlService.equals(getString(R.string.url_base_production));
+	}
+
+	@Override
+	public void setProduction(boolean isProduction) {
+		if(isProduction) {
+			this.urlService = getString(R.string.url_base_production);
+		}
+		else {
+			this.urlService = getString(R.string.url_base_pre_production);
+		}		
 	}
 }
