@@ -3,18 +3,17 @@ package com.android.resteassistesprevenu.model.adapters;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.android.resteassistesprevenu.R;
-import com.android.resteassistesprevenu.model.IncidentModel;
-import com.android.resteassistesprevenu.model.TypeLigne;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.resteassistesprevenu.R;
+import com.android.resteassistesprevenu.model.IncidentModel;
+import com.android.resteassistesprevenu.model.TypeLigne;
 
 public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 	private ArrayList<IncidentModel> incidents;
@@ -42,12 +41,12 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
              }
              IncidentModel incident = incidents.get(position);
              if (incident != null) {
-            	 	 ImageView imgTypeLigne = (ImageView) v.findViewById(R.id.textviewTypeLigne);
+            	 	 TextView txtTypeLigne = (TextView) v.findViewById(R.id.txtTypeLigne);
                      TextView tt = (TextView) v.findViewById(R.id.textviewLigneId);
                      TextView bt = (TextView) v.findViewById(R.id.textviewReason);
                      
-                     if(imgTypeLigne != null) {
-                    	 imgTypeLigne.setImageDrawable(getImageForLineType(incident.getTypeLigne()));
+                     if(txtTypeLigne != null) {
+                    	 txtTypeLigne.setText(incident.getLigne());
                      }
                      if (tt != null) {
                            tt.setText(incident.getLigne());                       
