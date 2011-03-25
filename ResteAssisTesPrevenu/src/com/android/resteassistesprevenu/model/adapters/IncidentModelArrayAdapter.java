@@ -1,5 +1,6 @@
 package com.android.resteassistesprevenu.model.adapters;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,18 +42,20 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
              }
              IncidentModel incident = incidents.get(position);
              if (incident != null) {
-            	 	 TextView txtTypeLigne = (TextView) v.findViewById(R.id.txtTypeLigne);
-                     TextView tt = (TextView) v.findViewById(R.id.textviewLigneId);
-                     TextView bt = (TextView) v.findViewById(R.id.textviewReason);
+            	 	 TextView txtLigne = (TextView) v.findViewById(R.id.txtLigne);
+                     TextView txtHeureIncident = (TextView) v.findViewById(R.id.txtHeureIncident);
+                     TextView txtReason = (TextView) v.findViewById(R.id.txtIncidentItemViewRaison);
                      
-                     if(txtTypeLigne != null) {
-                    	 txtTypeLigne.setText(incident.getLigne());
+                     if(txtLigne != null) {
+                    	 txtLigne.setText(incident.getTypeLigne().concat(" " + incident.getLigne()));
                      }
-                     if (tt != null) {
-                           tt.setText(incident.getLigne());                       
+                     
+                     if(txtReason != null){
+                    	 txtReason.setText(incident.getReason());
                      }
-                     if(bt != null){
-                           bt.setText(incident.getReason());
+                     
+                     if(txtHeureIncident != null) {
+                    	 txtHeureIncident.setText("@" + new SimpleDateFormat("HH:mm").format(incident.getLastModifiedTime()));
                      }
              }
              return v;

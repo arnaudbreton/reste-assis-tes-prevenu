@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/incidentEnCoursItemView" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" android:orientation="horizontal">
-	<TextView  xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/txtTypeLigne"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"  />
+	android:layout_height="fill_parent" android:orientation="vertical">
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:orientation="horizontal">
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/txtLigne" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text=" " />
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/txtHeureIncident" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+	</LinearLayout>
 	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/textviewLigneId"
-		android:layout_width="wrap_content"
-android:layout_height="wrap_content" />
-	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/textviewReason" 
-		android:layout_width="wrap_content"
-android:layout_height="wrap_content"/>
+		android:id="@+id/txtIncidentItemViewRaison" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" />
 </LinearLayout>
