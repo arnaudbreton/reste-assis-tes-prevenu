@@ -24,6 +24,7 @@ import com.resteassistesprevenu.activities.listeners.ChooseServeurListener;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 
@@ -80,7 +81,7 @@ public class IncidentsEnCoursActivity extends Activity {
 		};
 
 		getApplicationContext().bindService(
-				new Intent(".IncidentsBackgroundService.ACTION"), connection,
+				new Intent(getApplicationContext(),IncidentsTransportsBackgroundService.class), connection,
 				Context.BIND_AUTO_CREATE);
 	}
 

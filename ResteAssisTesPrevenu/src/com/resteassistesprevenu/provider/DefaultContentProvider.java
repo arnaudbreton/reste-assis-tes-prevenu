@@ -15,7 +15,7 @@ import com.resteassistesprevenu.R;
 
 public class DefaultContentProvider extends ContentProvider {
 
-	public static final String PROVIDER_NAME = "com.android.resteassistesprevenu.provider";
+	public static final String PROVIDER_NAME = "com.resteassistesprevenu.provider";
 	public static final String CONTENT_URI = "content://" + PROVIDER_NAME;
 
 	private static final int TYPE_LIGNES = 1;
