@@ -27,7 +27,7 @@ public class HomeActivity extends TabActivity {
 				.setIndicator("Incidents en cours")
 				.setContent(new Intent(this, IncidentsEnCoursActivity.class)));
 		mTabHost.addTab(mTabHost.newTabSpec("tab_test2")
-				.setIndicator("Lignes favorites").setContent(new Intent(this, IncidentsEnCoursActivity.class)));
+				.setIndicator("Mes Lignes").setContent(new Intent(this, IncidentsEnCoursActivity.class)));
 
 		mTabHost.setCurrentTab(0);		
 	}
