@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
@@ -150,6 +151,6 @@ public class NewIncidentActivity extends Activity {
 		    public void onServiceDisconnected(ComponentName className) {}		
 		};
 		
-		bindService(new Intent(".IncidentsBackgroundService.ACTION"), connection, Context.BIND_AUTO_CREATE);
+		bindService(new Intent(this, IncidentsTransportsBackgroundService.class), connection, Context.BIND_AUTO_CREATE);
 	}
 }
