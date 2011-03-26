@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.services;
+package com.resteassistesprevenu.services;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -25,15 +25,14 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.android.resteassistesprevenu.R;
-import com.android.resteassistesprevenu.model.IncidentModel;
-import com.android.resteassistesprevenu.provider.DefaultContentProvider;
-import com.android.resteassistesprevenu.provider.LigneBaseColumns;
-import com.android.resteassistesprevenu.provider.TypeLigneBaseColumns;
-import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
-import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
-import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
-import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
+import com.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.provider.DefaultContentProvider;
+import com.resteassistesprevenu.provider.LigneBaseColumns;
+import com.resteassistesprevenu.provider.TypeLigneBaseColumns;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
 
 public class IncidentsTransportsBackgroundService extends Service implements IIncidentsTransportsBackgroundService {
 

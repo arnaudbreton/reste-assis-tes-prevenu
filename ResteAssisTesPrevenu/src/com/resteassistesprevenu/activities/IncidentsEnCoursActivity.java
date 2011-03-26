@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.activities;
+package com.resteassistesprevenu.activities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +19,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 
-import com.android.resteassistesprevenu.R;
-import com.android.resteassistesprevenu.activities.listeners.ChooseServeurListener;
-import com.android.resteassistesprevenu.model.IncidentModel;
-import com.android.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
-import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.android.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
-import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
+import com.resteassistesprevenu.R;
+import com.resteassistesprevenu.activities.listeners.ChooseServeurListener;
+import com.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
+import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 
 public class IncidentsEnCoursActivity extends Activity {
 

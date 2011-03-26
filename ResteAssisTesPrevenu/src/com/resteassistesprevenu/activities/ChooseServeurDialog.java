@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.activities;
+package com.resteassistesprevenu.activities;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.RadioButton;
 
-import com.android.resteassistesprevenu.R;
-import com.android.resteassistesprevenu.activities.listeners.ChooseServeurListener;
+import com.resteassistesprevenu.R;
+import com.resteassistesprevenu.activities.listeners.ChooseServeurListener;
 
 public class ChooseServeurDialog extends Dialog {
 
@@ -28,7 +28,7 @@ public class ChooseServeurDialog extends Dialog {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.choose_serveur_dialog);
-		setTitle("Choix du serveur");
+		setTitle(getContext().getString(R.string.title_choose_serveur));
 
 		this.mRadioProduction = (RadioButton) findViewById(R.id.radioProduction);
 		this.mRadioPreProduction = (RadioButton) findViewById(R.id.radioPreProduction);
@@ -43,21 +43,23 @@ public class ChooseServeurDialog extends Dialog {
 		this.mRadioProduction.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (mListener != null) {
-					mListener.serveurChanged(true);
-				}
-				dismiss();
+				callListener(true);
 			}
 		});
 
 		this.mRadioPreProduction.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (mListener != null) {
-					mListener.serveurChanged(false);
-				}
-				dismiss();
+				callListener(false);
 			}
 		});
+	}
+	
+	private void callListener(boolean isProduction) {
+		if (mListener != null) {
+			mListener.serveurChanged(isProduction);
+		}
+		
+		dismiss();
 	}
 }

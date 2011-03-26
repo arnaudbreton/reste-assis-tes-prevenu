@@ -1,8 +1,8 @@
-package com.android.resteassistesprevenu.services.listeners;
+package com.resteassistesprevenu.services.listeners;
 
 import java.util.List;
 
-import com.android.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.model.IncidentModel;
 
 
 public interface IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener {

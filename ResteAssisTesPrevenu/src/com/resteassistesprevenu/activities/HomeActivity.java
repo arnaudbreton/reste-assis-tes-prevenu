@@ -1,11 +1,11 @@
-package com.android.resteassistesprevenu.activities;
+package com.resteassistesprevenu.activities;
 
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TabHost;
 
-import com.android.resteassistesprevenu.R;
+import com.resteassistesprevenu.R;
 
 public class HomeActivity extends TabActivity {
 

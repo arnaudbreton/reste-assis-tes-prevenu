@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.activities.listeners;
+package com.resteassistesprevenu.activities.listeners;
 
 public interface ChooseServeurListener {
 	void serveurChanged(boolean isProduction);
