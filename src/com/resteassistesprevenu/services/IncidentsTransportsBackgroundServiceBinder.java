@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.services;
+package com.resteassistesprevenu.services;
 
 import android.os.Binder;
 

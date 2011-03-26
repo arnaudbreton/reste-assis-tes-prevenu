@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.model.adapters;
+package com.resteassistesprevenu.model.adapters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +11,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import com.android.resteassistesprevenu.R;
-import com.android.resteassistesprevenu.model.IncidentModel;
-import com.android.resteassistesprevenu.model.TypeLigne;
+import com.resteassistesprevenu.R;
+import com.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.model.TypeLigne;
 
 public class LigneModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 	private ArrayList<IncidentModel> lignes;

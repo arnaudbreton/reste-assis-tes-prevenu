@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.activities;
+package com.resteassistesprevenu.activities;
 
 import java.util.List;
 
@@ -22,12 +22,12 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.android.resteassistesprevenu.R;
-import com.android.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.android.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
-import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
-import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
-import com.android.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
+import com.resteassistesprevenu.R;
+import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
 
 public class NewIncidentActivity extends Activity {	
 	private IIncidentsTransportsBackgroundService mBoundService;

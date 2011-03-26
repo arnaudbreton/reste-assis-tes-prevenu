@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.provider;
+package com.resteassistesprevenu.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.util.Log;
 
-import com.android.resteassistesprevenu.R;
+import com.resteassistesprevenu.R;
 
 public class DefaultContentProvider extends ContentProvider {
 

@@ -1,8 +1,8 @@
-package com.android.resteassistesprevenu.services.listeners;
+package com.resteassistesprevenu.services.listeners;
 
 import java.util.List;
 
-import com.android.resteassistesprevenu.model.LigneModel;
+import com.resteassistesprevenu.model.LigneModel;
 
 
 public interface IIncidentsTransportsBackgroundServiceGetTypeLignesListener {

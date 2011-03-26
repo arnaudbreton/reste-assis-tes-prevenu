@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.model;
+package com.resteassistesprevenu.model;
 
 public enum TypeLigne {
 	METRO,

@@ -1,4 +1,4 @@
-package com.android.resteassistesprevenu.provider;
+package com.resteassistesprevenu.provider;
 
 import android.provider.BaseColumns;
 
