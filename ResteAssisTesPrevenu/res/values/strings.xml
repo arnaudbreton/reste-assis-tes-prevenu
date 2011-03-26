@@ -81,11 +81,26 @@
 		VALUES(\'14\',2);	
 		
 		INSERT INTO lignes(nom,id_type_ligne)
-		VALUES(\'1\',5);	
+		VALUES(\'H\',3);	
 		INSERT INTO lignes(nom,id_type_ligne)
-		VALUES(\'2\',5);	
+		VALUES(\'J\',3);
 		INSERT INTO lignes(nom,id_type_ligne)
-		VALUES(\'3\',5);		
+		VALUES(\'K\',3);
+		INSERT INTO lignes(nom,id_type_ligne)
+		VALUES(\'L\',3);
+		INSERT INTO lignes(nom,id_type_ligne)
+		VALUES(\'N\',3);
+		INSERT INTO lignes(nom,id_type_ligne)
+		VALUES(\'R\',3);
+		INSERT INTO lignes(nom,id_type_ligne)
+		VALUES(\'U\',3);
+		
+		INSERT INTO lignes(nom,id_type_ligne)
+		VALUES(\'1\',5);
+		INSERT INTO lignes(nom,id_type_ligne)
+		VALUES(\'2\',5);
+		INSERT INTO lignes(nom,id_type_ligne)
+		VALUES(\'3\',5);
 	</string>
 	
 	<string name="msg_incident_en_cours_list_loading_incidents">Chargement des incidents en cours...</string>
@@ -95,7 +110,4 @@
 	<string name="msg_report_new_incident_reporting_incident">Report d\'un nouvel incident en cours...</string>
 	
 	<string name="title_choose_serveur">Choix du serveur</string>
-	
-	<string name="url_base_pre_production">http://openreact.alwaysdata.net/api</string>
-	<string name="url_base_production">http://www.incidents-transports.com/api</string>
 </resources>
