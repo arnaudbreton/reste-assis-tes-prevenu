@@ -9,8 +9,12 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.IncidentModel;
@@ -57,6 +61,15 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
                      if(txtHeureIncident != null) {
                     	 txtHeureIncident.setText("@" + new SimpleDateFormat("HH:mm").format(incident.getLastModifiedTime()));
                      }
+                     
+                     v.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							DemoPopupWindow dw = new DemoPopupWindow(v);
+							dw.showLikeQuickAction(0, 30);							
+						}
+					});
              }
              return v;
      }
@@ -77,4 +90,47 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 	public void addIncidents(List<IncidentModel> newIncidents) {
 		 this.incidents.addAll(newIncidents);
 	 }
+	
+	private static class DemoPopupWindow extends com.resteassistesprevenu.activities.BetterPopupWindow implements OnClickListener {
+		public DemoPopupWindow(View anchor) {
+			super(anchor);
+		}
+
+		@Override
+		protected void onCreate() {
+			// inflate layout
+			LayoutInflater inflater =
+					(LayoutInflater) this.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+			ViewGroup root = (ViewGroup) inflater.inflate(R.layout.popup_grid_layout, null);
+
+			// setup button events
+			for(int i = 0, icount = root.getChildCount() ; i < icount ; i++) {
+				View v = root.getChildAt(i);
+
+				if(v instanceof TableRow) {
+					TableRow row = (TableRow) v;
+
+					for(int j = 0, jcount = row.getChildCount() ; j < jcount ; j++) {
+						View item = row.getChildAt(j);
+						if(item instanceof Button) {
+							Button b = (Button) item;
+							b.setOnClickListener(this);
+						}
+					}
+				}
+			}
+
+			// set the inflated view as what we want to display
+			this.setContentView(root);
+		}
+
+		@Override
+		public void onClick(View v) {
+			// we'll just display a simple toast on a button click
+			Button b = (Button) v;
+			Toast.makeText(this.anchor.getContext(), b.getText(), Toast.LENGTH_SHORT).show();
+			this.dismiss();
+		}
+	}
 }
