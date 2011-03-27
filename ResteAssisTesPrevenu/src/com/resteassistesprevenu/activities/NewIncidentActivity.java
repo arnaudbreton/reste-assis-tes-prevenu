@@ -139,7 +139,7 @@ public class NewIncidentActivity extends Activity {
 					public void dataChanged(String idIncident) {
 						mPdRapporter.dismiss();
 						
-						Toast.makeText(NewIncidentActivity.this, String.format(getString(R.string.msg_report_new_incident_OK, idIncident)), 500);
+						Toast.makeText(NewIncidentActivity.this, String.format(getString(R.string.msg_report_new_incident_OK, idIncident)), Toast.LENGTH_LONG).show();
 						NewIncidentActivity.this.setResult(RESULT_OK);
 						NewIncidentActivity.this.finish();
 					}

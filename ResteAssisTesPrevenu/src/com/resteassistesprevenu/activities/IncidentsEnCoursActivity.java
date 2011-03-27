@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -20,7 +22,6 @@ import android.widget.Button;
 import android.widget.RadioButton;
 
 import com.resteassistesprevenu.R;
-import com.resteassistesprevenu.activities.listeners.ChooseServeurListener;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
@@ -81,8 +82,9 @@ public class IncidentsEnCoursActivity extends Activity {
 		};
 
 		getApplicationContext().bindService(
-				new Intent(getApplicationContext(),IncidentsTransportsBackgroundService.class), connection,
-				Context.BIND_AUTO_CREATE);
+				new Intent(getApplicationContext(),
+						IncidentsTransportsBackgroundService.class),
+				connection, Context.BIND_AUTO_CREATE);
 	}
 
 	private void initialize() {
@@ -154,15 +156,30 @@ public class IncidentsEnCoursActivity extends Activity {
 	}
 
 	private void chooseServeur() {
-		ChooseServeurDialog dialog = new ChooseServeurDialog(this, new ChooseServeurListener() {
-			
-			@Override
-			public void serveurChanged(boolean isProduction) {
-				mBoundService.setProduction(isProduction);
-				startGetIncidentsFromServiceAsync(mCurrentScope);
-			}
-		}, mBoundService.isProduction());
-		dialog.show();
+		final CharSequence[] items = { "Production", "Pré-Production" };
+		AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(
+				R.string.title_choose_serveur).setSingleChoiceItems(items,
+				mBoundService.isProduction() ? 0 : 1,
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (mBoundService != null) {
+							if (which == 0) {
+								mBoundService.setProduction(true);
+							} else {
+								mBoundService.setProduction(false);
+							}
+
+							IncidentsEnCoursActivity.this
+									.startGetIncidentsFromServiceAsync(mCurrentScope);
+						}
+
+						dialog.dismiss();
+					}
+				});
+
+		builder.show();
 	}
 
 	/**
