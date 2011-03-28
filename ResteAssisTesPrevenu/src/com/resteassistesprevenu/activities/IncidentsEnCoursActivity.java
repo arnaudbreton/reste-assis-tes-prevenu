@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -80,19 +79,25 @@ public class IncidentsEnCoursActivity extends Activity implements
 								}
 							}
 						});
-				
-				mBoundService.addVoteIncidentListener(new IIncidentsTransportsBackgroundServiceVoteIncidentListener() {
-					
-					@Override
-					public void dataChanged(boolean voteSent) {
-						if(voteSent) {
-							Toast.makeText(IncidentsEnCoursActivity.this, R.string.msg_vote_OK, Toast.LENGTH_SHORT).show();
-						}
-						else {
-							Toast.makeText(IncidentsEnCoursActivity.this, R.string.msg_vote_KO, Toast.LENGTH_SHORT).show();
-						}						
-					}
-				});
+
+				mBoundService
+						.addVoteIncidentListener(new IIncidentsTransportsBackgroundServiceVoteIncidentListener() {
+
+							@Override
+							public void dataChanged(boolean voteSent) {
+								if (voteSent) {
+									Toast.makeText(
+											IncidentsEnCoursActivity.this,
+											R.string.msg_vote_OK,
+											Toast.LENGTH_SHORT).show();
+								} else {
+									Toast.makeText(
+											IncidentsEnCoursActivity.this,
+											R.string.msg_vote_KO,
+											Toast.LENGTH_SHORT).show();
+								}
+							}
+						});
 
 				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
@@ -168,6 +173,8 @@ public class IncidentsEnCoursActivity extends Activity implements
 		case R.id.choose_serveur:
 			chooseServeur();
 			return true;
+		case R.id.menu_favoris:
+			startActivity(new Intent(this, FavorisActivity.class));
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -233,22 +240,23 @@ public class IncidentsEnCoursActivity extends Activity implements
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == Activity.RESULT_OK) {
 			startGetIncidentsFromServiceAsync(mCurrentScope);
-		}	
+		}
 	}
 
 	@Override
-	public void actionPerformed(int incidentId, IncidentAction action) {
-		if (!action.equals(IncidentAction.SHARE)) {
-			mBoundService.startVoteIncident(incidentId, action);
-		}
-		else {
+	public void actionPerformed(IncidentModel incident, IncidentAction action) {
+		if (action.equals(IncidentAction.SHARE)) {
 			Intent share = new Intent(Intent.ACTION_SEND);
-			share.setType("image/jpeg");
+			share.setType("text/plain");
 
-			share.putExtra(Intent.EXTRA_STREAM,
-			  Uri.parse("file:///sdcard/DCIM/Camera/myPic.jpg"));
+			share.putExtra(Intent.EXTRA_TEXT, String.format(
+					getString(R.string.msg_share), incident.getTypeLigne().concat(" ".concat(incident.getLigne())),
+					"http://openreact.alwaysdata.net/incident/detail/"+ incident.getId()));
 
-			startActivity(Intent.createChooser(share, "Share Image"));
+			startActivity(Intent.createChooser(share,
+					getString(R.string.msg_share)));
+		} else {
+			mBoundService.startVoteIncident(incident.getId(), action);
 		}
 	}
 }

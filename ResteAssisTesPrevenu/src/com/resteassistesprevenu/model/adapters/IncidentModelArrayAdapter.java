@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TableRow;
 import android.widget.TextView;
 
@@ -115,8 +115,8 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 
 					for(int j = 0, jcount = row.getChildCount() ; j < jcount ; j++) {
 						View item = row.getChildAt(j);
-						if(item instanceof Button) {
-							Button b = (Button) item;
+						if(item instanceof ImageButton) {
+							ImageButton b = (ImageButton) item;
 							b.setOnClickListener(this);
 						}
 					}
@@ -150,7 +150,7 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 			}
 			
 			if(listener != null) {
-				listener.actionPerformed(incident.getId(), action);
+				listener.actionPerformed(incident, action);
 			}
 		
 			this.dismiss();

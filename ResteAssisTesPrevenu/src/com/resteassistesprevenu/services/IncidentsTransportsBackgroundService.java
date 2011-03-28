@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.provider.DefaultContentProvider;
 import com.resteassistesprevenu.provider.LigneBaseColumns;
 import com.resteassistesprevenu.provider.TypeLigneBaseColumns;
@@ -95,22 +96,28 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 * 
 	 */
 	private class LoadLignesAsyncTask extends
-			AsyncTask<String, Void, List<String>> {
+			AsyncTask<String, Void, List<LigneModel>> {
 
 		@Override
-		protected List<String> doInBackground(String... params) {
+		protected List<LigneModel> doInBackground(String... params) {
 			try {
-				return getLignesFromService(params[0]);
+				if(params.length == 0) {
+					return getLignesFromService("");
+				}
+				else {
+					return getLignesFromService(params[0]);
+				}
+				
 			} catch (Exception e) {
 				Log.e("ResteAssisTesPrevenu",
 						"Erreur au chargement des lignes du type " + params[0]
 								+ " par le service.", e);
-				return new ArrayList<String>();
+				return new ArrayList<LigneModel>();
 			}
 		}
 
 		@Override
-		protected void onPostExecute(List<String> result) {
+		protected void onPostExecute(List<LigneModel> result) {
 			super.onPostExecute(result);
 			fireLignesChanged(result);
 		}
@@ -223,19 +230,25 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		return lignes;
 	}
 
-	private List<String> getLignesFromService(String typeLigne) {
+	private List<LigneModel> getLignesFromService(String typeLigne) {
 		ContentResolver cr = getContentResolver();
-		String[] projection = new String[] { LigneBaseColumns.NOM_LIGNE };
-		String selection = "type_ligne = '" + typeLigne + "'";
+		String[] projection = new String[] { TypeLigneBaseColumns.TYPE_LIGNE , LigneBaseColumns.NOM_LIGNE };		
+		String selection = null;
+		
+		if(!typeLigne.equals("")) {
+			selection = "type_ligne = '" + typeLigne + "'";
+		}
+		
 		Cursor c = cr.query(
 				Uri.parse(DefaultContentProvider.CONTENT_URI + "/lignes"),
 				projection, selection, null, null);
 
-		ArrayList<String> lignes = new ArrayList<String>();
+		ArrayList<LigneModel> lignes = new ArrayList<LigneModel>();
 		if (c.moveToFirst()) {
 			do {
-				lignes.add(c.getString(c
-						.getColumnIndex(LigneBaseColumns.NOM_LIGNE)));
+				LigneModel ligne = new LigneModel(0, c.getString(c.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)), c.getString(c
+								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)));
+				lignes.add(ligne);
 			} while (c.moveToNext());
 		}
 		return lignes;
@@ -407,7 +420,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	// Notification des listeners
-	private void fireLignesChanged(List<String> data) {
+	private void fireLignesChanged(List<LigneModel> data) {
 		if (getLigneslisteners != null) {
 			for (IIncidentsTransportsBackgroundServiceGetLignesListener listener : getLigneslisteners) {
 				listener.dataChanged(data);

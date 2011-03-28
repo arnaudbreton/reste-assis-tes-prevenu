@@ -1,5 +1,6 @@
 package com.resteassistesprevenu.activities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -23,6 +24,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.resteassistesprevenu.R;
+import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
@@ -125,10 +127,15 @@ public class NewIncidentActivity extends Activity {
 		    	
 		    	mBoundService.addGetLignesListener(new IIncidentsTransportsBackgroundServiceGetLignesListener() {					
 					@Override
-					public void dataChanged(List<String> data) {
+					public void dataChanged(List<LigneModel> data) {
 						Spinner spinTypeLigne = (Spinner)NewIncidentActivity.this.findViewById(R.id.spinnerNumeroLigne);
+						
+						ArrayList<String> lignes = new ArrayList<String>();
+						for(LigneModel ligne : data) {
+							lignes.add(ligne.getNumLigne());
+						}
 						ArrayAdapter<String> adapter = new ArrayAdapter<String>(NewIncidentActivity.this,
-					            android.R.layout.simple_spinner_item, data.toArray(new String[data.size()]));
+					            android.R.layout.simple_spinner_item, lignes.toArray(new String[lignes.size()]));
 						adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 						spinTypeLigne.setAdapter(adapter);
 					}
