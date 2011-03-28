@@ -115,4 +115,8 @@
 	<string name="msg_vote_KO">Erreur lors de l\'envoi de votre vote.</string>
 	
 	<string name="title_choose_serveur">Choix du serveur</string>
+	<string name="title_menu_favoris">Favoris</string>
+	
+	<string name="msg_share_title">Partager cet incident avec...</string>
+	<string name="msg_share">Un incident a été déclaré sur la ligne %1$s. Détail : %2$s.</string>
 </resources>
