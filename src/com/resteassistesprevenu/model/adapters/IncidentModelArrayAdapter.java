@@ -8,33 +8,30 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.resteassistesprevenu.R;
+import com.resteassistesprevenu.activities.listeners.IIncidentActionListener;
+import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.TypeLigne;
 
 public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 	private ArrayList<IncidentModel> incidents;
+	private IIncidentActionListener listener;
+	private IncidentModel incident;
 	
 	public IncidentModelArrayAdapter(Context context,
-			int textViewResourceId) {
-		super(context,textViewResourceId);
-
-		this.incidents = new ArrayList<IncidentModel>();
-	}
-	
-	public IncidentModelArrayAdapter(Context context,
-			int textViewResourceId, List<IncidentModel> objects) {
+			int textViewResourceId, List<IncidentModel> objects, IIncidentActionListener listener) {
 		super(context,textViewResourceId, objects);
 
 		this.incidents = (ArrayList<IncidentModel>) objects;
+		this.listener = listener;
 	}
 
 	 @Override
@@ -44,7 +41,7 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
                  LayoutInflater vi = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                  v = vi.inflate(R.layout.incident_item_view, null);
              }
-             IncidentModel incident = incidents.get(position);
+             incident = incidents.get(position);
              if (incident != null) {
             	 	 TextView txtLigne = (TextView) v.findViewById(R.id.txtLigne);
                      TextView txtHeureIncident = (TextView) v.findViewById(R.id.txtHeureIncident);
@@ -62,11 +59,10 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
                     	 txtHeureIncident.setText("@" + new SimpleDateFormat("HH:mm").format(incident.getLastModifiedTime()));
                      }
                      
-                     v.setOnClickListener(new OnClickListener() {
-						
+                     v.setOnClickListener(new OnClickListener() {						
 						@Override
 						public void onClick(View v) {
-							DemoPopupWindow dw = new DemoPopupWindow(v);
+							DemoPopupWindow dw = new DemoPopupWindow(v, incident, listener);
 							dw.showLikeQuickAction(0, 30);							
 						}
 					});
@@ -92,8 +88,14 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 	 }
 	
 	private static class DemoPopupWindow extends com.resteassistesprevenu.activities.BetterPopupWindow implements OnClickListener {
-		public DemoPopupWindow(View anchor) {
+		private IIncidentActionListener listener;
+		private IncidentModel incident;
+		
+		public DemoPopupWindow(View anchor, IncidentModel incident, IIncidentActionListener listener) {
 			super(anchor);
+			
+			this.listener = listener;
+			this.incident = incident;
 		}
 
 		@Override
@@ -127,9 +129,30 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 
 		@Override
 		public void onClick(View v) {
-			// we'll just display a simple toast on a button click
-			Button b = (Button) v;
-			Toast.makeText(this.anchor.getContext(), b.getText(), Toast.LENGTH_SHORT).show();
+			IncidentAction action;	
+			
+			switch (v.getId()) {
+			case R.id.btnPlus:
+				action = IncidentAction.VOTE_PLUS;
+				break;
+			case R.id.btnMinus:
+				action = IncidentAction.VOTE_MINUS;
+				break;
+			case R.id.btnEnd:
+				action = IncidentAction.VOTE_END;
+				break;
+			case R.id.btnShare:
+				action = IncidentAction.SHARE;
+				break;
+			default:
+				action = null;
+				break;
+			}
+			
+			if(listener != null) {
+				listener.actionPerformed(incident.getId(), action);
+			}
+		
 			this.dismiss();
 		}
 	}
