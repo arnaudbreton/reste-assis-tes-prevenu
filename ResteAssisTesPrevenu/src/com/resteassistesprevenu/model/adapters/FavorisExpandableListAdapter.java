@@ -52,9 +52,7 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 			if( txtLigne != null ) {
 				txtLigne.setText( c );
 				txtLigne.setPadding(60, 0, 0, 0);
-			}
-			
-
+			}	
 			
 	        return v;
 	}
