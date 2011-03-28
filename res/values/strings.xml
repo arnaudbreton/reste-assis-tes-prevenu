@@ -2,6 +2,8 @@
 <resources>
 	<string name="app_name">Reste Assis T\'es Prévenu</string>
 	<string name="ligne_prompt">Ligne :</string>
+	<string name="log_tag_name">ResteAssisTesPrevenu</string>
+	
 	<string name="req_create_table_type_ligne">
 		CREATE TABLE type_ligne
 		(id INTEGER PRIMARY KEY
@@ -108,6 +110,9 @@
 	<string name="msg_report_new_incident_OK">Votre incident a été crée sous le numéro %s</string>
 	<string name="msg_report_new_incident_KO_no_reason">Veuillez saisir une raison svp.</string>
 	<string name="msg_report_new_incident_reporting_incident">Report d\'un nouvel incident en cours...</string>
+	
+	<string name="msg_vote_OK">Votre vote a été enregistré.</string>
+	<string name="msg_vote_KO">Erreur lors de l\'envoi de votre vote.</string>
 	
 	<string name="title_choose_serveur">Choix du serveur</string>
 </resources>
