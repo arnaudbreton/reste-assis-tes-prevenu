@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.provider.DefaultContentProvider;
 import com.resteassistesprevenu.provider.LigneBaseColumns;
@@ -33,6 +34,7 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
 
 public class IncidentsTransportsBackgroundService extends Service implements
 		IIncidentsTransportsBackgroundService {
@@ -139,6 +141,32 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		}
 	}
 
+	/**
+	 * AsyncTask de report d'un incident
+	 * 
+	 */
+	private class VoteIncidentAsyncTask extends
+			AsyncTask<String, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(String... params) {
+			try {
+				return voteIncident(Integer.parseInt(params[0]), params[1]);
+			} catch (Exception e) {
+				Log.e("ResteAssisTesPrevenu",
+						"Erreur lors de la création de l'incident", e);
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			super.onPostExecute(result);
+			fireVoteIncidentChanged(result);
+		}
+	}
+
+	
 	private String urlService;
 
 	private final static String SERVICE_URL_BASE_PRE_PRODUCTION = "http://openreact.alwaysdata.net/api";
@@ -231,6 +259,27 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		Log.i("ResteAssisTesPrevenu", result);
 
 		return result;
+	}
+	
+	private Boolean voteIncident(int incidentId, String action) throws UnsupportedEncodingException, JSONException {
+		HttpPost request = new HttpPost(this.urlService + "/incident");
+
+		JSONObject json = new JSONObject();
+		json.put("incident_id", incidentId);
+		json.put("action", action);
+
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
+		request.setEntity(new StringEntity(json.toString()));
+
+		request.setHeader("Accept", "application/json");
+
+		try {
+			postToService(request);
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
 	}
 
 	private String getFromService(HttpGet request) {
@@ -404,6 +453,40 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			}
 		}
 	}
+	
+	@Override
+	public void startVoteIncident(int idIncident, IncidentAction action) {
+		new VoteIncidentAsyncTask().execute(String.valueOf(idIncident), action.toString());
+	}
+
+	private List<IIncidentsTransportsBackgroundServiceVoteIncidentListener> getVoteIncidentlisteners = null;
+
+	// Ajout d'un listener
+	public void addVoteIncidentListener(
+			IIncidentsTransportsBackgroundServiceVoteIncidentListener listener) {
+		if (getVoteIncidentlisteners == null) {
+			getVoteIncidentlisteners = new ArrayList<IIncidentsTransportsBackgroundServiceVoteIncidentListener>();
+		}
+		getVoteIncidentlisteners.add(listener);
+	}
+
+	// Suppression d'un listener
+	public void removeVoteIncidentListener(
+			IIncidentsTransportsBackgroundServiceVoteIncidentListener listener) {
+		if (getVoteIncidentlisteners != null) {
+			getVoteIncidentlisteners.remove(listener);
+		}
+	}
+
+	// Notification des listeners
+	private void fireVoteIncidentChanged(boolean voteSent) {
+		if (getVoteIncidentlisteners != null) {
+			for (IIncidentsTransportsBackgroundServiceVoteIncidentListener listener : getVoteIncidentlisteners) {
+				listener.dataChanged(voteSent);
+			}
+		}
+	}
+
 
 	@Override
 	public boolean isProduction() {

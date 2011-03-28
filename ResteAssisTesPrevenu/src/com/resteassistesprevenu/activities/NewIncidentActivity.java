@@ -137,7 +137,9 @@ public class NewIncidentActivity extends Activity {
 		    	mBoundService.addReportNewIncidentListener(new IIncidentsTransportsBackgroundServiceReportNewIncidentListener() {					
 					@Override
 					public void dataChanged(String idIncident) {
-						mPdRapporter.dismiss();
+						if(mPdRapporter != null) {
+							mPdRapporter.dismiss();
+						}						
 						
 						Toast.makeText(NewIncidentActivity.this, String.format(getString(R.string.msg_report_new_incident_OK, idIncident)), Toast.LENGTH_LONG).show();
 						NewIncidentActivity.this.setResult(RESULT_OK);

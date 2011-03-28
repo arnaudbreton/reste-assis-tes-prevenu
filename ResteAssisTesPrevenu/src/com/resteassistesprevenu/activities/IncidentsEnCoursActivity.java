@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -20,16 +21,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import com.resteassistesprevenu.R;
+import com.resteassistesprevenu.activities.listeners.IIncidentActionListener;
+import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
 
-public class IncidentsEnCoursActivity extends Activity {
+public class IncidentsEnCoursActivity extends Activity implements
+		IIncidentActionListener {
 
 	private List<IncidentModel> incidents;
 	private IncidentModelArrayAdapter mAdapter;
@@ -47,18 +53,17 @@ public class IncidentsEnCoursActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.incidents_en_cours_view);
+		setContentView(R.layout.main);
 
 		initialize();
 
 		ServiceConnection connection = new ServiceConnection() {
 			public void onServiceConnected(ComponentName className,
 					IBinder service) {
-				Log.i("BackgroundService", "Connected!");
+				Log.i(getString(R.string.log_tag_name), "Service Connected!");
+
 				mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 						.getService();
-
-				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
 
 				mBoundService
 						.addGetIncidentsListener(new IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener() {
@@ -75,16 +80,30 @@ public class IncidentsEnCoursActivity extends Activity {
 								}
 							}
 						});
+				
+				mBoundService.addVoteIncidentListener(new IIncidentsTransportsBackgroundServiceVoteIncidentListener() {
+					
+					@Override
+					public void dataChanged(boolean voteSent) {
+						if(voteSent) {
+							Toast.makeText(IncidentsEnCoursActivity.this, R.string.msg_vote_OK, Toast.LENGTH_SHORT).show();
+						}
+						else {
+							Toast.makeText(IncidentsEnCoursActivity.this, R.string.msg_vote_KO, Toast.LENGTH_SHORT).show();
+						}						
+					}
+				});
+
+				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
 
 			public void onServiceDisconnected(ComponentName className) {
 			}
 		};
 
-		getApplicationContext().bindService(
-				new Intent(getApplicationContext(),
-						IncidentsTransportsBackgroundService.class),
-				connection, Context.BIND_AUTO_CREATE);
+		bindService(new Intent(getApplicationContext(),
+				IncidentsTransportsBackgroundService.class), connection,
+				Context.BIND_AUTO_CREATE);
 	}
 
 	private void initialize() {
@@ -96,9 +115,8 @@ public class IncidentsEnCoursActivity extends Activity {
 
 		this.incidents = new ArrayList<IncidentModel>();
 		this.mCurrentScope = IncidentModel.SCOPE_CURRENT;
-		this.mAdapter = new IncidentModelArrayAdapter(
-				IncidentsEnCoursActivity.this, R.id.listViewIncidentEnCours,
-				this.incidents);
+		this.mAdapter = new IncidentModelArrayAdapter(this,
+				R.id.listViewIncidentEnCours, this.incidents, this);
 		((android.widget.ListView) this
 				.findViewById(R.id.listViewIncidentEnCours))
 				.setAdapter(mAdapter);
@@ -215,6 +233,22 @@ public class IncidentsEnCoursActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == Activity.RESULT_OK) {
 			startGetIncidentsFromServiceAsync(mCurrentScope);
+		}	
+	}
+
+	@Override
+	public void actionPerformed(int incidentId, IncidentAction action) {
+		if (!action.equals(IncidentAction.SHARE)) {
+			mBoundService.startVoteIncident(incidentId, action);
+		}
+		else {
+			Intent share = new Intent(Intent.ACTION_SEND);
+			share.setType("image/jpeg");
+
+			share.putExtra(Intent.EXTRA_STREAM,
+			  Uri.parse("file:///sdcard/DCIM/Camera/myPic.jpg"));
+
+			startActivity(Intent.createChooser(share, "Share Image"));
 		}
 	}
 }
