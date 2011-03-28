@@ -18,15 +18,13 @@ import com.resteassistesprevenu.model.adapters.FavorisExpandableListAdapter;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
 
 public class FavorisActivity extends ExpandableListActivity {
 	private IIncidentsTransportsBackgroundService mBoundService;
 
-	private List<String> typeLignesGroups;
-	private List<List<String>> lignesGroups;
-	
 	private FavorisExpandableListAdapter mAdapter;
 
 	@Override
@@ -34,56 +32,64 @@ public class FavorisActivity extends ExpandableListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.favoris_view);
 
-		typeLignesGroups = new ArrayList<String>();
-		lignesGroups = new ArrayList<List<String>>();
-		
-		mAdapter = new FavorisExpandableListAdapter(
-				FavorisActivity.this,
-				typeLignesGroups, lignesGroups);
+		mAdapter = new FavorisExpandableListAdapter(FavorisActivity.this);
 		setListAdapter(mAdapter);
-		
+
 		ServiceConnection connection = new ServiceConnection() {
 			public void onServiceConnected(ComponentName className,
 					IBinder service) {
 				Log.i(getString(R.string.log_tag_name), "Service Connected!");
 
-				
-				
 				mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 						.getService();
 
-				mBoundService.addGetTypeLignesListener(new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {					
-					@Override
-					public void dataChanged(List<String> data) {
-						typeLignesGroups = new ArrayList<String>();
-						for(String typeLigne : data) {
-							typeLignesGroups.add(typeLigne);
-							lignesGroups.add(new ArrayList<String>());
-							mBoundService.startGetLignesAsync(typeLigne);
-						}		
-						mAdapter.setTypeLignesGroups(typeLignesGroups);
-						mAdapter.notifyDataSetChanged();
-					}
-				});
-				
+				mBoundService
+						.addGetTypeLignesListener(new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
+							@Override
+							public void dataChanged(List<String> data) {
+
+								for (String typeLigne : data) {
+									mAdapter.getTypeLignesGroups().add(
+											typeLigne);
+									mAdapter.getLignesChildrenGroups().add(
+											new ArrayList<LigneModel>());
+									mBoundService
+											.startGetLignesAsync(typeLigne);
+								}
+								mAdapter.notifyDataSetChanged();
+							}
+						});
+
 				mBoundService
 						.addGetLignesListener(new IIncidentsTransportsBackgroundServiceGetLignesListener() {
 							@Override
 							public void dataChanged(List<LigneModel> lignesModel) {
-								if(lignesModel.size() > 0) {
-									int indexType = typeLignesGroups.indexOf(lignesModel.get(0).getTypeLigne());
-									List<String> lignes = lignesGroups.get(indexType);
-									
-									for(LigneModel ligneModel : lignesModel) {
-										lignes.add(ligneModel.getNumLigne());									
-									}							
-							     
-									mAdapter.setLignesChildrenGroups(lignesGroups);
+								if (lignesModel.size() > 0) {
+									int indexType = mAdapter
+											.getTypeLignesGroups().indexOf(
+													lignesModel.get(0)
+															.getTypeLigne());
+									List<LigneModel> lignes = mAdapter
+											.getLignesChildrenGroups().get(
+													indexType);
+
+									lignes.addAll(lignesModel);
+
 									mAdapter.notifyDataSetChanged();
 								}
 							}
-						});			
-								
+						});
+
+				mBoundService
+						.addGetFavorisListener(new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
+
+							@Override
+							public void dataChanged(List<LigneModel> lignes) {
+								mAdapter.getLignesFavoris().addAll(lignes);
+							}
+						});
+
+				mBoundService.startGetFavorisAsync();
 				mBoundService.startGetTypeLignesAsync();
 			}
 
