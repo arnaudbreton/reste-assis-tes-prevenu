@@ -31,6 +31,7 @@ import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.provider.DefaultContentProvider;
 import com.resteassistesprevenu.provider.LigneBaseColumns;
 import com.resteassistesprevenu.provider.TypeLigneBaseColumns;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
@@ -92,7 +93,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	/**
-	 * AsyncTask de récupération des types de lignes
+	 * AsyncTask de récupération des lignes
 	 * 
 	 */
 	private class LoadLignesAsyncTask extends
@@ -102,10 +103,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		protected List<LigneModel> doInBackground(String... params) {
 			try {
 				if(params.length == 0) {
-					return getLignesFromService("");
+					return getLignesFromProvider("");
 				}
 				else {
-					return getLignesFromService(params[0]);
+					return getLignesFromProvider(params[0]);
 				}
 				
 			} catch (Exception e) {
@@ -120,6 +121,32 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		protected void onPostExecute(List<LigneModel> result) {
 			super.onPostExecute(result);
 			fireLignesChanged(result);
+		}
+	}
+	
+	/**
+	 * AsyncTask de récupération des favoris
+	 * 
+	 */
+	private class GetFavorisAsyncTask extends
+			AsyncTask<Void, Void, List<LigneModel>> {
+
+		@Override
+		protected List<LigneModel> doInBackground(Void... params) {
+			try {
+				return getFavorisFromProvider();				
+			} catch (Exception e) {
+				Log.e("ResteAssisTesPrevenu",
+						"Erreur au chargement des lignes du type " + params[0]
+								+ " par le service.", e);
+				return new ArrayList<LigneModel>();
+			}
+		}
+
+		@Override
+		protected void onPostExecute(List<LigneModel> result) {
+			super.onPostExecute(result);
+			fireFavorisChanged(result);
 		}
 	}
 
@@ -230,9 +257,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		return lignes;
 	}
 
-	private List<LigneModel> getLignesFromService(String typeLigne) {
+	private List<LigneModel> getLignesFromProvider(String typeLigne) {
 		ContentResolver cr = getContentResolver();
-		String[] projection = new String[] { TypeLigneBaseColumns.TYPE_LIGNE , LigneBaseColumns.NOM_LIGNE };		
+		String[] projection = new String[] { LigneBaseColumns.NOM_TABLE.concat(".".concat(LigneBaseColumns._ID)), TypeLigneBaseColumns.TYPE_LIGNE , LigneBaseColumns.NOM_LIGNE };		
 		String selection = null;
 		
 		if(!typeLigne.equals("")) {
@@ -246,14 +273,34 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		ArrayList<LigneModel> lignes = new ArrayList<LigneModel>();
 		if (c.moveToFirst()) {
 			do {
-				LigneModel ligne = new LigneModel(0, c.getString(c.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)), c.getString(c
+				LigneModel ligne = new LigneModel(c.getInt(c.getColumnIndex(LigneBaseColumns._ID)), c.getString(c.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)), c.getString(c
 								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)));
 				lignes.add(ligne);
 			} while (c.moveToNext());
 		}
 		return lignes;
 	}
+	
+	private List<LigneModel> getFavorisFromProvider() {
+		ContentResolver cr = getContentResolver();
+		String[] projection = new String[] { "l2."+LigneBaseColumns._ID, TypeLigneBaseColumns.TYPE_LIGNE , LigneBaseColumns.NOM_LIGNE };		
+		String selection = null;		
+			
+		Cursor c = cr.query(
+				Uri.parse(DefaultContentProvider.CONTENT_URI + "/favoris"),
+				projection, selection, null, null);
 
+		ArrayList<LigneModel> lignes = new ArrayList<LigneModel>();
+		if (c.moveToFirst()) {
+			do {
+				LigneModel ligne = new LigneModel(c.getInt(c.getColumnIndex(LigneBaseColumns._ID)), c.getString(c.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)), c.getString(c
+								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)));
+				lignes.add(ligne);
+			} while (c.moveToNext());
+		}
+		return lignes;
+	}
+	
 	private String createIncident(String typeLigne, String numLigne,
 			String raison) throws UnsupportedEncodingException, JSONException {
 		HttpPost request = new HttpPost(this.urlService + "/incident");
@@ -332,6 +379,38 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		httpclient.getConnectionManager().shutdown();
 
 		return result;
+	}
+	
+	public void startGetFavorisAsync() {
+		new GetFavorisAsyncTask().execute();
+	}
+
+	private List<IIncidentsTransportsBackgroundServiceGetFavorisListener> getFavorislisteners = null;
+
+	// Ajout d'un listener
+	public void addGetFavorisListener(
+			IIncidentsTransportsBackgroundServiceGetFavorisListener listener) {
+		if (getFavorislisteners == null) {
+			getFavorislisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetFavorisListener>();
+		}
+		getFavorislisteners.add(listener);
+	}
+
+	// Suppression d'un listener
+	public void removeGetFavorisListener(
+			IIncidentsTransportsBackgroundServiceGetFavorisListener listener) {
+		if (getFavorislisteners != null) {
+			getFavorislisteners.remove(listener);
+		}
+	}
+
+	// Notification des listeners
+	private void fireFavorisChanged(List<LigneModel> data) {
+		if (getFavorislisteners != null) {
+			for (IIncidentsTransportsBackgroundServiceGetFavorisListener listener : getFavorislisteners) {
+				listener.dataChanged(data);
+			}
+		}
 	}
 
 	@Override

@@ -21,11 +21,13 @@ public class DefaultContentProvider extends ContentProvider {
 	private static final int TYPE_LIGNES = 1;
 	private static final int LIGNES = 2;
 	private static final int LIGNES_ID = 3;
+	private static final int FAVORIS = 4;
 
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI(PROVIDER_NAME, "type_lignes", TYPE_LIGNES);
+		uriMatcher.addURI(PROVIDER_NAME, "favoris", FAVORIS);
 		uriMatcher.addURI(PROVIDER_NAME, "lignes", LIGNES);
 		uriMatcher.addURI(PROVIDER_NAME, "lignes/#", LIGNES_ID);
 	}
@@ -75,11 +77,14 @@ public class DefaultContentProvider extends ContentProvider {
 			qb.setTables("type_ligne");
 			break;
 		case LIGNES:
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.id)");
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
 			break;
 		case LIGNES_ID:
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.id)");
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
 			qb.appendWhere("lignes.id = " + uri.getPathSegments().get(1));
+			break;
+		case FAVORIS:
+			qb.setTables("(favoris f INNER JOIN lignes l1 ON (f.id_ligne=l1._id)) l2 INNER JOIN type_ligne t1 ON (l2.id_type_ligne=t1._id)");
 			break;
 		}
 		
@@ -97,7 +102,7 @@ public class DefaultContentProvider extends ContentProvider {
 
 	private SQLiteDatabase ratpDB;
 	private static final String DATABASE_NAME = "ResteAssisTesPrevenu";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 
 	private class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -132,6 +137,10 @@ public class DefaultContentProvider extends ContentProvider {
 
 			db.execSQL(getContext().getString(
 					R.string.req_create_table_terminus));
+			
+
+			db.execSQL(getContext().getString(
+					R.string.req_create_table_favoris));
 
 		}
 
@@ -140,9 +149,15 @@ public class DefaultContentProvider extends ContentProvider {
 			Log.w("Content provider database",
 					"Upgrading database from version " + oldVersion + " to "
 							+ newVersion + ", which will destroy all old data");
-			db.execSQL("DROP TABLE IF EXISTS titles");
+			dropTables(db);
 			onCreate(db);
+		}
 
+		private void dropTables(SQLiteDatabase db) {
+			db.execSQL("DROP TABLE IF EXISTS favoris");
+			db.execSQL("DROP TABLE IF EXISTS terminus");
+			db.execSQL("DROP TABLE IF EXISTS lignes");
+			db.execSQL("DROP TABLE IF EXISTS type_ligne");
 		}
 
 	}
