@@ -1,30 +1,37 @@
 package com.resteassistesprevenu.model.adapters;
 
+import java.util.List;
+
 import android.content.Context;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import com.resteassistesprevenu.R;
+
 public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
-	private String[] typeLignesGroups;
-	private String[][] lignesChildrenGroups;
+	private List<String> typeLignesGroups;
+	private List<List<String>> lignesChildrenGroups;
 
 	private Context ctx;
+	private LayoutInflater inflater;
 
-	public FavorisExpandableListAdapter(Context ctx, String[] typeLignesGroups,
-			String[][] lignesChildrenGroups) {
+	public FavorisExpandableListAdapter(Context ctx, List<String> typeLignesGroups,
+			List<List<String>> lignesChildrenGroups) {
 		this.typeLignesGroups = typeLignesGroups;
 		this.lignesChildrenGroups = lignesChildrenGroups;
 
 		this.ctx = ctx;
+		this.inflater = LayoutInflater.from(ctx);
 	}
 
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
-		return lignesChildrenGroups[groupPosition][childPosition];
+		return lignesChildrenGroups.get(groupPosition).get(childPosition);
 	}
 
 	@Override
@@ -35,16 +42,28 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	@Override
 	public View getChildView(int groupPosition, int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {
-		TextView textView = getGenericView();
-		textView.setText(getChild(groupPosition, childPosition).toString());
-		return textView;
+		 View v = null;
+	        if( convertView != null )
+	            v = convertView;
+	        else
+	            v = inflater.inflate(R.layout.favorite_item_view, parent, false); 
+	        String c = (String)getChild( groupPosition, childPosition );
+			TextView txtLigne = (TextView)v.findViewById( R.id.txtLigne );
+			if( txtLigne != null ) {
+				txtLigne.setText( c );
+				txtLigne.setPadding(60, 0, 0, 0);
+			}
+			
+
+			
+	        return v;
 	}
 
 	@Override
 	public int getChildrenCount(int groupPosition) {
 		int i = 0;
 		try {
-			i = lignesChildrenGroups[groupPosition].length;
+			i = lignesChildrenGroups.get(groupPosition).size();
 
 		} catch (Exception e) {
 		}
@@ -54,12 +73,12 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public Object getGroup(int groupPosition) {
-		return typeLignesGroups[groupPosition];
+		return typeLignesGroups.get(groupPosition);
 	}
 
 	@Override
 	public int getGroupCount() {
-		return typeLignesGroups.length;
+		return typeLignesGroups.size();
 	}
 
 	@Override
@@ -96,7 +115,23 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 		// Center the text vertically
 		tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
 		// Set the text starting position
-		tv.setPadding(36, 0, 0, 0);
+		tv.setPadding(50, 0, 0, 0);
 		return tv;
+	}
+
+	public List<String> getTypeLignesGroups() {
+		return typeLignesGroups;
+	}
+
+	public void setTypeLignesGroups(List<String> typeLignesGroups) {
+		this.typeLignesGroups = typeLignesGroups;
+	}
+
+	public List<List<String>> getLignesChildrenGroups() {
+		return lignesChildrenGroups;
+	}
+
+	public void setLignesChildrenGroups(List<List<String>> lignesChildrenGroups) {
+		this.lignesChildrenGroups = lignesChildrenGroups;
 	}
 }
