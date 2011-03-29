@@ -26,19 +26,23 @@ import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.activities.listeners.IIncidentActionListener;
 import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
 
 public class IncidentsEnCoursActivity extends Activity implements
 		IIncidentActionListener {
 
-	private List<IncidentModel> incidents;
+	private List<IncidentModel> incidentsService;
+	
 	private IncidentModelArrayAdapter mAdapter;
 	private IIncidentsTransportsBackgroundService mBoundService;
+	private List<LigneModel> lignesFavoris;
 
 	private RadioButton mBtnEnCours;
 	private RadioButton mBtnHeure;
@@ -99,7 +103,20 @@ public class IncidentsEnCoursActivity extends Activity implements
 							}
 						});
 
-				startGetIncidentsFromServiceAsync(mCurrentScope);
+				mBoundService
+						.addGetFavorisListener(new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
+
+							@Override
+							public void dataChanged(List<LigneModel> lignes) {
+								lignesFavoris = new ArrayList<LigneModel>();
+								lignesFavoris.clear();
+								lignesFavoris.addAll(lignes);
+
+								startGetIncidentsFromServiceAsync(mCurrentScope);
+							}
+						});
+
+				mBoundService.startGetFavorisAsync();
 			}
 
 			public void onServiceDisconnected(ComponentName className) {
@@ -118,10 +135,12 @@ public class IncidentsEnCoursActivity extends Activity implements
 		this.mBtnAddIncident = (Button) this
 				.findViewById(R.id.btnAjouterIncident);
 
-		this.incidents = new ArrayList<IncidentModel>();
+		this.incidentsService = new ArrayList<IncidentModel>();
+		
 		this.mCurrentScope = IncidentModel.SCOPE_CURRENT;
+		
 		this.mAdapter = new IncidentModelArrayAdapter(this,
-				R.id.listViewIncidentEnCours, this.incidents, this);
+				R.id.listViewIncidentEnCours, this.incidentsService, this);
 		((android.widget.ListView) this
 				.findViewById(R.id.listViewIncidentEnCours))
 				.setAdapter(mAdapter);
@@ -139,7 +158,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				mCurrentScope = IncidentModel.SCOPE_CURRENT;
-				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_CURRENT);
+				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
 		});
 
@@ -147,7 +166,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				mCurrentScope = IncidentModel.SCOPE_HOUR;
-				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_HOUR);
+				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
 		});
 
@@ -155,7 +174,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				mCurrentScope = IncidentModel.SCOPE_MINUTE;
-				startGetIncidentsFromServiceAsync(IncidentModel.SCOPE_MINUTE);
+				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
 		});
 	}
@@ -174,7 +193,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 			chooseServeur();
 			return true;
 		case R.id.menu_favoris:
-			startActivity(new Intent(this, FavorisActivity.class));
+			startActivityForResult(new Intent(this, FavorisActivity.class), 0);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -211,7 +230,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 	 * @return the incidents
 	 */
 	public List<IncidentModel> getIncidents() {
-		return incidents;
+		return incidentsService;
 	}
 
 	/**
@@ -219,12 +238,23 @@ public class IncidentsEnCoursActivity extends Activity implements
 	 *            the incidents to set
 	 */
 	public void setIncidents(List<IncidentModel> incidents) {
-		if (this.incidents == null) {
-			this.incidents = new ArrayList<IncidentModel>();
+		if (this.incidentsService == null) {
+			this.incidentsService = new ArrayList<IncidentModel>();
 		}
 
-		this.incidents.clear();
-		this.incidents.addAll(incidents);
+		this.incidentsService.clear();
+		
+		if (lignesFavoris != null && lignesFavoris.size() > 0) {
+			for (IncidentModel incident : incidents) {
+				if(lignesFavoris.contains(incident.getLigne())) {
+					incidentsService.add(incident);
+				}
+			}
+		}
+		else {			
+			this.incidentsService.addAll(incidents);
+		}
+		
 		mAdapter.notifyDataSetChanged();
 	}
 
@@ -250,8 +280,9 @@ public class IncidentsEnCoursActivity extends Activity implements
 			share.setType("text/plain");
 
 			share.putExtra(Intent.EXTRA_TEXT, String.format(
-					getString(R.string.msg_share), incident.getTypeLigne().concat(" ".concat(incident.getLigne())),
-					"http://openreact.alwaysdata.net/incident/detail/"+ incident.getId()));
+					getString(R.string.msg_share), incident.getLigne().toString(),
+					"http://openreact.alwaysdata.net/incident/detail/"
+							+ incident.getId()));
 
 			startActivity(Intent.createChooser(share,
 					getString(R.string.msg_share)));

@@ -12,14 +12,13 @@ import org.json.JSONObject;
 public class IncidentModel {
 	private String statut;
 	private int id;
-	private String ligne;
 	private int votePlus;
 	private int voteMinus;
 	private int voteEnded;
 	private String reason;
 	private Date lastModifiedTime;
-	private String typeLigne;
-	
+	private LigneModelService ligne;
+
 	/**
 	 * Scope "current" du WebService : incidents en cours
 	 */
@@ -29,12 +28,12 @@ public class IncidentModel {
 	 * Scope "hour" du WebService : incidents en cours de l'heure
 	 */
 	public static final String SCOPE_HOUR = "hour";
-	
+
 	/**
 	 * Scope "hour" du WebService : incidents en cours des dernières minutes
 	 */
 	public static final String SCOPE_MINUTE = "minute";
-	
+
 	public IncidentModel() {
 		this.statut = "";
 		id = -1;
@@ -44,16 +43,17 @@ public class IncidentModel {
 		reason = "";
 		lastModifiedTime = null;
 	}
-	
-	public static ArrayList<IncidentModel> deserializeFromArray(String serializedArray) throws JSONException, ParseException {
+
+	public static ArrayList<IncidentModel> deserializeFromArray(
+			String serializedArray) throws JSONException, ParseException {
 		JSONArray jsonArray = new JSONArray(serializedArray);
-		
+
 		ArrayList<IncidentModel> incidents = new ArrayList<IncidentModel>();
-		for(int i=0;i<jsonArray.length();i++) {
+		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject incident = jsonArray.getJSONObject(i);
 			incidents.add(deserializeFromJSONObj(incident));
 		}
-		
+
 		return incidents;
 	}
 
@@ -61,16 +61,19 @@ public class IncidentModel {
 			throws JSONException, ParseException {
 		IncidentModel incidentModel = new IncidentModel();
 		SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
-		
+
 		incidentModel.id = incidentJSON.getInt("uid");
-		incidentModel.statut = incidentJSON.getString("status");
-		incidentModel.typeLigne = incidentJSON.getString("line").split(" ")[0];
-		incidentModel.ligne = incidentJSON.getString("line").split(" ")[1];;
+		incidentModel.statut = incidentJSON.getString("status");	
 		incidentModel.reason = incidentJSON.getString("reason");
 		incidentModel.votePlus = incidentJSON.getInt("vote_plus");
 		incidentModel.voteMinus = incidentJSON.getInt("vote_minus");
 		incidentModel.voteEnded = incidentJSON.getInt("vote_ended");
-		incidentModel.lastModifiedTime = sdf.parse(incidentJSON.getString("last_modified_time"));
+		incidentModel.lastModifiedTime = sdf.parse(incidentJSON
+				.getString("last_modified_time"));
+
+		incidentModel.ligne = new LigneModelService(incidentJSON.getString(
+		"line").split(" ")[0], incidentJSON.getString("line")
+		.split(" ")[1]);
 		
 		return incidentModel;
 	}
@@ -83,7 +86,8 @@ public class IncidentModel {
 	}
 
 	/**
-	 * @param statut the statut to set
+	 * @param statut
+	 *            the statut to set
 	 */
 	public void setStatut(String statut) {
 		this.statut = statut;
@@ -97,7 +101,8 @@ public class IncidentModel {
 	}
 
 	/**
-	 * @param id the id to set
+	 * @param id
+	 *            the id to set
 	 */
 	public void setId(int id) {
 		this.id = id;
@@ -111,7 +116,8 @@ public class IncidentModel {
 	}
 
 	/**
-	 * @param votePlus the votePlus to set
+	 * @param votePlus
+	 *            the votePlus to set
 	 */
 	public void setVotePlus(int votePlus) {
 		this.votePlus = votePlus;
@@ -125,7 +131,8 @@ public class IncidentModel {
 	}
 
 	/**
-	 * @param voteMinus the voteMinus to set
+	 * @param voteMinus
+	 *            the voteMinus to set
 	 */
 	public void setVoteMinus(int voteMinus) {
 		this.voteMinus = voteMinus;
@@ -139,7 +146,8 @@ public class IncidentModel {
 	}
 
 	/**
-	 * @param voteEnded the voteEnded to set
+	 * @param voteEnded
+	 *            the voteEnded to set
 	 */
 	public void setVoteEnded(int voteEnded) {
 		this.voteEnded = voteEnded;
@@ -153,7 +161,8 @@ public class IncidentModel {
 	}
 
 	/**
-	 * @param reason the reason to set
+	 * @param reason
+	 *            the reason to set
 	 */
 	public void setReason(String reason) {
 		this.reason = reason;
@@ -167,31 +176,15 @@ public class IncidentModel {
 	}
 
 	/**
-	 * @param lastModifiedTime the lastModifiedTime to set
+	 * @param lastModifiedTime
+	 *            the lastModifiedTime to set
 	 */
 	public void setLastModifiedTime(Date lastModifiedTime) {
 		this.lastModifiedTime = lastModifiedTime;
 	}
 
-	/**
-	 * @return the ligne
-	 */
-	public String getLigne() {
-		return ligne;
-	}
 
-	/**
-	 * @param ligne the ligne to set
-	 */
-	public void setLigne(String ligne) {
-		this.ligne = ligne;
-	}
-
-	public String getTypeLigne() {
-		return typeLigne;
-	}
-
-	public void setTypeLigne(String typeLigne) {
-		this.typeLigne = typeLigne;
-	}
+	public LigneModelService getLigne() {
+		return this.ligne;
+	}	
 }

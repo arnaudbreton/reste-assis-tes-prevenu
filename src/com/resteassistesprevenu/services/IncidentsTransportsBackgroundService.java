@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -102,13 +103,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected List<LigneModel> doInBackground(String... params) {
 			try {
-				if(params.length == 0) {
+				if (params.length == 0) {
 					return getLignesFromProvider("");
-				}
-				else {
+				} else {
 					return getLignesFromProvider(params[0]);
 				}
-				
+
 			} catch (Exception e) {
 				Log.e("ResteAssisTesPrevenu",
 						"Erreur au chargement des lignes du type " + params[0]
@@ -121,6 +121,31 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		protected void onPostExecute(List<LigneModel> result) {
 			super.onPostExecute(result);
 			fireLignesChanged(result);
+		}
+	}
+
+	/**
+	 * AsyncTask de report d'un incident
+	 * 
+	 */
+	private class ReportIncidentAsyncTask extends
+			AsyncTask<String, Void, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+			try {
+				return createIncident(params[0], params[1], params[2]);
+			} catch (Exception e) {
+				Log.e("ResteAssisTesPrevenu",
+						"Erreur lors de la création de l'incident", e);
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			fireReportNewIncidentChanged(result);
 		}
 	}
 	
@@ -151,27 +176,28 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	/**
-	 * AsyncTask de report d'un incident
+	 * AsyncTask d'enregistrement d'un favoris
 	 * 
 	 */
-	private class ReportIncidentAsyncTask extends
-			AsyncTask<String, Void, String> {
+	private class RegisterFavorisAsyncTask extends
+			AsyncTask<LigneModel, Void, Void> {
 
 		@Override
-		protected String doInBackground(String... params) {
+		protected Void doInBackground(LigneModel... params) {
 			try {
-				return createIncident(params[0], params[1], params[2]);
+				registerFavoris(params[0]);
 			} catch (Exception e) {
 				Log.e("ResteAssisTesPrevenu",
 						"Erreur lors de la création de l'incident", e);
-				return null;
 			}
+
+			return null;
 		}
 
 		@Override
-		protected void onPostExecute(String result) {
+		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			fireReportNewIncidentChanged(result);
+			// fireReportNewIncidentChanged(result);
 		}
 	}
 
@@ -200,7 +226,6 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		}
 	}
 
-	
 	private String urlService;
 
 	private final static String SERVICE_URL_BASE_PRE_PRODUCTION = "http://openreact.alwaysdata.net/api";
@@ -223,7 +248,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		super.onStartCommand(intent, flags, startId);		
+		super.onStartCommand(intent, flags, startId);
 
 		return START_STICKY;
 	}
@@ -259,13 +284,17 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	private List<LigneModel> getLignesFromProvider(String typeLigne) {
 		ContentResolver cr = getContentResolver();
-		String[] projection = new String[] { LigneBaseColumns.NOM_TABLE.concat(".".concat(LigneBaseColumns._ID)), TypeLigneBaseColumns.TYPE_LIGNE , LigneBaseColumns.NOM_LIGNE };		
+		String[] projection = new String[] {
+				LigneBaseColumns.NOM_TABLE.concat("."
+						.concat(LigneBaseColumns._ID)),
+				TypeLigneBaseColumns.TYPE_LIGNE, LigneBaseColumns.NOM_LIGNE,
+				LigneBaseColumns.IS_FAVORIS };
 		String selection = null;
-		
-		if(!typeLigne.equals("")) {
+
+		if (!typeLigne.equals("")) {
 			selection = "type_ligne = '" + typeLigne + "'";
 		}
-		
+
 		Cursor c = cr.query(
 				Uri.parse(DefaultContentProvider.CONTENT_URI + "/lignes"),
 				projection, selection, null, null);
@@ -273,8 +302,13 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		ArrayList<LigneModel> lignes = new ArrayList<LigneModel>();
 		if (c.moveToFirst()) {
 			do {
-				LigneModel ligne = new LigneModel(c.getInt(c.getColumnIndex(LigneBaseColumns._ID)), c.getString(c.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)), c.getString(c
-								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)));
+				LigneModel ligne = new LigneModel(
+						c.getInt(c.getColumnIndex(LigneBaseColumns._ID)),
+						c.getString(c
+								.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)),
+						c.getString(c
+								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)),
+						c.getInt(c.getColumnIndex(LigneBaseColumns.IS_FAVORIS)) != 0);
 				lignes.add(ligne);
 			} while (c.moveToNext());
 		}
@@ -283,7 +317,11 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	
 	private List<LigneModel> getFavorisFromProvider() {
 		ContentResolver cr = getContentResolver();
-		String[] projection = new String[] { "l2."+LigneBaseColumns._ID, TypeLigneBaseColumns.TYPE_LIGNE , LigneBaseColumns.NOM_LIGNE };		
+		String[] projection = new String[] {
+				LigneBaseColumns.NOM_TABLE.concat("."
+						.concat(LigneBaseColumns._ID)),
+				TypeLigneBaseColumns.TYPE_LIGNE, LigneBaseColumns.NOM_LIGNE,
+				LigneBaseColumns.IS_FAVORIS };
 		String selection = null;		
 			
 		Cursor c = cr.query(
@@ -293,14 +331,19 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		ArrayList<LigneModel> lignes = new ArrayList<LigneModel>();
 		if (c.moveToFirst()) {
 			do {
-				LigneModel ligne = new LigneModel(c.getInt(c.getColumnIndex(LigneBaseColumns._ID)), c.getString(c.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)), c.getString(c
-								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)));
+				LigneModel ligne = new LigneModel(
+						c.getInt(c.getColumnIndex(LigneBaseColumns._ID)),
+						c.getString(c
+								.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)),
+						c.getString(c
+								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)),
+						c.getInt(c.getColumnIndex(LigneBaseColumns.IS_FAVORIS)) != 0);
 				lignes.add(ligne);
 			} while (c.moveToNext());
 		}
 		return lignes;
 	}
-	
+
 	private String createIncident(String typeLigne, String numLigne,
 			String raison) throws UnsupportedEncodingException, JSONException {
 		HttpPost request = new HttpPost(this.urlService + "/incident");
@@ -320,8 +363,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 		return result;
 	}
-	
-	private Boolean voteIncident(int incidentId, String action) throws UnsupportedEncodingException, JSONException {
+
+	private Boolean voteIncident(int incidentId, String action)
+			throws UnsupportedEncodingException, JSONException {
 		HttpPost request = new HttpPost(this.urlService + "/incident");
 
 		JSONObject json = new JSONObject();
@@ -336,10 +380,21 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		try {
 			postToService(request);
 			return true;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	public void registerFavoris(LigneModel ligne) {
+		ContentResolver cr = getContentResolver();
+		ContentValues editedValues = new ContentValues();
+
+		editedValues
+				.put(LigneBaseColumns.IS_FAVORIS, ligne.isFavoris() ? 1 : 0);
+
+		cr.update(
+				Uri.parse(DefaultContentProvider.CONTENT_URI + "/favoris/"
+						+ ligne.getId()), editedValues, null, null);
 	}
 
 	private String getFromService(HttpGet request) {
@@ -379,38 +434,6 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		httpclient.getConnectionManager().shutdown();
 
 		return result;
-	}
-	
-	public void startGetFavorisAsync() {
-		new GetFavorisAsyncTask().execute();
-	}
-
-	private List<IIncidentsTransportsBackgroundServiceGetFavorisListener> getFavorislisteners = null;
-
-	// Ajout d'un listener
-	public void addGetFavorisListener(
-			IIncidentsTransportsBackgroundServiceGetFavorisListener listener) {
-		if (getFavorislisteners == null) {
-			getFavorislisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetFavorisListener>();
-		}
-		getFavorislisteners.add(listener);
-	}
-
-	// Suppression d'un listener
-	public void removeGetFavorisListener(
-			IIncidentsTransportsBackgroundServiceGetFavorisListener listener) {
-		if (getFavorislisteners != null) {
-			getFavorislisteners.remove(listener);
-		}
-	}
-
-	// Notification des listeners
-	private void fireFavorisChanged(List<LigneModel> data) {
-		if (getFavorislisteners != null) {
-			for (IIncidentsTransportsBackgroundServiceGetFavorisListener listener : getFavorislisteners) {
-				listener.dataChanged(data);
-			}
-		}
 	}
 
 	@Override
@@ -545,10 +568,11 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			}
 		}
 	}
-	
+
 	@Override
 	public void startVoteIncident(int idIncident, IncidentAction action) {
-		new VoteIncidentAsyncTask().execute(String.valueOf(idIncident), action.toString());
+		new VoteIncidentAsyncTask().execute(String.valueOf(idIncident),
+				action.toString());
 	}
 
 	private List<IIncidentsTransportsBackgroundServiceVoteIncidentListener> getVoteIncidentlisteners = null;
@@ -579,6 +603,41 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		}
 	}
 
+	public void startRegisterFavoris(LigneModel ligne) {
+		new RegisterFavorisAsyncTask().execute(ligne);
+	}
+	
+	public void startGetFavorisAsync() {
+		new GetFavorisAsyncTask().execute();
+	}
+
+	private List<IIncidentsTransportsBackgroundServiceGetFavorisListener> getFavorislisteners = null;
+
+	// Ajout d'un listener
+	public void addGetFavorisListener(
+			IIncidentsTransportsBackgroundServiceGetFavorisListener listener) {
+		if (getFavorislisteners == null) {
+			getFavorislisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetFavorisListener>();
+		}
+		getFavorislisteners.add(listener);
+	}
+
+	// Suppression d'un listener
+	public void removeGetFavorisListener(
+			IIncidentsTransportsBackgroundServiceGetFavorisListener listener) {
+		if (getFavorislisteners != null) {
+			getFavorislisteners.remove(listener);
+		}
+	}
+
+	// Notification des listeners
+	private void fireFavorisChanged(List<LigneModel> data) {
+		if (getFavorislisteners != null) {
+			for (IIncidentsTransportsBackgroundServiceGetFavorisListener listener : getFavorislisteners) {
+				listener.dataChanged(data);
+			}
+		}
+	}
 
 	@Override
 	public boolean isProduction() {
