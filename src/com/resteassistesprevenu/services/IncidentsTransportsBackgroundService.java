@@ -230,8 +230,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	private final static String SERVICE_URL_BASE_PRE_PRODUCTION = "http://openreact.alwaysdata.net/api";
 	private final static String SERVICE_URL_BASE_PRODUCTION = "http://www.incidents-transports.com/api";
-	private static String INCIDENTS_JSON_URL = "/incidents.json/";
-
+	
+	private static String INCIDENTS_JSON_URL = "/incidents.json";
+	private static String INCIDENT_JSON_URL = "/incident.json";
+	
 	private IncidentsTransportsBackgroundServiceBinder mBinder;
 
 	@Override
@@ -261,7 +263,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	private String getIncidentsEnCoursFromService(String scope) {
-		return getFromService(new HttpGet(this.urlService + INCIDENTS_JSON_URL
+		return getFromService(new HttpGet(this.urlService + INCIDENTS_JSON_URL + "/"
 				+ scope));
 	}
 
@@ -366,17 +368,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	private Boolean voteIncident(int incidentId, String action)
 			throws UnsupportedEncodingException, JSONException {
-		HttpPost request = new HttpPost(this.urlService + "/incident");
+		String url;
 
-		JSONObject json = new JSONObject();
-		json.put("incident_id", incidentId);
-		json.put("action", action);
-
-		request.setHeader("Content-Type", "application/json; charset=UTF-8");
-		request.setEntity(new StringEntity(json.toString()));
-
-		request.setHeader("Accept", "application/json");
-
+		url = this.urlService + INCIDENT_JSON_URL + "/vote/" + incidentId + "/" + action;
+		
+		HttpPost request = new HttpPost(url);
+		
 		try {
 			postToService(request);
 			return true;

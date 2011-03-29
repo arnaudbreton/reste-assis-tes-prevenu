@@ -52,7 +52,10 @@ public class IncidentsEnCoursActivity extends Activity implements
 	private ProgressDialog loadingDialog;
 
 	private String mCurrentScope;
-
+	
+	private static final int REQUEST_FAVORIS = 100; 
+	private static final int REQUEST_CHOOSE_SERVEUR = 101;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -109,7 +112,6 @@ public class IncidentsEnCoursActivity extends Activity implements
 							@Override
 							public void dataChanged(List<LigneModel> lignes) {
 								lignesFavoris = new ArrayList<LigneModel>();
-								lignesFavoris.clear();
 								lignesFavoris.addAll(lignes);
 
 								startGetIncidentsFromServiceAsync(mCurrentScope);
@@ -193,7 +195,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 			chooseServeur();
 			return true;
 		case R.id.menu_favoris:
-			startActivityForResult(new Intent(this, FavorisActivity.class), 0);
+			startActivityForResult(new Intent(this, FavorisActivity.class), REQUEST_FAVORIS);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -246,8 +248,8 @@ public class IncidentsEnCoursActivity extends Activity implements
 		
 		if (lignesFavoris != null && lignesFavoris.size() > 0) {
 			for (IncidentModel incident : incidents) {
-				if(lignesFavoris.contains(incident.getLigne())) {
-					incidentsService.add(incident);
+				if(this.lignesFavoris.contains(incident.getLigne())) {
+					this.incidentsService.add(incident);
 				}
 			}
 		}
@@ -268,8 +270,10 @@ public class IncidentsEnCoursActivity extends Activity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode == Activity.RESULT_OK) {
-			startGetIncidentsFromServiceAsync(mCurrentScope);
+		if(requestCode == REQUEST_FAVORIS) {
+			if (resultCode == Activity.RESULT_OK) {	
+				mBoundService.startGetFavorisAsync();
+			}
 		}
 	}
 
