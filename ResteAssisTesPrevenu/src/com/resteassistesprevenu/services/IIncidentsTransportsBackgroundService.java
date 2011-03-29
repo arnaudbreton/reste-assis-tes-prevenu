@@ -1,6 +1,7 @@
 package com.resteassistesprevenu.services;
 
 import com.resteassistesprevenu.model.IncidentAction;
+import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
@@ -9,14 +10,6 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
 
 public interface IIncidentsTransportsBackgroundService {	
-	/**
-	 * Récupération des favoris, asynchrone
-	 */
-	public void startGetFavorisAsync();
-	
-	public void addGetFavorisListener(IIncidentsTransportsBackgroundServiceGetFavorisListener listener);
-	public void removeGetFavorisListener(IIncidentsTransportsBackgroundServiceGetFavorisListener listener);
-
 	/**
 	 * Récupération des incidents, asynchrone
 	 */
@@ -63,6 +56,25 @@ public interface IIncidentsTransportsBackgroundService {
 	
 	public void addVoteIncidentListener(IIncidentsTransportsBackgroundServiceVoteIncidentListener listener);
 	public void removeVoteIncidentListener(IIncidentsTransportsBackgroundServiceVoteIncidentListener listener);
+	
+	/** 
+	 * Enregistrement d'un favoris, asynchrone.
+	 * @return
+	 */
+	public void startRegisterFavoris(LigneModel ligne);
+	
+	/** 
+	 * Lecture des favoris, asynchrone.
+	 * @return
+	 */
+	/**
+	 * Récupération des favoris, asynchrone
+	 */
+	public void startGetFavorisAsync();
+	
+	public void addGetFavorisListener(IIncidentsTransportsBackgroundServiceGetFavorisListener listener);
+	public void removeGetFavorisListener(IIncidentsTransportsBackgroundServiceGetFavorisListener listener);
+
 	
 	public boolean isProduction();
 	

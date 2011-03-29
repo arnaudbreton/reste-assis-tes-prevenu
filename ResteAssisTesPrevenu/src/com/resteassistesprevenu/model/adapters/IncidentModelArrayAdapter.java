@@ -48,7 +48,7 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
                      TextView txtReason = (TextView) v.findViewById(R.id.txtIncidentItemViewRaison);
                      
                      if(txtLigne != null) {
-                    	 txtLigne.setText(incident.getTypeLigne().concat(" " + incident.getLigne()));
+                    	 txtLigne.setText(incident.getLigne().toString());
                      }
                      
                      if(txtReason != null){

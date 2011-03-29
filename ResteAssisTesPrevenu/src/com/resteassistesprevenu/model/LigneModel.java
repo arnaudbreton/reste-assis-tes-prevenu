@@ -1,14 +1,14 @@
 package com.resteassistesprevenu.model;
 
-public class LigneModel {
+public class LigneModel extends LigneModelService {
 	private int id;
-	private String mTypeLigne;
-	private String mNumLigne;
-	
-	public LigneModel(int id, String typeLigne, String numLigne) {
-		this.id = id;
-		this.mTypeLigne = typeLigne;
-		this.mNumLigne = numLigne;
+	private boolean isFavoris;	
+
+	public LigneModel(int id, String typeLigne, String numLigne, boolean isFavoris) {
+		super(typeLigne, numLigne);
+		
+		this.id = id;		
+		this.isFavoris = isFavoris;
 	}
 	
 	/**
@@ -17,23 +17,19 @@ public class LigneModel {
 	public int getId() {
 		return id;
 	}
-
-	/**
-	 * @return the mTypeLigne
-	 */
-	public String getTypeLigne() {
-		return mTypeLigne;
-	}
-
-	/**
-	 * @return the mNumLigne
-	 */
-	public String getNumLigne() {
-		return mNumLigne;
-	}
 	
-	@Override
-	public String toString() {
-		return getTypeLigne() + " " + getNumLigne();
+	/**
+	 * @return the isFavoris
+	 */
+	public boolean isFavoris() {
+		return isFavoris;
 	}
+
+	/**
+	 * @param isFavoris the isFavoris to set
+	 */
+	public void setFavoris(boolean isFavoris) {
+		this.isFavoris = isFavoris;
+	}
+
 }

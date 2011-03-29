@@ -17,19 +17,14 @@
 		AUTOINCREMENT,
 		nom VARCHAR NOT NULL,
 		id_type_ligne INTEGER REFERENCES
-		type_ligne(id));
+		type_ligne(_id),
+		isFavoris INTEGER DEFAULT 0);
 	</string>
 	<string name="req_create_table_terminus">
 		CREATE TABLE terminus
 		(_id INTEGER PRIMARY KEY AUTOINCREMENT,
-		id_ligne INTEGER REFERENCES lignes(id),
+		id_ligne INTEGER REFERENCES lignes(_id),
 		terminus VARCHAR2 NOT NULL);
-	</string>
-	<string name="req_create_table_favoris">
-		CREATE TABLE favoris
-		(_id INTEGER PRIMARY KEY
-		AUTOINCREMENT,
-		id_ligne INTEGER REFERENCES lignes(id));
 	</string>
 	<string name="req_insert_type_ligne">
 		INSERT INTO type_ligne(type_ligne)
@@ -125,4 +120,5 @@
 	
 	<string name="msg_share_title">Partager cet incident avec...</string>
 	<string name="msg_share">Un incident a été déclaré sur la ligne %1$s. Détail : %2$s.</string>
+	<string name="msg_favoris_registered">Favoris mis à jour.</string>
 </resources>

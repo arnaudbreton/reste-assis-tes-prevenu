@@ -19,12 +19,9 @@ import com.resteassistesprevenu.model.LigneModel;
 public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	private List<String> typeLignesGroups;
 	private List<List<LigneModel>> lignesChildrenGroups;
-	private List<LigneModel> lignesFavoris;
 	
-	private LigneModel currentLigneModel; 
-
 	private Context ctx;
-	private LayoutInflater inflater;
+	private LayoutInflater inflater;	
 
 	public FavorisExpandableListAdapter(Context ctx) {
 		this.ctx = ctx;
@@ -32,12 +29,8 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 		
 		this.typeLignesGroups = new ArrayList<String>();
 		this.lignesChildrenGroups = new ArrayList<List<LigneModel>>();
-		this.lignesFavoris = new ArrayList<LigneModel>();
 	}
 
-	public List<LigneModel> getLignesFavoris() {
-		return lignesFavoris;
-	}
 
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
@@ -57,23 +50,27 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	            v = convertView;
 	        else
 	            v = inflater.inflate(R.layout.favorite_item_view, parent, false); 
-	        currentLigneModel = (LigneModel)getChild( groupPosition, childPosition );
+	        LigneModel ligneModel = (LigneModel)getChild( groupPosition, childPosition );
 			TextView txtLigne = (TextView)v.findViewById( R.id.txtLigne );
 			if( txtLigne != null ) {
-				txtLigne.setText(currentLigneModel.getNumLigne());
+				txtLigne.setText(ligneModel.getNumLigne());
 				txtLigne.setPadding(60, 0, 0, 0);
-			}	
-			
-			ImageButton btnFavorite = (ImageButton) v.findViewById(R.id.btnFavorite);
-			for (LigneModel ligne : lignesFavoris) {
-				if(ligne.getId() == currentLigneModel.getId()) {
-					btnFavorite.setImageDrawable(ctx.getResources().getDrawable(android.R.drawable.star_big_on));
-					break;
-				}
 			}			
+						
+			ImageButton btnFavorite = (ImageButton) v.findViewById(R.id.btnFavorite);
+			
+			btnFavorite.setFocusable(false);
+			txtLigne.setFocusable(false);
+			
+			if(ligneModel.isFavoris()) {
+				btnFavorite.setImageDrawable(ctx.getResources().getDrawable(android.R.drawable.star_big_on));
+			}
+			else {
+				btnFavorite.setImageDrawable(ctx.getResources().getDrawable(android.R.drawable.star_big_off));
+			}
 			
 	        return v;
-	}
+	}	
 
 	@Override
 	public int getChildrenCount(int groupPosition) {

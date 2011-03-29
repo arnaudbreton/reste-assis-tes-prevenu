@@ -22,12 +22,14 @@ public class DefaultContentProvider extends ContentProvider {
 	private static final int LIGNES = 2;
 	private static final int LIGNES_ID = 3;
 	private static final int FAVORIS = 4;
+	private static final int FAVORIS_ID = 5;
 
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI(PROVIDER_NAME, "type_lignes", TYPE_LIGNES);
 		uriMatcher.addURI(PROVIDER_NAME, "favoris", FAVORIS);
+		uriMatcher.addURI(PROVIDER_NAME, "favoris/#", FAVORIS_ID);
 		uriMatcher.addURI(PROVIDER_NAME, "lignes", LIGNES);
 		uriMatcher.addURI(PROVIDER_NAME, "lignes/#", LIGNES_ID);
 	}
@@ -81,23 +83,37 @@ public class DefaultContentProvider extends ContentProvider {
 			break;
 		case LIGNES_ID:
 			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
-			qb.appendWhere("lignes.id = " + uri.getPathSegments().get(1));
+			qb.appendWhere("lignes._id = " + uri.getPathSegments().get(1));
 			break;
 		case FAVORIS:
-			qb.setTables("(favoris f INNER JOIN lignes l1 ON (f.id_ligne=l1._id)) l2 INNER JOIN type_ligne t1 ON (l2.id_type_ligne=t1._id)");
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
+			qb.appendWhere("isFavoris = 1");
 			break;
 		}
-		
+
 		Cursor c = qb.query(db, projection, selection, null, null, null,
 				sortOrder);
 		c.setNotificationUri(getContext().getContentResolver(), uri);
-		
+
 		return c;
 	}
 
 	@Override
-	public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
-		return 0;
+	public int update(Uri uri, ContentValues values, String selection,
+			String[] selectionArgs) {
+		int count = 0;
+		switch (uriMatcher.match(uri)) {
+		case FAVORIS_ID:
+			count = this.dbHelper.getWritableDatabase().update(
+					LigneBaseColumns.NOM_TABLE, values,
+					LigneBaseColumns._ID + "=" + uri.getPathSegments().get(1),
+					selectionArgs);
+			break;
+		}
+
+		getContext().getContentResolver().notifyChange(uri, null);
+		
+		return count;
 	}
 
 	private SQLiteDatabase ratpDB;
@@ -118,13 +134,15 @@ public class DefaultContentProvider extends ContentProvider {
 		}
 
 		private void initializeData(SQLiteDatabase db) {
-			String[] reqsInsertTypeLignes = getContext().getString(R.string.req_insert_type_ligne).split(";");			
-			for(String reqInsertTypeLigne : reqsInsertTypeLignes) {
+			String[] reqsInsertTypeLignes = getContext().getString(
+					R.string.req_insert_type_ligne).split(";");
+			for (String reqInsertTypeLigne : reqsInsertTypeLignes) {
 				db.execSQL(reqInsertTypeLigne);
 			}
-			
-			String[] reqsInsertLignes = getContext().getString(R.string.req_insert_lignes).split(";");			
-			for(String reqInsertLigne : reqsInsertLignes) {
+
+			String[] reqsInsertLignes = getContext().getString(
+					R.string.req_insert_lignes).split(";");
+			for (String reqInsertLigne : reqsInsertLignes) {
 				db.execSQL(reqInsertLigne);
 			}
 		}
@@ -137,11 +155,6 @@ public class DefaultContentProvider extends ContentProvider {
 
 			db.execSQL(getContext().getString(
 					R.string.req_create_table_terminus));
-			
-
-			db.execSQL(getContext().getString(
-					R.string.req_create_table_favoris));
-
 		}
 
 		@Override
@@ -154,7 +167,6 @@ public class DefaultContentProvider extends ContentProvider {
 		}
 
 		private void dropTables(SQLiteDatabase db) {
-			db.execSQL("DROP TABLE IF EXISTS favoris");
 			db.execSQL("DROP TABLE IF EXISTS terminus");
 			db.execSQL("DROP TABLE IF EXISTS lignes");
 			db.execSQL("DROP TABLE IF EXISTS type_ligne");
