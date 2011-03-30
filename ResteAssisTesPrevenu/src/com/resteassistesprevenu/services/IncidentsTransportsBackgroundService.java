@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -355,10 +356,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		json.put("reason", raison);
 		json.put("source", getString(R.string.log_tag_name));
 
-		request.setHeader("Content-Type", "application/json; charset=UTF-8");
-		request.setEntity(new StringEntity(json.toString()));
+		request.setHeader("Content-Type", "application/json");
+		request.setEntity(new StringEntity(json.toString(),HTTP.UTF_8));
 
-		request.setHeader("Accept", "application/json");
+		request.setHeader("Accept", "application/json;charset=UTF-8");
 
 		String result = postToService(request);
 		Log.i(getString(R.string.log_tag_name), result);

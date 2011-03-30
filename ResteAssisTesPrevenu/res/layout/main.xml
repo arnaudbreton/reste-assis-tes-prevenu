@@ -2,18 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical">
-	<RelativeLayout
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:orientation="horizontal">
+	<RelativeLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:orientation="horizontal">
 		<RadioGroup android:id="@+id/radioGroup1"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
 			android:orientation="horizontal">
-			<RadioButton android:text="Minutes" android:checked="true"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:textSize="15.0sp" android:id="@+id/radioMinute"></RadioButton>
 			<RadioButton android:text="Heure" android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:textSize="15.0sp"
-				android:id="@+id/radioHeure"></RadioButton>
+				android:id="@+id/radioHeure" android:checked="true"></RadioButton>
+			<RadioButton android:text="Minutes" 
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:textSize="15.0sp" android:id="@+id/radioMinute"></RadioButton>
 			<RadioButton android:text="Jour" android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:textSize="15.0sp"
 				android:id="@+id/radioJour"></RadioButton>
@@ -22,7 +21,9 @@
 			android:layout_width="60dp" android:layout_height="wrap_content"
 			android:text="+" android:layout_alignParentRight="true" />
 	</RelativeLayout>
-	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/txtAucunIncident" android:visibility="gone" android:text="Aucun incident n\'est déclaré" />
+	<TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/txtAucunIncident"
+		android:visibility="gone" android:text="Aucun incident n\'est déclaré" />
 	<ListView android:id="@+id/listViewIncidentEnCours"
 		android:layout_width="fill_parent" android:layout_height="wrap_content" />
 </LinearLayout>
