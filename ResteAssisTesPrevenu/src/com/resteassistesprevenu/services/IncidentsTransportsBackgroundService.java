@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
@@ -55,7 +56,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				return IncidentModel
 						.deserializeFromArray(getIncidentsEnCoursFromService(params[0]));
 			} catch (Exception e) {
-				Log.e("ResteAssisTesPrevenu",
+				Log.e(getString(R.string.log_tag_name),
 						"Erreur au chargement des incidents par le service", e);
 				return new ArrayList<IncidentModel>();
 			}
@@ -80,9 +81,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			try {
 				return getTypeLignesFromService();
 			} catch (Exception e) {
-				Log.e("ResteAssisTesPrevenu",
-						"Erreur au chargement des incidents par le service", e);
-				return new ArrayList<String>();
+				Log.e(getString(R.string.log_tag_name),
+						"Erreur au chargement des types de ligne", e);
+				return null;
 			}
 		}
 
@@ -110,10 +111,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				}
 
 			} catch (Exception e) {
-				Log.e("ResteAssisTesPrevenu",
+				Log.e(getString(R.string.log_tag_name),
 						"Erreur au chargement des lignes du type " + params[0]
 								+ " par le service.", e);
-				return new ArrayList<LigneModel>();
+				return null;
 			}
 		}
 
@@ -136,7 +137,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			try {
 				return createIncident(params[0], params[1], params[2]);
 			} catch (Exception e) {
-				Log.e("ResteAssisTesPrevenu",
+				Log.e(getString(R.string.log_tag_name),
 						"Erreur lors de la création de l'incident", e);
 				return null;
 			}
@@ -161,10 +162,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			try {
 				return getFavorisFromProvider();				
 			} catch (Exception e) {
-				Log.e("ResteAssisTesPrevenu",
-						"Erreur au chargement des lignes du type " + params[0]
-								+ " par le service.", e);
-				return new ArrayList<LigneModel>();
+				Log.e(getString(R.string.log_tag_name),
+						"Erreur lors du chargement des favoris par le service", e);
+				return null;
 			}
 		}
 
@@ -187,10 +187,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			try {
 				registerFavoris(params[0]);
 			} catch (Exception e) {
-				Log.e("ResteAssisTesPrevenu",
-						"Erreur lors de la création de l'incident", e);
+				Log.e(getString(R.string.log_tag_name),
+						"Erreur lors de l'enregistrement du favoris " + params[0], e);				
 			}
-
+			
 			return null;
 		}
 
@@ -213,8 +213,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			try {
 				return voteIncident(Integer.parseInt(params[0]), params[1]);
 			} catch (Exception e) {
-				Log.e("ResteAssisTesPrevenu",
-						"Erreur lors de la création de l'incident", e);
+				Log.e(getString(R.string.log_tag_name),
+						"Erreur lors du vote pour l'incident n°" + params[0] + " action : " + params[1], e);
 				return null;
 			}
 		}
@@ -347,13 +347,13 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	private String createIncident(String typeLigne, String numLigne,
-			String raison) throws UnsupportedEncodingException, JSONException {
+			String raison) throws UnsupportedEncodingException, JSONException, ClientProtocolException {
 		HttpPost request = new HttpPost(this.urlService + "/incident");
 
 		JSONObject json = new JSONObject();
 		json.put("line_name", typeLigne + " " + numLigne);
 		json.put("reason", raison);
-		json.put("source", "ResteAssisTesPrevenu");
+		json.put("source", getString(R.string.log_tag_name));
 
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
 		request.setEntity(new StringEntity(json.toString()));
@@ -361,7 +361,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		request.setHeader("Accept", "application/json");
 
 		String result = postToService(request);
-		Log.i("ResteAssisTesPrevenu", result);
+		Log.i(getString(R.string.log_tag_name), result);
 
 		return result;
 	}
@@ -408,12 +408,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			e.printStackTrace();
 		}
 		httpclient.getConnectionManager().shutdown();
-		Log.i("ResteAssisTesPrevenu : ", result);
+		Log.i(getString(R.string.log_tag_name), result);
 
 		return result;
 	}
 
-	private String postToService(HttpPost request) {
+	private String postToService(HttpPost request) throws ClientProtocolException {
 		HttpClient httpclient = new DefaultHttpClient();
 
 		String result = null;
@@ -421,9 +421,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		ResponseHandler<String> handler = new BasicResponseHandler();
 		try {
 			result = httpclient.execute(request, handler);
-			Log.i("ResteAssisTesPrevenu : ", result);
+			Log.i(getString(R.string.log_tag_name), result);
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			throw e;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

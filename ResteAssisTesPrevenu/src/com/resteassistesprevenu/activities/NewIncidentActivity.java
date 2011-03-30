@@ -120,7 +120,7 @@ public class NewIncidentActivity extends Activity {
 						adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 						spinTypeLigne.setAdapter(adapter);
 						if(spinTypeLigne.getSelectedItem() != null) {
-							mBoundService.startGetLignesAsync(spinTypeLigne.getSelectedItem().toString());
+							mBoundService.startGetLignesAsync("RER");
 						}						
 					}
 				});
@@ -146,11 +146,23 @@ public class NewIncidentActivity extends Activity {
 					public void dataChanged(String idIncident) {
 						if(mPdRapporter != null) {
 							mPdRapporter.dismiss();
-						}						
+						}					
 						
-						Toast.makeText(NewIncidentActivity.this, String.format(getString(R.string.msg_report_new_incident_OK, idIncident)), Toast.LENGTH_LONG).show();
-						NewIncidentActivity.this.setResult(RESULT_OK);
-						NewIncidentActivity.this.finish();
+						if(idIncident == null) {
+							AlertDialog.Builder builder = new AlertDialog.Builder(NewIncidentActivity.this);
+							builder.setMessage(getString(R.string.msg_report_new_incident_KO))
+							       .setCancelable(false)
+							       .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+							           public void onClick(DialogInterface dialog, int id) {			                
+							           }
+							       });
+							builder.show();
+						}
+						else {
+							Toast.makeText(NewIncidentActivity.this, String.format(getString(R.string.msg_report_new_incident_OK, idIncident)), Toast.LENGTH_LONG).show();
+							NewIncidentActivity.this.setResult(RESULT_OK);
+							NewIncidentActivity.this.finish();
+						}
 					}
 				});
 		        
