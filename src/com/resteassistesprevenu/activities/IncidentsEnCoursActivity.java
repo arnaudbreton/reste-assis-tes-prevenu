@@ -19,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -246,6 +245,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 		}
 
 		this.incidentsService.clear();
+		TextView txtAucunIncident = (TextView) findViewById(R.id.txtAucunIncident);
 		
 		if (lignesFavoris != null && lignesFavoris.size() > 0) {
 			for (IncidentModel incident : incidents) {
@@ -253,12 +253,19 @@ public class IncidentsEnCoursActivity extends Activity implements
 					this.incidentsService.add(incident);
 				}
 			}
+			
+			if(this.incidentsService.size() == 0) {
+				txtAucunIncident.setText(getString(R.string.msg_no_incident_favoris));
+			}
 		}
 		else {			
 			this.incidentsService.addAll(incidents);
+			
+			if(this.incidentsService.size() == 0) {
+				txtAucunIncident.setText(getString(R.string.msg_no_incident));
+			}
 		}
 		
-		TextView txtAucunIncident = (TextView) findViewById(R.id.txtAucunIncident);
 		if(this.incidentsService.size() == 0) {
 			txtAucunIncident.setVisibility(View.VISIBLE);			
 		}
@@ -297,7 +304,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 							+ incident.getId()));
 
 			startActivity(Intent.createChooser(share,
-					getString(R.string.msg_share)));
+					getString(R.string.msg_share_title)));
 		} else {
 			mBoundService.startVoteIncident(incident.getId(), action);
 		}

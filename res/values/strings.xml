@@ -109,11 +109,12 @@
 	<string name="msg_incident_en_cours_list_loading_incidents">Chargement des incidents en cours...</string>
 	
 	<string name="msg_report_new_incident_OK">Votre incident a été crée sous le numéro %s</string>
+	<string name="msg_report_new_incident_KO">Erreur lors de la création de l\'incident. Merci de réessayer.</string>
 	<string name="msg_report_new_incident_KO_no_reason">Veuillez saisir une raison svp.</string>
 	<string name="msg_report_new_incident_reporting_incident">Report d\'un nouvel incident en cours...</string>
 	
 	<string name="msg_vote_OK">Votre vote a été enregistré.</string>
-	<string name="msg_vote_KO">Erreur lors de l\'envoi de votre vote.</string>
+	<string name="msg_vote_KO">Erreur lors de l\'envoi de votre vote. Merci de réessayer.</string>
 	
 	<string name="title_choose_serveur">Choix du serveur</string>
 	<string name="title_menu_favoris">Favoris</string>
@@ -121,4 +122,7 @@
 	<string name="msg_share_title">Partager cet incident avec...</string>
 	<string name="msg_share">Un incident a été déclaré sur la ligne %1$s. Détail : %2$s.</string>
 	<string name="msg_favoris_registered">Favoris mis à jour.</string>
+	
+	<string name="msg_no_incident_favoris">Aucun incident n\'a été déclaré pour vos lignes favorites.</string>
+	<string name="msg_no_incident">Aucun incident n\'a été déclaré.</string>
 </resources>
