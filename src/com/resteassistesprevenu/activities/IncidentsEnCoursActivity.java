@@ -80,9 +80,17 @@ public class IncidentsEnCoursActivity extends Activity implements
 									setIncidents(incidentsService);
 									loadingDialog.dismiss();
 								} catch (Exception e) {
-									Log.e("ResteAssisTesPrevenu : ",
-											"Problème de conversion en retour du service",
+									Log.e(getString(R.string.log_tag_name),
+											"Problème de chargement des incidents",
 											e);
+									AlertDialog.Builder builder = new AlertDialog.Builder(IncidentsEnCoursActivity.this);
+									builder.setMessage(getString(R.string.msg_incident_en_cours_list_load_incidents_KO))
+									       .setCancelable(false)
+									       .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+									           public void onClick(DialogInterface dialog, int id) {			                
+									           }
+									       });
+									builder.show();
 								}
 							}
 						});
@@ -108,7 +116,6 @@ public class IncidentsEnCoursActivity extends Activity implements
 
 				mBoundService
 						.addGetFavorisListener(new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
-
 							@Override
 							public void dataChanged(List<LigneModel> lignes) {
 								lignesFavoris = new ArrayList<LigneModel>();
