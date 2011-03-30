@@ -2,19 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/incidentEnCoursItemView" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:orientation="vertical">
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:orientation="horizontal">
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:orientation="horizontal">
+		<TextView android:id="@+id/txtLigne" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:textSize="20dp" />
 		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-			android:id="@+id/txtLigne" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" />
-		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		    android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
 			android:text=" " />
-		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-			android:id="@+id/txtHeureIncident" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" />
+		<TextView android:id="@+id/txtHeureIncident"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingRight="3dip" />
+		<ImageView  android:layout_width="25sp"
+    android:layout_height="25sp" android:src="@drawable/ic_vote_plus" />
+		<TextView android:id="@+id/txtNbVotePlus"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="3dip" />
+		<ImageView   android:layout_width="25sp"
+    android:layout_height="25sp" android:src="@drawable/ic_vote_minus" />
+		<TextView android:id="@+id/txtNbVoteMinus"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="3dip" />
+		<ImageView  android:layout_width="25sp"
+    android:layout_height="25sp" android:src="@drawable/ic_vote_end" />
+		<TextView android:id="@+id/txtNbVoteEnd"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="3dip"/>
 	</LinearLayout>
 	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/txtIncidentItemViewRaison" android:layout_width="fill_parent"

@@ -2,26 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical">
-	<LinearLayout
+	<RelativeLayout
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:orientation="horizontal">
 		<RadioGroup android:id="@+id/radioGroup1"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
 			android:orientation="horizontal">
-			<RadioButton android:text="En cours" android:checked="true"
+			<RadioButton android:text="Minutes" android:checked="true"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:textSize="15.0sp" android:id="@+id/radioEnCours"></RadioButton>
-			<RadioButton android:text="Minute" android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:textSize="15.0sp"
-				android:id="@+id/radioMinute"></RadioButton>
+				android:textSize="15.0sp" android:id="@+id/radioMinute"></RadioButton>
 			<RadioButton android:text="Heure" android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:textSize="15.0sp"
 				android:id="@+id/radioHeure"></RadioButton>
+			<RadioButton android:text="Jour" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:textSize="15.0sp"
+				android:id="@+id/radioJour"></RadioButton>
 		</RadioGroup>
 		<Button android:id="@+id/btnAjouterIncident"
-			android:layout_width="fill_parent" android:layout_height="wrap_content"
-			android:text="+" />
-	</LinearLayout>
+			android:layout_width="60dp" android:layout_height="wrap_content"
+			android:text="+" android:layout_alignParentRight="true" />
+	</RelativeLayout>
+	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/txtAucunIncident" android:visibility="gone" android:text="Aucun incident n\'est déclaré" />
 	<ListView android:id="@+id/listViewIncidentEnCours"
 		android:layout_width="fill_parent" android:layout_height="wrap_content" />
 </LinearLayout>

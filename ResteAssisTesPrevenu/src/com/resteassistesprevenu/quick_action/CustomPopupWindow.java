@@ -1,11 +1,22 @@
-package com.resteassistesprevenu.activities;
+/**
+ * Lorensius W. L. T
+ * 
+ * http://www.londatiga.net
+ * 
+ * lorenz@londatiga.net 
+ */
+
+
+package com.resteassistesprevenu.quick_action;
 
 import com.resteassistesprevenu.R;
 
 import android.content.Context;
+
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -13,45 +24,50 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
+
 import android.widget.PopupWindow;
 
 /**
- * This class does most of the work of wrapping the {@link PopupWindow} so it's simpler to use.
+ * This class does most of the work of wrapping the {@link PopupWindow} so it's simpler to use. 
+ * Edited by Lorensius. W. L. T
  * 
  * @author qberticus
  * 
  */
-public class BetterPopupWindow {
+public class CustomPopupWindow {
 	protected final View anchor;
-	private final PopupWindow window;
+	protected final PopupWindow window;
 	private View root;
 	private Drawable background = null;
-	private final WindowManager windowManager;
-
+	protected final WindowManager windowManager;
+	
 	/**
-	 * Create a BetterPopupWindow
+	 * Create a QuickAction
 	 * 
 	 * @param anchor
-	 *            the view that the BetterPopupWindow will be displaying 'from'
+	 *            the view that the QuickAction will be displaying 'from'
 	 */
-	public BetterPopupWindow(View anchor) {
+	public CustomPopupWindow(View anchor) {
 		this.anchor = anchor;
 		this.window = new PopupWindow(anchor.getContext());
 
 		// when a touch even happens outside of the window
 		// make the window go away
-		this.window.setTouchInterceptor(new OnTouchListener() {
+		window.setTouchInterceptor(new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-					BetterPopupWindow.this.window.dismiss();
+				if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+					CustomPopupWindow.this.window.dismiss();
+					
 					return true;
 				}
+				
 				return false;
 			}
 		});
 
-		this.windowManager = (WindowManager) this.anchor.getContext().getSystemService(Context.WINDOW_SERVICE);
+		windowManager = (WindowManager) anchor.getContext().getSystemService(Context.WINDOW_SERVICE);
+		
 		onCreate();
 	}
 
@@ -66,28 +82,30 @@ public class BetterPopupWindow {
 	 */
 	protected void onShow() {}
 
-	private void preShow() {
-		if(this.root == null) {
+	protected void preShow() {
+		if (root == null) {
 			throw new IllegalStateException("setContentView was not called with a view to display.");
 		}
+		
 		onShow();
 
-		if(this.background == null) {
-			this.window.setBackgroundDrawable(new BitmapDrawable());
+		if (background == null) {
+			window.setBackgroundDrawable(new BitmapDrawable());
 		} else {
-			this.window.setBackgroundDrawable(this.background);
+			window.setBackgroundDrawable(background);
 		}
 
 		// if using PopupWindow#setBackgroundDrawable this is the only values of the width and hight that make it work
 		// otherwise you need to set the background of the root viewgroup
 		// and set the popupwindow background to an empty BitmapDrawable
-		this.window.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
-		this.window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-		this.window.setTouchable(true);
-		this.window.setFocusable(true);
-		this.window.setOutsideTouchable(true);
+		
+		window.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
+		window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+		window.setTouchable(true);
+		window.setFocusable(true);
+		window.setOutsideTouchable(true);
 
-		this.window.setContentView(this.root);
+		window.setContentView(root);
 	}
 
 	public void setBackgroundDrawable(Drawable background) {
@@ -102,7 +120,8 @@ public class BetterPopupWindow {
 	 */
 	public void setContentView(View root) {
 		this.root = root;
-		this.window.setContentView(root);
+		
+		window.setContentView(root);
 	}
 
 	/**
@@ -112,8 +131,9 @@ public class BetterPopupWindow {
 	 */
 	public void setContentView(int layoutResID) {
 		LayoutInflater inflator =
-				(LayoutInflater) this.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		this.setContentView(inflator.inflate(layoutResID, null));
+				(LayoutInflater) anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		setContentView(inflator.inflate(layoutResID, null));
 	}
 
 	/**
@@ -122,14 +142,14 @@ public class BetterPopupWindow {
 	 * @param listener
 	 */
 	public void setOnDismissListener(PopupWindow.OnDismissListener listener) {
-		this.window.setOnDismissListener(listener);
+		window.setOnDismissListener(listener); 
 	}
 
 	/**
 	 * Displays like a popdown menu from the anchor view
 	 */
-	public void showLikePopDownMenu() {
-		this.showLikePopDownMenu(0, 0);
+	public void showDropDown() {
+		showDropDown(0, 0);
 	}
 
 	/**
@@ -140,19 +160,19 @@ public class BetterPopupWindow {
 	 * @param yOffset
 	 *            offset in Y direction
 	 */
-	public void showLikePopDownMenu(int xOffset, int yOffset) {
-		this.preShow();
+	public void showDropDown(int xOffset, int yOffset) {
+		preShow();
 
-		this.window.setAnimationStyle(R.style.Animations_PopDownMenu);
+		window.setAnimationStyle(R.style.Animations_PopDownMenu_Left);
 
-		this.window.showAsDropDown(this.anchor, xOffset, yOffset);
+		window.showAsDropDown(anchor, xOffset, yOffset);
 	}
 
 	/**
 	 * Displays like a QuickAction from the anchor view.
 	 */
 	public void showLikeQuickAction() {
-		this.showLikeQuickAction(0, 0);
+		showLikeQuickAction(0, 0);
 	}
 
 	/**
@@ -164,38 +184,40 @@ public class BetterPopupWindow {
 	 *            offset in the Y direction
 	 */
 	public void showLikeQuickAction(int xOffset, int yOffset) {
-		this.preShow();
+		preShow();
 
-		this.window.setAnimationStyle(R.style.Animations_GrowFromBottom);
+		window.setAnimationStyle(R.style.Animations_PopUpMenu_Center);
 
 		int[] location = new int[2];
-		this.anchor.getLocationOnScreen(location);
+		anchor.getLocationOnScreen(location);
 
 		Rect anchorRect =
-				new Rect(location[0], location[1], location[0] + this.anchor.getWidth(), location[1]
-					+ this.anchor.getHeight());
+				new Rect(location[0], location[1], location[0] + anchor.getWidth(), location[1]
+					+ anchor.getHeight());
 
-		this.root.measure(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		root.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		root.measure(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		
+		int rootWidth 		= root.getMeasuredWidth();
+		int rootHeight 		= root.getMeasuredHeight();
 
-		int rootWidth = this.root.getMeasuredWidth();
-		int rootHeight = this.root.getMeasuredHeight();
+		int screenWidth 	= windowManager.getDefaultDisplay().getWidth();
+		//int screenHeight 	= windowManager.getDefaultDisplay().getHeight();
 
-		int screenWidth = this.windowManager.getDefaultDisplay().getWidth();
-		int screenHeight = this.windowManager.getDefaultDisplay().getHeight();
-
-		int xPos = ((screenWidth - rootWidth) / 2) + xOffset;
-		int yPos = anchorRect.top - rootHeight + yOffset;
+		int xPos 			= ((screenWidth - rootWidth) / 2) + xOffset;
+		int yPos	 		= anchorRect.top - rootHeight + yOffset;
 
 		// display on bottom
-		if(rootHeight > anchorRect.top) {
+		if (rootHeight > anchor.getTop()) {
 			yPos = anchorRect.bottom + yOffset;
-			this.window.setAnimationStyle(R.style.Animations_GrowFromTop);
+			
+			window.setAnimationStyle(R.style.Animations_PopDownMenu_Center);
 		}
 
-		this.window.showAtLocation(this.anchor, Gravity.NO_GRAVITY, xPos, yPos);
+		window.showAtLocation(anchor, Gravity.NO_GRAVITY, xPos, yPos);
 	}
-
+	
 	public void dismiss() {
-		this.window.dismiss();
+		window.dismiss();
 	}
 }
