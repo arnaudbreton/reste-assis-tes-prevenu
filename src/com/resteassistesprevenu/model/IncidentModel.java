@@ -22,7 +22,7 @@ public class IncidentModel {
 	/**
 	 * Scope "current" du WebService : incidents en cours
 	 */
-	public static final String SCOPE_CURRENT = "current";
+	public static final String SCOPE_JOUR = "day";
 
 	/**
 	 * Scope "hour" du WebService : incidents en cours de l'heure

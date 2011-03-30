@@ -19,7 +19,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.resteassistesprevenu.R;
@@ -44,7 +46,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 	private IIncidentsTransportsBackgroundService mBoundService;
 	private List<LigneModel> lignesFavoris;
 
-	private RadioButton mBtnEnCours;
+	private RadioButton mBtnJour;
 	private RadioButton mBtnHeure;
 	private RadioButton mBtnMinute;
 	private Button mBtnAddIncident;
@@ -54,7 +56,6 @@ public class IncidentsEnCoursActivity extends Activity implements
 	private String mCurrentScope;
 	
 	private static final int REQUEST_FAVORIS = 100; 
-	private static final int REQUEST_CHOOSE_SERVEUR = 101;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +132,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 	}
 
 	private void initialize() {
-		this.mBtnEnCours = (RadioButton) this.findViewById(R.id.radioEnCours);
+		this.mBtnJour = (RadioButton) this.findViewById(R.id.radioJour);
 		this.mBtnHeure = (RadioButton) this.findViewById(R.id.radioHeure);
 		this.mBtnMinute = (RadioButton) this.findViewById(R.id.radioMinute);
 		this.mBtnAddIncident = (Button) this
@@ -139,7 +140,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 
 		this.incidentsService = new ArrayList<IncidentModel>();
 		
-		this.mCurrentScope = IncidentModel.SCOPE_CURRENT;
+		this.mCurrentScope = IncidentModel.SCOPE_HOUR;
 		
 		this.mAdapter = new IncidentModelArrayAdapter(this,
 				R.id.listViewIncidentEnCours, this.incidentsService, this);
@@ -156,10 +157,10 @@ public class IncidentsEnCoursActivity extends Activity implements
 			}
 		});
 
-		this.mBtnEnCours.setOnClickListener(new View.OnClickListener() {
+		this.mBtnJour.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mCurrentScope = IncidentModel.SCOPE_CURRENT;
+				mCurrentScope = IncidentModel.SCOPE_JOUR;
 				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
 		});
@@ -257,6 +258,13 @@ public class IncidentsEnCoursActivity extends Activity implements
 			this.incidentsService.addAll(incidents);
 		}
 		
+		TextView txtAucunIncident = (TextView) findViewById(R.id.txtAucunIncident);
+		if(this.incidentsService.size() == 0) {
+			txtAucunIncident.setVisibility(View.VISIBLE);			
+		}
+		else {
+			txtAucunIncident.setVisibility(View.GONE);
+		}
 		mAdapter.notifyDataSetChanged();
 	}
 
