@@ -3,7 +3,7 @@ package com.resteassistesprevenu.activities;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.ExpandableListActivity;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +12,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.Toast;
 
 import com.resteassistesprevenu.R;
@@ -26,10 +28,11 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
 
 /**
  * Activité des favoris
+ * 
  * @author Arnaud
- *
+ * 
  */
-public class FavorisActivity extends ExpandableListActivity {
+public class FavorisActivity extends Activity implements OnChildClickListener, View.OnClickListener {
 	private static final String TAG_ACTIVITY = "FavorisActivity";
 	/**
 	 * Service
@@ -46,83 +49,31 @@ public class FavorisActivity extends ExpandableListActivity {
 	 */
 	private boolean isModified;
 	
+	private ExpandableListView mExpandableListView;
+	private Button mBtnOK;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.favoris_view);
 
 		this.isModified = false;
-		
+
+		mBtnOK = (Button) findViewById(R.id.btnFavorisViewOK);
+		mExpandableListView = (ExpandableListView) findViewById(R.id.expandableFavorisView);
 		mAdapter = new FavorisExpandableListAdapter(FavorisActivity.this);
-		setListAdapter(mAdapter);
-
-		ServiceConnection connection = new ServiceConnection() {
-			public void onServiceConnected(ComponentName className,
-					IBinder service) {
-				Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Service Connected!");
-
-				mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
-						.getService();
-
-				mBoundService
-						.addGetTypeLignesListener(new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
-							@Override
-							public void dataChanged(List<String> data) {
-								Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Chargement des types de lignes");
-								for (String typeLigne : data) {
-									mAdapter.getTypeLignesGroups().add(
-											typeLigne);
-									mAdapter.getLignesChildrenGroups().add(
-											new ArrayList<LigneModel>());
-									mBoundService
-											.startGetLignesAsync(typeLigne);
-								}
-								mAdapter.notifyDataSetChanged();
-							}
-						});
-
-				mBoundService
-						.addGetLignesListener(new IIncidentsTransportsBackgroundServiceGetLignesListener() {
-							@Override
-							public void dataChanged(List<LigneModel> lignesModel) {
-								Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Chargement des lignes.");
-								if (lignesModel.size() > 0) {
-									Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Chargement de " + lignesModel.size() + " lignes.");
-									int indexType = mAdapter
-											.getTypeLignesGroups().indexOf(
-													lignesModel.get(0)
-															.getTypeLigne());
-
-									if (mAdapter.getLignesChildrenGroups()
-											.get(indexType).size() == 0) {
-										List<LigneModel> lignes = mAdapter
-												.getLignesChildrenGroups().get(
-														indexType);
-
-										lignes.addAll(lignesModel);
-									}
-
-									mAdapter.notifyDataSetChanged();
-								}
-							}
-						});
-
-				mBoundService.startGetTypeLignesAsync();
-
-			}
-
-			public void onServiceDisconnected(ComponentName className) {
-			}
-		};
+		
+		mExpandableListView.setAdapter(mAdapter);
 
 		bindService(new Intent(getApplicationContext(),
-				IncidentsTransportsBackgroundService.class), connection,
+				IncidentsTransportsBackgroundService.class), new IncidentServiceConnection(),
 				Context.BIND_AUTO_CREATE);
-
-		getExpandableListView().setOnChildClickListener(this);
+		
+		mBtnOK.setOnClickListener(this);
+	
+		mExpandableListView.setOnChildClickListener(this);
 	}
 
-	@Override
 	public boolean onChildClick(ExpandableListView parent, View v,
 			int groupPosition, int childPosition, long id) {
 		LigneModel ligne = mAdapter.getLignesChildrenGroups()
@@ -136,16 +87,93 @@ public class FavorisActivity extends ExpandableListActivity {
 				Toast.LENGTH_SHORT).show();
 
 		this.isModified = true;
-		
+
 		return true;
 	}
-	
+
 	@Override
-	public void onBackPressed() {	
-		if(this.isModified) {
+	public void onBackPressed() {
+		if (this.isModified) {
+			setResult(RESULT_OK);
+		}
+
+		super.onBackPressed();
+	}
+	
+	private class IncidentServiceConnection implements ServiceConnection {
+		public void onServiceConnected(ComponentName className,
+				IBinder service) {
+			Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+					"Service Connected!");
+
+			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
+					.getService();
+
+			mBoundService
+					.addGetTypeLignesListener(new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
+						@Override
+						public void dataChanged(List<String> data) {
+							Log.i(getString(R.string.log_tag_name) + " "
+									+ TAG_ACTIVITY,
+									"Chargement des types de lignes");
+							for (String typeLigne : data) {
+								mAdapter.getTypeLignesGroups().add(
+										typeLigne);
+								mAdapter.getLignesChildrenGroups().add(
+										new ArrayList<LigneModel>());
+								mBoundService
+										.startGetLignesAsync(typeLigne);
+							}
+							mAdapter.notifyDataSetChanged();
+						}
+					});
+
+			mBoundService
+					.addGetLignesListener(new IIncidentsTransportsBackgroundServiceGetLignesListener() {
+						@Override
+						public void dataChanged(List<LigneModel> lignesModel) {
+							Log.i(getString(R.string.log_tag_name) + " "
+									+ TAG_ACTIVITY,
+									"Chargement des lignes.");
+							if (lignesModel.size() > 0) {
+								Log.i(getString(R.string.log_tag_name)
+										+ " " + TAG_ACTIVITY,
+										"Chargement de "
+												+ lignesModel.size()
+												+ " lignes.");
+								int indexType = mAdapter
+										.getTypeLignesGroups().indexOf(
+												lignesModel.get(0)
+														.getTypeLigne());
+
+								if (mAdapter.getLignesChildrenGroups()
+										.get(indexType).size() == 0) {
+									List<LigneModel> lignes = mAdapter
+											.getLignesChildrenGroups().get(
+													indexType);
+
+									lignes.addAll(lignesModel);
+								}
+
+								mAdapter.notifyDataSetChanged();
+							}
+						}
+					});
+
+			mBoundService.startGetTypeLignesAsync();
+
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		if(isModified) {
 			setResult(RESULT_OK);
 		}
 		
-		super.onBackPressed();		
-	}
+		this.finish();		
+	};
 }

@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
@@ -43,13 +42,14 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
 
 /**
  * Service de communication avec les WebServices et le ContentProvider
+ * 
  * @author Arnaud
- *
+ * 
  */
 public class IncidentsTransportsBackgroundService extends Service implements
 		IIncidentsTransportsBackgroundService {
 	private static final String TAG_SERVICE = "IncidentsTransportsBackgroundService";
-	
+
 	/**
 	 * AsyncTask de récupération des incidents
 	 * 
@@ -156,7 +156,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			fireReportNewIncidentChanged(result);
 		}
 	}
-	
+
 	/**
 	 * AsyncTask de récupération des favoris
 	 * 
@@ -167,10 +167,11 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected List<LigneModel> doInBackground(Void... params) {
 			try {
-				return getFavorisFromProvider();				
+				return getFavorisFromProvider();
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
-						"Erreur lors du chargement des favoris par le service", e);
+						"Erreur lors du chargement des favoris par le service",
+						e);
 				return null;
 			}
 		}
@@ -195,9 +196,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				registerFavoris(params[0]);
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
-						"Erreur lors de l'enregistrement du favoris " + params[0], e);				
+						"Erreur lors de l'enregistrement du favoris "
+								+ params[0], e);
 			}
-			
+
 			return null;
 		}
 
@@ -221,7 +223,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				return voteIncident(Integer.parseInt(params[0]), params[1]);
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
-						"Erreur lors du vote pour l'incident n°" + params[0] + " action : " + params[1], e);
+						"Erreur lors du vote pour l'incident n°" + params[0]
+								+ " action : " + params[1], e);
 				return null;
 			}
 		}
@@ -237,10 +240,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	private final static String SERVICE_URL_BASE_PRE_PRODUCTION = "http://openreact.alwaysdata.net/api";
 	private final static String SERVICE_URL_BASE_PRODUCTION = "http://www.incidents-transports.com/api";
-	
+
 	private static String INCIDENTS_JSON_URL = "/incidents.json";
 	private static String INCIDENT_JSON_URL = "/incident.json";
-	
+
 	private IncidentsTransportsBackgroundServiceBinder mBinder;
 
 	@Override
@@ -269,20 +272,24 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		this.mBinder = null;
 	}
 
-	private String getIncidentsEnCoursFromService(String scope) {
-		return getFromService(new HttpGet(this.urlService + INCIDENTS_JSON_URL + "/"
-				+ scope));
+	private String getIncidentsEnCoursFromService(String scope)
+			throws IOException {
+		return getFromService(new HttpGet(this.urlService + INCIDENTS_JSON_URL
+				+ "/" + scope));
 	}
 
 	/**
 	 * Récupération des types de ligne.
+	 * 
 	 * @return Les types de lignes
 	 */
 	private List<String> getTypeLignesFromProvider() {
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Début récupération type lignes");
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début récupération type lignes");
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] { TypeLigneBaseColumns.TYPE_LIGNE };
-		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Envoi d'une requête au service");
+		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Envoi d'une requête au service");
 		Cursor c = cr.query(
 				Uri.parse(DefaultContentProvider.CONTENT_URI + "/type_lignes"),
 				projection, null, null, null);
@@ -290,22 +297,28 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		ArrayList<String> lignes = new ArrayList<String>();
 		if (c.moveToFirst()) {
 			do {
-				Log.d(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Ajout de la ligne : " + c.getString(c
-						.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)));
+				Log.d(getApplicationContext().getString(R.string.log_tag_name)
+						+ " " + TAG_SERVICE,
+						"Ajout de la ligne : "
+								+ c.getString(c
+										.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)));
 				lignes.add(c.getString(c
 						.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)));
 			} while (c.moveToNext());
 		}
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Fin récupération type lignes");
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin récupération type lignes");
 		return lignes;
 	}
 
 	/**
 	 * Récupération des lignes.
+	 * 
 	 * @return Une liste de modèle de ligne
 	 */
 	private List<LigneModel> getLignesFromProvider(String typeLigne) {
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Début récupération lignes");
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début récupération lignes");
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
 				LigneBaseColumns.NOM_TABLE.concat("."
@@ -315,11 +328,13 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		String selection = null;
 
 		if (!typeLigne.equals("")) {
-			Log.d(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Ligne du type : " + typeLigne);
+			Log.d(getApplicationContext().getString(R.string.log_tag_name)
+					+ " " + TAG_SERVICE, "Ligne du type : " + typeLigne);
 			selection = "type_ligne = '" + typeLigne + "'";
 		}
 
-		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Envoi d'une requête au ContentProvider");
+		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Envoi d'une requête au ContentProvider");
 		Cursor c = cr.query(
 				Uri.parse(DefaultContentProvider.CONTENT_URI + "/lignes"),
 				projection, selection, null, null);
@@ -334,28 +349,32 @@ public class IncidentsTransportsBackgroundService extends Service implements
 						c.getString(c
 								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)),
 						c.getInt(c.getColumnIndex(LigneBaseColumns.IS_FAVORIS)) != 0);
-				Log.d(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
+				Log.d(getApplicationContext().getString(R.string.log_tag_name)
+						+ " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
 				lignes.add(ligne);
 			} while (c.moveToNext());
 		}
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Fin récupération lignes");
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin récupération lignes");
 		return lignes;
 	}
-	
+
 	/**
 	 * Récupération des favoris, du provider
+	 * 
 	 * @return Les lignes favorites
 	 */
 	private List<LigneModel> getFavorisFromProvider() {
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Début récupération des favoris");
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début récupération des favoris");
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
 				LigneBaseColumns.NOM_TABLE.concat("."
 						.concat(LigneBaseColumns._ID)),
 				TypeLigneBaseColumns.TYPE_LIGNE, LigneBaseColumns.NOM_LIGNE,
 				LigneBaseColumns.IS_FAVORIS };
-		String selection = null;		
-			
+		String selection = null;
+
 		Cursor c = cr.query(
 				Uri.parse(DefaultContentProvider.CONTENT_URI + "/favoris"),
 				projection, selection, null, null);
@@ -370,21 +389,26 @@ public class IncidentsTransportsBackgroundService extends Service implements
 						c.getString(c
 								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)),
 						c.getInt(c.getColumnIndex(LigneBaseColumns.IS_FAVORIS)) != 0);
-				Log.d(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
+				Log.d(getApplicationContext().getString(R.string.log_tag_name)
+						+ " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
 				lignes.add(ligne);
 			} while (c.moveToNext());
 		}
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Fin récupération des favoris");
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin récupération des favoris");
 		return lignes;
 	}
 
 	/**
 	 * Création d'un incident
+	 * 
 	 * @return Le numéro d'incident
+	 * @throws IOException
 	 */
 	private String createIncident(String typeLigne, String numLigne,
-			String raison) throws UnsupportedEncodingException, JSONException, ClientProtocolException {
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Début de création d'un incident.");
+			String raison) throws JSONException, IOException {
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début de création d'un incident.");
 		HttpPost request = new HttpPost(this.urlService + "/incident");
 
 		JSONObject json = new JSONObject();
@@ -392,108 +416,125 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		json.put("reason", raison);
 		json.put("source", getString(R.string.log_tag_name));
 
+		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Incident JSON : " + json);
+
 		request.setHeader("Content-Type", "application/json");
-		request.setEntity(new StringEntity(json.toString(),HTTP.UTF_8));
+		request.setEntity(new StringEntity(json.toString(), HTTP.UTF_8));
 
 		request.setHeader("Accept", "application/json;charset=UTF-8");
 
 		String result = postToService(request);
-		Log.d(getString(R.string.log_tag_name), "Résultat du serveur :" + result);
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Fin de création d'un incident.");
+		Log.d(getString(R.string.log_tag_name), "Résultat du serveur :"
+				+ result);
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin de création d'un incident.");
 		return result;
 	}
 
 	/**
 	 * Vote pour un incident
-	 * @param incidentId Numéro de l'incident
-	 * @param action Action à réaliser (plus, moins, end)
+	 * 
+	 * @param incidentId
+	 *            Numéro de l'incident
+	 * @param action
+	 *            Action à réaliser (plus, moins, end)
 	 * @return Vrai si tout s'est bien passé, faux sinon
 	 * @throws UnsupportedEncodingException
 	 * @throws JSONException
 	 */
 	private Boolean voteIncident(int incidentId, String action)
 			throws UnsupportedEncodingException, JSONException {
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Début de vote pour un incident");
-		
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début de vote pour un incident");
+
 		String url;
-		url = this.urlService + INCIDENT_JSON_URL + "/vote/" + incidentId + "/" + action;
-		
+		url = this.urlService + INCIDENT_JSON_URL + "/vote/" + incidentId + "/"
+				+ action;
+
 		HttpPost request = new HttpPost(url);
-		
+
 		try {
 			postToService(request);
-			Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Fin de vote pour un incident");
+			Log.i(getApplicationContext().getString(R.string.log_tag_name)
+					+ " " + TAG_SERVICE, "Fin de vote pour un incident");
 			return true;
 		} catch (Exception e) {
-			Log.e(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Vote pour un incident",e);
+			Log.e(getApplicationContext().getString(R.string.log_tag_name)
+					+ " " + TAG_SERVICE, "Vote pour un incident en erreur", e);
 			return false;
 		}
-		
-		
+
 	}
 
 	/**
 	 * Enregistrement d'un favoris
-	 * @param ligne La ligne à mettre à jour
+	 * 
+	 * @param ligne
+	 *            La ligne à mettre à jour
 	 */
 	public void registerFavoris(LigneModel ligne) {
 		ContentResolver cr = getContentResolver();
 		ContentValues editedValues = new ContentValues();
-		
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Début enregistrement d'un favoris");
+
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début enregistrement d'un favoris");
 		editedValues
 				.put(LigneBaseColumns.IS_FAVORIS, ligne.isFavoris() ? 1 : 0);
-
+		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Mise à jour d'un favoris : " + ligne + " "
+				+ ligne.isFavoris());
 		cr.update(
 				Uri.parse(DefaultContentProvider.CONTENT_URI + "/favoris/"
 						+ ligne.getId()), editedValues, null, null);
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " " + TAG_SERVICE, "Fin enregistrement d'un favoris");
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin enregistrement d'un favoris");
 	}
 
 	/**
 	 * Envoi d'une requête HTTP en GET au serveur
-	 * @param request La requête à envoyer
+	 * 
+	 * @param request
+	 *            La requête à envoyer
 	 * @return La réponse du serveur
+	 * @throws IOException
 	 */
-	private String getFromService(HttpGet request) {
+	private String getFromService(HttpGet request) throws IOException {
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début de requête en GET.");
 		HttpClient httpclient = new DefaultHttpClient();
 
 		String result = null;
 
 		ResponseHandler<String> handler = new BasicResponseHandler();
-		try {
 			result = httpclient.execute(request, handler);
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 		httpclient.getConnectionManager().shutdown();
 		Log.i(getString(R.string.log_tag_name), result);
-
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin de requête en GET " + result);
 		return result;
 	}
 
-
 	/**
 	 * Envoi d'une requête HTTP en POST au serveur
-	 * @param request La requête à envoyer
+	 * 
+	 * @param request
+	 *            La requête à envoyer
 	 * @return La réponse du serveur
+	 * @throws IOException
 	 */
-	private String postToService(HttpPost request) throws ClientProtocolException {
+	private String postToService(HttpPost request) throws IOException {
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début de requête en POST.");
 		HttpClient httpclient = new DefaultHttpClient();
 
 		String result = null;
 
 		ResponseHandler<String> handler = new BasicResponseHandler();
-		try {
-			result = httpclient.execute(request, handler);
-			Log.i(getString(R.string.log_tag_name), result);
-		} catch (ClientProtocolException e) {
-			throw e;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		result = httpclient.execute(request, handler);
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin de requête en POST " + result);
 
 		httpclient.getConnectionManager().shutdown();
 
@@ -670,7 +711,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	public void startRegisterFavoris(LigneModel ligne) {
 		new RegisterFavorisAsyncTask().execute(ligne);
 	}
-	
+
 	public void startGetFavorisAsync() {
 		new GetFavorisAsyncTask().execute();
 	}

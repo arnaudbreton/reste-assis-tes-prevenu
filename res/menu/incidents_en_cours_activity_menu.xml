@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/choose_serveur" android:title="@string/title_choose_serveur" />
 	<item android:id="@+id/menu_favoris" android:title="@string/title_menu_favoris" />
+	<item android:id="@+id/choose_serveur" android:title="@string/title_choose_serveur" />
+	<item android:id="@+id/menu_about" android:title="@string/title_menu_about" />
 </menu>

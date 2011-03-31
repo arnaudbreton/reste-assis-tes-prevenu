@@ -191,9 +191,32 @@ public class IncidentsEnCoursActivity extends Activity implements
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 			"Menu : favoris");
 			startActivityForResult(new Intent(this, FavorisActivity.class), REQUEST_FAVORIS);
+			return true;
+		case R.id.menu_about:
+			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+			"Menu : about");
+			about();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	private void about() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(
+				this);
+		builder.setTitle(R.string.title_menu_about);
+		builder.setMessage(
+				getString(R.string.msg_about))				
+				.setCancelable(false)
+				.setPositiveButton("Ok",
+						new DialogInterface.OnClickListener() {
+							public void onClick(
+									DialogInterface dialog,
+									int id) {
+							}
+						});
+		builder.show();		
 	}
 
 	private void chooseServeur() {
