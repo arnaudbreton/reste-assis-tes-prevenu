@@ -1,5 +1,10 @@
 package com.resteassistesprevenu.model;
 
+/**
+ * Action possible sur un incident
+ * @author Arnaud
+ *
+ */
 public enum IncidentAction {
 	VOTE_PLUS("plus"),
 	VOTE_MINUS("minus"), 

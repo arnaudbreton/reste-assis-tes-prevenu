@@ -2,6 +2,11 @@ package com.resteassistesprevenu.provider;
 
 import android.provider.BaseColumns;
 
+/**
+ * Description des colonnes de la table lignes
+ * @author Arnaud
+ *
+ */
 public final class LigneBaseColumns implements BaseColumns {
 	public static final String NOM_TABLE = "lignes"; 
 	public static final String NOM_LIGNE = "nom"; 
