@@ -9,14 +9,50 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Modèle représentant un incident
+ * @author Arnaud
+ *
+ */
 public class IncidentModel {
+	/**
+	 * Statut de l'incident
+	 */
 	private String statut;
+	
+	/**
+	 * Id de l'incident
+	 */
 	private int id;
+	
+	/**
+	 * Nombre de votes positifs
+	 */
 	private int votePlus;
+	
+	/**
+	 * Nombre de votes négatifs
+	 */
 	private int voteMinus;
+	
+	/**
+	 * Nombre de votes indiquant un incident clos.
+	 */
 	private int voteEnded;
+	
+	/**
+	 * Raison de l'incident
+	 */
 	private String reason;
+	
+	/**
+	 * Dernière modification de l'incident
+	 */
 	private Date lastModifiedTime;
+	
+	/**
+	 * Ligne de l'incident
+	 */
 	private LigneModelService ligne;
 
 	/**
@@ -34,6 +70,9 @@ public class IncidentModel {
 	 */
 	public static final String SCOPE_MINUTE = "minute";
 
+	/**
+	 * Constructeur par défaut
+	 */
 	public IncidentModel() {
 		this.statut = "";
 		id = -1;
@@ -44,6 +83,13 @@ public class IncidentModel {
 		lastModifiedTime = null;
 	}
 
+	/**
+	 * Déserialisation via JSON
+	 * @param serializedArray Incidents sous forme de tableau JSON
+	 * @return Liste d'IncidentModel
+	 * @throws JSONException
+	 * @throws ParseException
+	 */
 	public static ArrayList<IncidentModel> deserializeFromArray(
 			String serializedArray) throws JSONException, ParseException {
 		JSONArray jsonArray = new JSONArray(serializedArray);
@@ -57,6 +103,13 @@ public class IncidentModel {
 		return incidents;
 	}
 
+	/**
+	 * Déserialise un incident au format JSON
+	 * @param incidentJSON L'incident au format JSON
+	 * @return IncidentModel
+	 * @throws JSONException
+	 * @throws ParseException
+	 */
 	private static IncidentModel deserializeFromJSONObj(JSONObject incidentJSON)
 			throws JSONException, ParseException {
 		IncidentModel incidentModel = new IncidentModel();

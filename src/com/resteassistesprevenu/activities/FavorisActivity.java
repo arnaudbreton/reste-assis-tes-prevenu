@@ -24,11 +24,26 @@ import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBin
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
 
+/**
+ * Activité des favoris
+ * @author Arnaud
+ *
+ */
 public class FavorisActivity extends ExpandableListActivity {
+	private static final String TAG_ACTIVITY = "FavorisActivity";
+	/**
+	 * Service
+	 */
 	private IIncidentsTransportsBackgroundService mBoundService;
 
+	/**
+	 * Adapteur favoris => ExpandableListView
+	 */
 	private FavorisExpandableListAdapter mAdapter;
 
+	/**
+	 * Indicateur de modification d'un favoris
+	 */
 	private boolean isModified;
 	
 	@Override
@@ -44,7 +59,7 @@ public class FavorisActivity extends ExpandableListActivity {
 		ServiceConnection connection = new ServiceConnection() {
 			public void onServiceConnected(ComponentName className,
 					IBinder service) {
-				Log.i(getString(R.string.log_tag_name), "Service Connected!");
+				Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Service Connected!");
 
 				mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 						.getService();
@@ -53,7 +68,7 @@ public class FavorisActivity extends ExpandableListActivity {
 						.addGetTypeLignesListener(new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
 							@Override
 							public void dataChanged(List<String> data) {
-
+								Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Chargement des types de lignes");
 								for (String typeLigne : data) {
 									mAdapter.getTypeLignesGroups().add(
 											typeLigne);
@@ -70,7 +85,9 @@ public class FavorisActivity extends ExpandableListActivity {
 						.addGetLignesListener(new IIncidentsTransportsBackgroundServiceGetLignesListener() {
 							@Override
 							public void dataChanged(List<LigneModel> lignesModel) {
+								Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Chargement des lignes.");
 								if (lignesModel.size() > 0) {
+									Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Chargement de " + lignesModel.size() + " lignes.");
 									int indexType = mAdapter
 											.getTypeLignesGroups().indexOf(
 													lignesModel.get(0)

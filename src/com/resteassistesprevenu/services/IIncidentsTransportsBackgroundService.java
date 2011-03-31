@@ -9,6 +9,11 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
 
+/**
+ * Interface du service
+ * @author Arnaud
+ *
+ */
 public interface IIncidentsTransportsBackgroundService {	
 	/**
 	 * Récupération des incidents, asynchrone
@@ -75,8 +80,15 @@ public interface IIncidentsTransportsBackgroundService {
 	public void addGetFavorisListener(IIncidentsTransportsBackgroundServiceGetFavorisListener listener);
 	public void removeGetFavorisListener(IIncidentsTransportsBackgroundServiceGetFavorisListener listener);
 
-	
+	/**
+	 * Indique si le service pointe sur la production
+	 * @return
+	 */
 	public boolean isProduction();
 	
+	/**
+	 * Indique au service s'il doit pointer sur la production
+	 * @param isProduction
+	 */
 	public void setProduction(boolean isProduction);
 }

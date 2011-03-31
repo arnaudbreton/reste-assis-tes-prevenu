@@ -5,10 +5,18 @@ import com.resteassistesprevenu.activities.listeners.IIncidentActionListener;
 import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+/**
+ * QuickAction lié à un incident
+ * @author Arnaud
+ *
+ */
 public class IncidentQuickAction extends QuickAction {
+	private final static String TAG_QUICK_ACTION = "IncidentQuickAction";
+	
 	private View mView;
 	private IIncidentActionListener listener;
 	private IncidentModel incident;
@@ -86,6 +94,7 @@ public class IncidentQuickAction extends QuickAction {
 	}
 	
 	private void callListener(IncidentAction action) {
+		Log.d(mView.getContext().getString(R.string.log_tag_name) + " " + TAG_QUICK_ACTION, "Appel au listener pour l'action : " + action);
 		if(listener != null) {
 			listener.actionPerformed(incident, action);			
 		}	
