@@ -145,6 +145,14 @@
 		Son objectif est de permettre au usagers du réseau de
 		transport en commun
 		parisien de se prévenir des incidents en temps
-		réel.		
+		réel.\n\n		
+		
+		Ce service et les informations qu\'il contient sont entièrement indépendants
+		de la société RATP (http://www.ratp.fr/fr/).\n
+		Les noms des lignes faisant l\'objet de la déclaration 
+		d\'un incident affiché au sein de cette application
+		reste l\'entière propriété de la société RATP (http://www.ratp.fr/fr/).\n
+		Les incidents déclarés officiellement par la société RATP (http://www.ratp.fr/fr/)
+		sont consultables, grâce au service d\'info trafic, à cette adresse : http://www.ratp.fr/informer/trafic/trafic.php
 	</string>
 </resources>
