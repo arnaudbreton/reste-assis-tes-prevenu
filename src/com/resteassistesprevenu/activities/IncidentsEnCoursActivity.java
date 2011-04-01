@@ -405,6 +405,10 @@ public class IncidentsEnCoursActivity extends Activity implements
 						public void dataChanged(List<LigneModel> lignes) {
 							Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Retour de demande de chargement des favoris.");
 							
+							if(lignesFavoris != null) {
+								lignesFavoris.clear();
+							}
+							
 							if(lignes != null && lignes.size() > 0) 
 							{
 								Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Chargement de " + lignes.size() + " favoris.");
