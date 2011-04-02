@@ -21,6 +21,6 @@
 		android:layout_height="wrap_content" android:background="@android:drawable/editbox_background"
 		android:layout_below="@id/lblRaison"
 		android:height="100dp" />
-	<Button android:id="@+id/btnRapporterIncident" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:text="Rapporter un incident" />
+	<Button android:id="@+id/btnRapporterIncident" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="Rapporter cet incident" />
 </LinearLayout>
