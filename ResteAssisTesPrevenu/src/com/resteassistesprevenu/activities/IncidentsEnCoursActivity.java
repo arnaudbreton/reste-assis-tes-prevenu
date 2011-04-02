@@ -38,28 +38,33 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
 
 /**
  * Activité listant les incidents
+ * 
  * @author Arnaud
- *
+ * 
  */
 public class IncidentsEnCoursActivity extends Activity implements
 		IIncidentActionListener {
+	private enum ModeChargement {
+		NORMAL, IGNORER_FAVORIS
+	};
+
 	private static final String TAG_ACTIVITY = "IncidentEnCoursActivity";
-	
+
 	/**
 	 * Ensemble des incidents affichés
 	 */
 	private List<IncidentModel> incidentsService;
-	
+
 	/**
 	 * Adapter des incidents modèle => listeView
 	 */
 	private IncidentModelArrayAdapter mAdapter;
-	
+
 	/**
 	 * Service
 	 */
 	private IIncidentsTransportsBackgroundService mBoundService;
-	
+
 	/**
 	 * Lignes favorites
 	 */
@@ -69,21 +74,32 @@ public class IncidentsEnCoursActivity extends Activity implements
 	 * Bouton scope "day"
 	 */
 	private RadioButton mBtnJour;
-	
+
 	/**
 	 * Bouton scope "hour"
 	 */
 	private RadioButton mBtnHeure;
-	
+
 	/**
 	 * Bouton scope "minute"
 	 */
 	private RadioButton mBtnMinute;
-	
+
 	/**
 	 * Bouton d'ajout d'incident
 	 */
 	private Button mBtnAddIncident;
+
+	/**
+	 * Texte indiquant qu'il n'y a aucun incident (parmis les favoris ou sur le
+	 * service)
+	 */
+	private TextView mTxtAucunIncident;
+
+	/**
+	 * Bouton pour ignorer les favoris dans le chargement des incidents
+	 */
+	private Button mBtnIgnorerFavoris;
 
 	/**
 	 * ProgressDialog de chargement des incidents
@@ -94,22 +110,27 @@ public class IncidentsEnCoursActivity extends Activity implements
 	 * Scope courant
 	 */
 	private String mCurrentScope;
-	
+
 	/**
 	 * RequestCode FavorisActivity
 	 */
-	private static final int REQUEST_FAVORIS = 100; 
-	
+	private static final int REQUEST_FAVORIS = 100;
+
+	/**
+	 * Mode de chargement (avec/sans favoris)
+	 */
+	private ModeChargement mModeChargement;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		initialize();		
+		initialize();
 
 		bindService(new Intent(getApplicationContext(),
-				IncidentsTransportsBackgroundService.class), new ServiceIncidentConnection(),
-				Context.BIND_AUTO_CREATE);
+				IncidentsTransportsBackgroundService.class),
+				new ServiceIncidentConnection(), Context.BIND_AUTO_CREATE);
 	}
 
 	private void initialize() {
@@ -117,17 +138,24 @@ public class IncidentsEnCoursActivity extends Activity implements
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 				"Début initialisation de l'activité.");
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-		"Récupération des contrôles.");
+				"Récupération des contrôles.");
+
 		this.mBtnJour = (RadioButton) this.findViewById(R.id.radioJour);
 		this.mBtnHeure = (RadioButton) this.findViewById(R.id.radioHeure);
 		this.mBtnMinute = (RadioButton) this.findViewById(R.id.radioMinute);
 		this.mBtnAddIncident = (Button) this
 				.findViewById(R.id.btnAjouterIncident);
+		this.mBtnIgnorerFavoris = (Button) this
+				.findViewById(R.id.btnIgnorerFavoris);
+
+		this.mTxtAucunIncident = (TextView) findViewById(R.id.txtAucunIncident);
 
 		this.incidentsService = new ArrayList<IncidentModel>();
-		
+
 		this.mCurrentScope = IncidentModel.SCOPE_HOUR;
-		
+
+		this.mModeChargement = ModeChargement.NORMAL;
+
 		this.mAdapter = new IncidentModelArrayAdapter(this,
 				R.id.listViewIncidentEnCours, this.incidentsService, this);
 		((android.widget.ListView) this
@@ -163,6 +191,15 @@ public class IncidentsEnCoursActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				mCurrentScope = IncidentModel.SCOPE_MINUTE;
+				mModeChargement = ModeChargement.NORMAL;
+				startGetIncidentsFromServiceAsync(mCurrentScope);
+			}
+		});
+
+		this.mBtnIgnorerFavoris.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mModeChargement = ModeChargement.IGNORER_FAVORIS;
 				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
 		});
@@ -171,7 +208,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-		"Début création du menu");
+				"Début création du menu");
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.incidents_en_cours_activity_menu, menu);
 		return true;
@@ -180,48 +217,43 @@ public class IncidentsEnCoursActivity extends Activity implements
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-		"Choix d'un menu");
+				"Choix d'un menu");
 		switch (item.getItemId()) {
 		case R.id.choose_serveur:
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-			"Menu : choix du serveur");
+					"Menu : choix du serveur");
 			chooseServeur();
 			return true;
 		case R.id.menu_favoris:
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-			"Menu : favoris");
-			startActivityForResult(new Intent(this, FavorisActivity.class), REQUEST_FAVORIS);
+					"Menu : favoris");
+			startActivityForResult(new Intent(this, FavorisActivity.class),
+					REQUEST_FAVORIS);
 			return true;
 		case R.id.menu_about:
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-			"Menu : about");
+					"Menu : about");
 			about();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
 	private void about() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(
-				this);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.title_menu_about);
-		builder.setMessage(
-				getString(R.string.msg_about))				
-				.setCancelable(false)
-				.setPositiveButton("Ok",
-						new DialogInterface.OnClickListener() {
-							public void onClick(
-									DialogInterface dialog,
-									int id) {
-							}
-						});
-		builder.show();		
+		builder.setMessage(getString(R.string.msg_about)).setCancelable(false)
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+					}
+				});
+		builder.show();
 	}
 
 	private void chooseServeur() {
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-		"Début création AlertDialog choix du serveur");
+				"Début création AlertDialog choix du serveur");
 		final CharSequence[] items = { "Production", "Pré-Production" };
 		AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(
 				R.string.title_choose_serveur).setSingleChoiceItems(items,
@@ -246,7 +278,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 				});
 
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-		"Affichage du choix du serveur");
+				"Affichage du choix du serveur");
 		builder.show();
 	}
 
@@ -267,57 +299,68 @@ public class IncidentsEnCoursActivity extends Activity implements
 		}
 
 		this.incidentsService.clear();
-		TextView txtAucunIncident = (TextView) findViewById(R.id.txtAucunIncident);
 		
-		if (lignesFavoris != null && lignesFavoris.size() > 0) {
-			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-			"Favoris présent");
-			for (IncidentModel incident : incidents) {
-				if(this.lignesFavoris.contains(incident.getLigne())) {
-					this.incidentsService.add(incident);
+		if (incidents != null && incidents.size() > 0) {		
+			// Présence de favoris
+			if (this.mModeChargement.equals(ModeChargement.NORMAL)
+					&& lignesFavoris != null && lignesFavoris.size() > 0) {
+				Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+						"Favoris présent");
+
+				for (IncidentModel incident : incidents) {
+					if (this.lignesFavoris.contains(incident.getLigne())) {
+						this.incidentsService.add(incident);
+					}
+				}
+
+				if (this.incidentsService.size() == 0) {
+					this.mTxtAucunIncident
+							.setText(getString(R.string.msg_no_incident_favoris));
+					this.mBtnIgnorerFavoris.setVisibility(View.VISIBLE);
+				}
+			} else {
+				Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+						"Aucun favoris");
+				this.incidentsService.addAll(incidents);
+				
+				if (this.incidentsService.size() == 0) {
+					this.mTxtAucunIncident.setText(getString(R.string.msg_no_incident));
 				}
 			}
-			
-			if(this.incidentsService.size() == 0) {
-				txtAucunIncident.setText(getString(R.string.msg_no_incident_favoris));
-			}
+		} else {
+			this.mTxtAucunIncident.setText(getString(R.string.msg_no_incident));
 		}
-		else {			
-			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-			"Aucun favoris");
-			this.incidentsService.addAll(incidents);
-			
-			if(this.incidentsService.size() == 0) {
-				txtAucunIncident.setText(getString(R.string.msg_no_incident));
-			}
-		}
-		
-		if(this.incidentsService.size() == 0) {
-			txtAucunIncident.setVisibility(View.VISIBLE);			
-		}
-		else {
-			txtAucunIncident.setVisibility(View.GONE);
-		}
-		
-		mAdapter.notifyDataSetChanged();
+
+		if (this.incidentsService.size() == 0) {
+			this.mTxtAucunIncident.setVisibility(View.VISIBLE);
+		} else {
+			this.mTxtAucunIncident.setVisibility(View.GONE);
+		}	
+
+		this.mAdapter.notifyDataSetChanged();
 	}
 
 	private void startGetIncidentsFromServiceAsync(String scope) {
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-		"Début chargement des incidents.");
-		loadingDialog = ProgressDialog
+				"Début chargement des incidents.");
+		
+		this.loadingDialog = ProgressDialog
 				.show(IncidentsEnCoursActivity.this,
 						"",
 						getString(R.string.msg_incident_en_cours_list_loading_incidents));
-		mBoundService.startGetIncidentsAsync(scope);
+		
+		this.mBtnIgnorerFavoris.setVisibility(View.GONE);
+		this.mTxtAucunIncident.setVisibility(View.GONE);
+		
+		this.mBoundService.startGetIncidentsAsync(scope);
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if(requestCode == REQUEST_FAVORIS) {
+		if (requestCode == REQUEST_FAVORIS) {
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-			"Fin activité Favoris : " + resultCode);
-			if (resultCode == Activity.RESULT_OK) {	
+					"Fin activité Favoris : " + resultCode);
+			if (resultCode == Activity.RESULT_OK) {
 				mBoundService.startGetFavorisAsync();
 			}
 		}
@@ -326,13 +369,14 @@ public class IncidentsEnCoursActivity extends Activity implements
 	@Override
 	public void actionPerformed(IncidentModel incident, IncidentAction action) {
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-		"Choix d'une action :" + action);
+				"Choix d'une action :" + action);
 		if (action.equals(IncidentAction.SHARE)) {
 			Intent share = new Intent(Intent.ACTION_SEND);
 			share.setType("text/plain");
 
 			share.putExtra(Intent.EXTRA_TEXT, String.format(
-					getString(R.string.msg_share), incident.getLigne().toString(),
+					getString(R.string.msg_share), incident.getLigne()
+							.toString(),
 					"http://openreact.alwaysdata.net/incident/detail/"
 							+ incident.getId()));
 
@@ -342,10 +386,9 @@ public class IncidentsEnCoursActivity extends Activity implements
 			mBoundService.startVoteIncident(incident.getId(), action);
 		}
 	}
-	
+
 	private class ServiceIncidentConnection implements ServiceConnection {
-		public void onServiceConnected(ComponentName className,
-				IBinder service) {
+		public void onServiceConnected(ComponentName className, IBinder service) {
 			Log.i(getString(R.string.log_tag_name), "Service Connected!");
 
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
@@ -357,21 +400,29 @@ public class IncidentsEnCoursActivity extends Activity implements
 						public void dataChanged(
 								List<IncidentModel> incidentsService) {
 							try {
-								Log.i(getString(R.string.log_tag_name), "Début du chargement des incidents.");
+								Log.i(getString(R.string.log_tag_name),
+										"Début du chargement des incidents.");
 								setIncidents(incidentsService);
 								loadingDialog.dismiss();
-								Log.i(getString(R.string.log_tag_name), "Chargement des incidents réussi.");
+								Log.i(getString(R.string.log_tag_name),
+										"Chargement des incidents réussi.");
 							} catch (Exception e) {
 								Log.e(getString(R.string.log_tag_name),
 										"Problème de chargement des incidents",
 										e);
-								AlertDialog.Builder builder = new AlertDialog.Builder(IncidentsEnCoursActivity.this);
-								builder.setMessage(getString(R.string.msg_incident_en_cours_list_load_incidents_KO))
-								       .setCancelable(false)
-								       .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-								           public void onClick(DialogInterface dialog, int id) {			                
-								           }
-								       });
+								AlertDialog.Builder builder = new AlertDialog.Builder(
+										IncidentsEnCoursActivity.this);
+								builder.setMessage(
+										getString(R.string.msg_incident_en_cours_list_load_incidents_KO))
+										.setCancelable(false)
+										.setPositiveButton(
+												"Ok",
+												new DialogInterface.OnClickListener() {
+													public void onClick(
+															DialogInterface dialog,
+															int id) {
+													}
+												});
 								builder.show();
 							}
 						}
@@ -382,17 +433,20 @@ public class IncidentsEnCoursActivity extends Activity implements
 
 						@Override
 						public void dataChanged(boolean voteSent) {
-							Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Retour de demande de vote.");
+							Log.i(getString(R.string.log_tag_name) + " "
+									+ TAG_ACTIVITY,
+									"Retour de demande de vote.");
 							if (voteSent) {
-								Log.i(getString(R.string.log_tag_name), "Demande de vote réussi.");
-								Toast.makeText(
-										IncidentsEnCoursActivity.this,
+								Log.i(getString(R.string.log_tag_name),
+										"Demande de vote réussi.");
+								Toast.makeText(IncidentsEnCoursActivity.this,
 										R.string.msg_vote_OK,
 										Toast.LENGTH_SHORT).show();
 							} else {
-								Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Echec de la demande de vote.");
-								Toast.makeText(
-										IncidentsEnCoursActivity.this,
+								Log.i(getString(R.string.log_tag_name) + " "
+										+ TAG_ACTIVITY,
+										"Echec de la demande de vote.");
+								Toast.makeText(IncidentsEnCoursActivity.this,
 										R.string.msg_vote_KO,
 										Toast.LENGTH_SHORT).show();
 							}
@@ -403,18 +457,23 @@ public class IncidentsEnCoursActivity extends Activity implements
 					.addGetFavorisListener(new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
 						@Override
 						public void dataChanged(List<LigneModel> lignes) {
-							Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Retour de demande de chargement des favoris.");
-							
-							if(lignesFavoris != null) {
+							Log.i(getString(R.string.log_tag_name) + " "
+									+ TAG_ACTIVITY,
+									"Retour de demande de chargement des favoris.");
+
+							if (lignesFavoris != null) {
 								lignesFavoris.clear();
 							}
-							
-							if(lignes != null && lignes.size() > 0) 
-							{
-								Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Chargement de " + lignes.size() + " favoris.");
+
+							if (lignes != null && lignes.size() > 0) {
+								Log.d(getString(R.string.log_tag_name) + " "
+										+ TAG_ACTIVITY, "Chargement de "
+										+ lignes.size() + " favoris.");
 								lignesFavoris = new ArrayList<LigneModel>();
 								lignesFavoris.addAll(lignes);
-								Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY, "Fin de chargement des favoris.");
+								Log.d(getString(R.string.log_tag_name) + " "
+										+ TAG_ACTIVITY,
+										"Fin de chargement des favoris.");
 							}
 
 							startGetIncidentsFromServiceAsync(mCurrentScope);
