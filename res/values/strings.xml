@@ -35,10 +35,7 @@
 		VALUES(\'Métro\');
 		INSERT INTO
 		type_ligne(type_ligne)
-		VALUES(\'Transilien\');
-		INSERT INTO
-		type_ligne(type_ligne)
-		VALUES(\'Bus\');
+		VALUES(\'Transilien\');		
 		INSERT INTO
 		type_ligne(type_ligne)
 		VALUES(\'Tramway\');
@@ -130,13 +127,13 @@
 
 		INSERT INTO
 		lignes(nom,id_type_ligne)
-		VALUES(\'1\',5);
+		VALUES(\'1\',4);
 		INSERT INTO
 		lignes(nom,id_type_ligne)
-		VALUES(\'2\',5);
+		VALUES(\'2\',4);
 		INSERT INTO
 		lignes(nom,id_type_ligne)
-		VALUES(\'3\',5);
+		VALUES(\'3\',4);
 	</string>
 
 	<!-- Valeurs pour la liste des incidents -->

@@ -164,7 +164,7 @@ public class DefaultContentProvider extends ContentProvider {
 	/**
 	 * Version de la base
 	 */
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 
 	private class DatabaseHelper extends SQLiteOpenHelper {
 
