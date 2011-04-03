@@ -1,11 +1,18 @@
 package com.resteassistesprevenu.model;
 
+
 /**
  * Modèle de ligne, au sens du service
  * @author Arnaud
  *
  */
 public class LigneModelService {
+	public static final String TYPE_LIGNE_RER = "RER";	
+	public static final String TYPE_LIGNE_METRO = "Métro";	
+	public static final String TYPE_LIGNE_TRANSILIEN = "Transilien";	
+	public static final String TYPE_LIGNE_BUS = "Bus";	
+	public static final String TYPE_LIGNE_TRAMWAY = "Tramway";
+	
 	/**
 	 * Type de ligne
 	 */
@@ -60,7 +67,31 @@ public class LigneModelService {
 		}
 		else {
 			return false;
-		}
+		}		
+	}
+	
+	public static String getTypeLigneImage(String typeLigne) {
+		String typeLigneDrawable;
 		
+		if(typeLigne.equals(TYPE_LIGNE_METRO) || typeLigne.equals("Metro")) {
+			typeLigneDrawable = "metro";
+		}
+		else {
+			typeLigneDrawable = typeLigne.toLowerCase();
+		}
+
+		return "ic_" + typeLigneDrawable;
+	}
+	
+	public static String getNumLigneImage(LigneModelService ligne) {
+		String typeLigneDrawable;
+		
+		if(ligne.getTypeLigne().equals(TYPE_LIGNE_METRO) || ligne.getTypeLigne().equals("Metro")) {
+			typeLigneDrawable = "metro";
+		}
+		else {
+			typeLigneDrawable = ligne.getTypeLigne().toLowerCase();
+		}
+		return "ic_" + typeLigneDrawable + "_" +  ligne.getNumLigne().toLowerCase();
 	}
 }

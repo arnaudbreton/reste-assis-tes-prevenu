@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,10 +12,12 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
+import com.resteassistesprevenu.model.LigneModelService;
 
 public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	private List<String> typeLignesGroups;
@@ -49,18 +52,26 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	        if( convertView != null )
 	            v = convertView;
 	        else
-	            v = inflater.inflate(R.layout.favorite_item_view, parent, false); 
+	            v = inflater.inflate(R.layout.favoris_item_view, parent, false); 
 	        LigneModel ligneModel = (LigneModel)getChild( groupPosition, childPosition );
-			TextView txtLigne = (TextView)v.findViewById( R.id.txtLigne );
-			if( txtLigne != null ) {
-				txtLigne.setText(ligneModel.getNumLigne());
-				txtLigne.setPadding(60, 0, 0, 0);
-			}			
+	        
+			ImageView imgNumLigne = (ImageView)v.findViewById( R.id.imgNumLigne );
+			
+			int imageResource;
+			Drawable image;			
+		
+			if( imgNumLigne != null ) {
+				imageResource = ctx.getResources().getIdentifier(LigneModelService.getNumLigneImage(ligneModel), "drawable", ctx.getPackageName());
+				image = ctx.getResources().getDrawable(imageResource);
+				
+				imgNumLigne.setImageDrawable(image);
+				imgNumLigne.setPadding(60, 0, 0, 0);
+			}	
 						
 			ImageButton btnFavorite = (ImageButton) v.findViewById(R.id.btnFavorite);
 			
 			btnFavorite.setFocusable(false);
-			txtLigne.setFocusable(false);
+			imgNumLigne.setFocusable(false);
 			
 			if(ligneModel.isFavoris()) {
 				btnFavorite.setImageDrawable(ctx.getResources().getDrawable(android.R.drawable.star_big_on));
@@ -102,9 +113,27 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	@Override
 	public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
-		TextView textView = getGenericView();
-		textView.setText(getGroup(groupPosition).toString());
-		return textView;
+			View v;
+			if( convertView != null )
+	            v = convertView;
+	        else
+	            v = inflater.inflate(R.layout.favoris_group_view, parent, false); 
+		  	String typeLigne = (String)getGroup(groupPosition);
+	        
+			ImageView imgTypeLigne = (ImageView)v.findViewById( R.id.imgTypeLigne );
+			
+			int imageResource;
+			Drawable image;			
+		
+			if( imgTypeLigne != null ) {
+				imageResource = ctx.getResources().getIdentifier(LigneModelService.getTypeLigneImage(typeLigne), "drawable", ctx.getPackageName());
+				image = ctx.getResources().getDrawable(imageResource);
+				
+				imgTypeLigne.setImageDrawable(image);
+				imgTypeLigne.setPadding(60, 0, 0, 0);
+			}					
+			
+	        return v;
 	}
 
 	@Override
