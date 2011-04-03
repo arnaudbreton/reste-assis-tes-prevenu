@@ -6,16 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.activities.listeners.IIncidentActionListener;
 import com.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.model.LigneModelService;
 import com.resteassistesprevenu.quick_action.IncidentQuickAction;
 
 public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
@@ -40,8 +43,10 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 			v = vi.inflate(R.layout.incident_item_view, null);
 		}
 		incident = incidents.get(position);
-		if (incident != null) {
-			TextView txtLigne = (TextView) v.findViewById(R.id.txtLigne);
+		if (incident != null) {			
+			ImageView imgTypeLigne = (ImageView) v.findViewById(R.id.imgTypeLigne);
+			ImageView imgNumLigne = (ImageView) v.findViewById(R.id.imgNumLigne);
+			
 			TextView txtHeureIncident = (TextView) v
 					.findViewById(R.id.txtHeureIncident);
 			TextView txtReason = (TextView) v
@@ -54,8 +59,19 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 			TextView txtNbVoteEnd = (TextView) v
 					.findViewById(R.id.txtNbVoteEnd);
 
-			if (txtLigne != null) {
-				txtLigne.setText(incident.getLigne().toString());
+			int imageResource;
+			Drawable image;
+			
+			if (imgTypeLigne != null) {
+				imageResource = getContext().getResources().getIdentifier(LigneModelService.getTypeLigneImage(incident.getLigne().getTypeLigne()), "drawable", getContext().getPackageName());
+				image = getContext().getResources().getDrawable(imageResource);
+				imgTypeLigne.setImageDrawable(image);
+			}
+			
+			if (imgNumLigne != null) {
+				imageResource = getContext().getResources().getIdentifier(LigneModelService.getNumLigneImage(incident.getLigne()), "drawable", getContext().getPackageName());
+				image = getContext().getResources().getDrawable(imageResource);
+				imgNumLigne.setImageDrawable(image);
 			}
 
 			if (txtReason != null) {

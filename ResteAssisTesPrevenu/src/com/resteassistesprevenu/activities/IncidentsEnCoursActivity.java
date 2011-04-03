@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -219,7 +220,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 				"Choix d'un menu");
 		switch (item.getItemId()) {
-		case R.id.choose_serveur:
+		case R.id.menu_choose_serveur:
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 					"Menu : choix du serveur");
 			chooseServeur();
@@ -235,9 +236,32 @@ public class IncidentsEnCoursActivity extends Activity implements
 					"Menu : about");
 			about();
 			return true;
+		case R.id.menu_voter:
+			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+					"Menu : vote");
+			vote();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void vote() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.title_menu_voter);
+		builder.setMessage(getString(R.string.msg_voter)).setCancelable(true)
+				.setPositiveButton(getString(R.string.msg_btn_voter), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setData(Uri.parse("market://details?id=com.resteassistesprevenu"));
+						startActivity(intent);	
+					}
+				}).setNegativeButton("Annuler", new DialogInterface.OnClickListener() {					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {						
+					}
+				});
+		builder.show();		
 	}
 
 	private void about() {

@@ -3,7 +3,7 @@
 	<string name="app_name">Reste Assis T\'es Prévenu</string>
 	<string name="ligne_prompt">Ligne :</string>
 	<string name="log_tag_name">ResteAssisTesPrevenu</string>
-	
+
 	<string name="req_create_table_type_ligne">
 		CREATE TABLE type_ligne
 		(_id INTEGER PRIMARY KEY
@@ -22,20 +22,25 @@
 	</string>
 	<string name="req_create_table_terminus">
 		CREATE TABLE terminus
-		(_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		(_id INTEGER PRIMARY KEY
+		AUTOINCREMENT,
 		id_ligne INTEGER REFERENCES lignes(_id),
-		terminus VARCHAR2 NOT NULL);
+		terminus
+		VARCHAR2 NOT NULL);
 	</string>
 	<string name="req_insert_type_ligne">
 		INSERT INTO type_ligne(type_ligne)
 		VALUES(\'RER\');
 		INSERT INTO type_ligne(type_ligne)
 		VALUES(\'Métro\');
-		INSERT INTO type_ligne(type_ligne)
+		INSERT INTO
+		type_ligne(type_ligne)
 		VALUES(\'Transilien\');
-		INSERT INTO type_ligne(type_ligne)
+		INSERT INTO
+		type_ligne(type_ligne)
 		VALUES(\'Bus\');
-		INSERT INTO type_ligne(type_ligne)
+		INSERT INTO
+		type_ligne(type_ligne)
 		VALUES(\'Tramway\');
 	</string>
 	<string name="req_insert_lignes">
@@ -45,70 +50,99 @@
 		VALUES(\'B\',1);
 		INSERT INTO lignes(nom,id_type_ligne)
 		VALUES(\'C\',1);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'D\',1);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'E\',1);
-		
-		INSERT INTO lignes(nom,id_type_ligne)
+
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'1\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'2\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'3\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'3bis\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'4\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'5\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'6\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'7\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'7bis\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'8\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'9\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'10\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'11\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'12\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'13\',2);
-		INSERT INTO lignes(nom,id_type_ligne)
-		VALUES(\'14\',2);	
-		
-		INSERT INTO lignes(nom,id_type_ligne)
-		VALUES(\'H\',3);	
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
+		VALUES(\'14\',2);
+
+		INSERT INTO
+		lignes(nom,id_type_ligne)
+		VALUES(\'H\',3);
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'J\',3);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'K\',3);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'L\',3);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'N\',3);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'R\',3);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'U\',3);
-		
-		INSERT INTO lignes(nom,id_type_ligne)
+
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'1\',5);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'2\',5);
-		INSERT INTO lignes(nom,id_type_ligne)
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'3\',5);
 	</string>
-	
+
+	<!-- Valeurs pour la liste des incidents -->
 	<string name="msg_incident_en_cours_list_loading_incidents">Chargement des incidents en cours...</string>
 	<string name="msg_incident_en_cours_list_load_incidents_KO">Erreur lors du chargement des incidents.</string>
-	
+
 	<string name="msg_report_new_incident_OK">Votre incident a été crée sous le numéro %s</string>
 	<string name="msg_report_new_incident_KO">Erreur lors de la création de l\'incident. Merci de réessayer.</string>
 	<string name="msg_report_new_incident_KO_no_reason">Veuillez saisir une raison svp.</string>
@@ -117,42 +151,83 @@
 	<string name="msg_vote_OK">Votre vote a été enregistré.</string>
 	<string name="msg_vote_KO">Erreur lors de l\'envoi de votre vote. Merci de
 		réessayer.</string>
-
-	<string name="title_choose_serveur">Choix du serveur</string>
-	<string name="title_menu_favoris">Favoris</string>
-	<string name="title_menu_about">A propos</string>
-
-	<string name="msg_share_title">Partager cet incident avec...</string>
-	<string name="msg_share">Un incident a été déclaré sur la ligne %1$s. Détail
-		: %2$s.</string>
-	<string name="msg_favoris_registered">Favoris mis à jour.</string>
-
+		
 	<string name="msg_no_incident_favoris">Aucun incident n\'a été déclaré pour vos lignes
 		favorites.</string>
 	<string name="msg_no_incident">Aucun incident n\'a été déclaré.</string>
+	
+		<string name="msg_share_title">Partager cet incident avec...</string>
+	<string name="msg_share">Un incident a été déclaré sur la ligne %1$s. Détail
+		: %2$s.</string>
+		
 
+	<!-- Valeur pour le menu "Choix du serveur" -->
+	<string name="title_choose_serveur">Choix du serveur</string>	
+
+
+	<!-- Valeurs pour le menu Favoris -->
+	<string name="title_menu_favoris">Favoris</string>
+	<string name="msg_favoris_registered">Favoris mis à jour.</string>	
+
+	<!-- Valeurs pour le menu "A propos" -->
+	<string name="title_menu_about">A propos</string>
 	<string name="msg_about">
-		Cette application a été développée par Arnaud BRETON (@arnaud_breton sur Twitter).\n
-		Elle est difusée sous licence open-source GNU GPLv3.\n\n
-		Vous pouvez me contacter par email à resteassistesprevenu@gmail.com,
-		ou bien via Twitter  : @rasstp_android.\n\n
-		
-		Reste Assis T\'es Prévenu (RASSTP) est un client Android
+		Cette application a été développée par Arnaud
+		BRETON (@arnaud_breton sur Twitter).\n
+		Elle est difusée sous licence
+		open-source GNU GPLv3.\n\n
+		Vous pouvez me contacter par email à
+		resteassistesprevenu@gmail.com,
+		ou bien via Twitter :
+		@rasstp_android.\n\n
+
+		Reste Assis T\'es Prévenu (RASSTP) est un client
+		Android
 		pour le service
-		Incidents-transports.com développé par Olivier GIRARDOT
-		(@ogirardot sur Twitter).\n\n
-		
-		Son objectif est de permettre au usagers du réseau de
+		Incidents-transports.com développé par Olivier
+		GIRARDOT
+		(@ogirardot sur
+		Twitter).\n\n
+
+		Son objectif est de permettre au
+		usagers du réseau de
 		transport en commun
-		parisien de se prévenir des incidents en temps
-		réel.\n\n		
-		
-		Ce service et les informations qu\'il contient sont entièrement indépendants
-		de la société RATP (http://www.ratp.fr/fr/).\n
-		Les noms des lignes faisant l\'objet de la déclaration 
+		parisien de se prévenir des
+		incidents en temps
+		réel.\n\n
+
+		Ce service et les informations qu\'il
+		contient sont entièrement
+		indépendants
+		de la société RATP
+		(http://www.ratp.fr/fr/).\n
+		Les noms des
+		lignes faisant l\'objet de la
+		déclaration
 		d\'un incident affiché au sein de cette application
-		reste l\'entière propriété de la société RATP (http://www.ratp.fr/fr/).\n
-		Les incidents déclarés officiellement par la société RATP (http://www.ratp.fr/fr/)
-		sont consultables, grâce au service d\'info trafic, à cette adresse : http://www.ratp.fr/informer/trafic/trafic.php
+		reste
+		l\'entière
+		propriété de la société RATP (http://www.ratp.fr/fr/).\n
+		Les
+		incidents
+		déclarés officiellement par la société RATP
+		(http://www.ratp.fr/fr/)
+		sont consultables, grâce au service d\'info
+		trafic, à cette adresse :
+		http://www.ratp.fr/informer/trafic/trafic.php
 	</string>
+
+	<!-- Valeurs pour le menu "Voter" -->
+	<string name="title_menu_voter">Voter</string>
+	<string name="title_alert_voter">Voter pour l\'application</string>
+	<string name="msg_voter">
+		Si vous aimez cette application, n\'oubliez pas
+		d\'aller voter pour elle sur l\'Android Market
+		afin d\'améliorer sa
+		visibilité :).\n\n
+
+		Merci d\'avance,
+		Arnaud.
+	</string>
+	<string name="msg_btn_voter">Aller sur le market</string>
 </resources>
