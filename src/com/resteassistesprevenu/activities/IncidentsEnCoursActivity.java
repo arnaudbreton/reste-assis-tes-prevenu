@@ -116,6 +116,11 @@ public class IncidentsEnCoursActivity extends Activity implements
 	 * RequestCode FavorisActivity
 	 */
 	private static final int REQUEST_FAVORIS = 100;
+	
+	/**
+	 * RequestCode NewIncidentActivity
+	 */
+	private static final int REQUEST_NEW_INCIDENT = 100;
 
 	/**
 	 * Mode de chargement (avec/sans favoris)
@@ -168,7 +173,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 			public void onClick(View v) {
 				IncidentsEnCoursActivity.this.startActivityForResult(
 						new Intent(IncidentsEnCoursActivity.this,
-								NewIncidentActivity.class), 1);
+								NewIncidentActivity.class), REQUEST_NEW_INCIDENT);
 			}
 		});
 
@@ -386,6 +391,13 @@ public class IncidentsEnCoursActivity extends Activity implements
 					"Fin activité Favoris : " + resultCode);
 			if (resultCode == Activity.RESULT_OK) {
 				mBoundService.startGetFavorisAsync();
+			}
+		}
+		else if (requestCode == REQUEST_NEW_INCIDENT) {
+			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+					"Fin activité NewIncident : " + resultCode);
+			if (resultCode == Activity.RESULT_OK) {
+				mBoundService.startGetIncidentsAsync(mCurrentScope);
 			}
 		}
 	}
