@@ -61,7 +61,7 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 			Drawable image;			
 		
 			if( imgNumLigne != null ) {
-				imageResource = ctx.getResources().getIdentifier(LigneModelService.getNumLigneImage(ligneModel), "drawable", ctx.getPackageName());
+				imageResource = ctx.getResources().getIdentifier(LigneModelService.getNumLigneImage(ligneModel.getTypeLigne(),ligneModel.getNumLigne()), "drawable", ctx.getPackageName());
 				
 				if(imageResource != 0) {
 					image = ctx.getResources().getDrawable(imageResource);
