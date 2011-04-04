@@ -90,7 +90,7 @@ public class LigneModelService {
 			typeLigneDrawable = "metro";
 		}
 		else if(ligne.getTypeLigne().equals(TYPE_LIGNE_BUS)) {
-			return "ic_" +  ligne.getTypeLigne().toLowerCase();
+			return "";
 		}
 		else {
 			typeLigneDrawable = ligne.getTypeLigne().toLowerCase();
