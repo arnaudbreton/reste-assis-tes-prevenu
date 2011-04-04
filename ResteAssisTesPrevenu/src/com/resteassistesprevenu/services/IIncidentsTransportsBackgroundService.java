@@ -91,4 +91,9 @@ public interface IIncidentsTransportsBackgroundService {
 	 * @param isProduction
 	 */
 	public void setProduction(boolean isProduction);
+	
+	/**
+	 * Retourne l'URL sur lequel pointe courrament le service
+	 */
+	public String getUrlService();
 }

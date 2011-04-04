@@ -62,10 +62,15 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 		
 			if( imgNumLigne != null ) {
 				imageResource = ctx.getResources().getIdentifier(LigneModelService.getNumLigneImage(ligneModel), "drawable", ctx.getPackageName());
-				image = ctx.getResources().getDrawable(imageResource);
 				
-				imgNumLigne.setImageDrawable(image);
-				imgNumLigne.setPadding(60, 0, 0, 0);
+				if(imageResource != 0) {
+					image = ctx.getResources().getDrawable(imageResource);
+					imgNumLigne.setImageDrawable(image);
+					imgNumLigne.setPadding(60, 0, 0, 0);
+				}
+				else {
+					imgNumLigne.setImageDrawable(null);	
+				}				
 			}	
 						
 			ImageButton btnFavorite = (ImageButton) v.findViewById(R.id.btnFavorite);

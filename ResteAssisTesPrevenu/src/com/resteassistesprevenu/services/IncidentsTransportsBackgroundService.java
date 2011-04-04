@@ -9,9 +9,13 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +69,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
 						"Erreur au chargement des incidents par le service", e);
-				return new ArrayList<IncidentModel>();
+				return null;
 			}
 		}
 
@@ -238,8 +242,11 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	private String urlService;
 
-	private final static String SERVICE_URL_BASE_PRE_PRODUCTION = "http://openreact.alwaysdata.net/api";
-	private final static String SERVICE_URL_BASE_PRODUCTION = "http://www.incidents-transports.com/api";
+	private final static int TIMEOUT_CONNECTION = 10000;
+	private final static int TIMEOUT_SOCKET = 5000;
+
+	private final static String SERVICE_URL_BASE_PRE_PRODUCTION = "http://openreact.alwaysdata.net/";
+	private final static String SERVICE_URL_BASE_PRODUCTION = "http://www.incidents-transports.com/";
 
 	private static String INCIDENTS_JSON_URL = "/incidents.json";
 	private static String INCIDENT_JSON_URL = "/incident.json";
@@ -274,7 +281,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	private String getIncidentsEnCoursFromService(String scope)
 			throws IOException {
-		return getFromService(new HttpGet(this.urlService + INCIDENTS_JSON_URL
+		return requestToService(new HttpGet(this.urlService + "/api" + INCIDENTS_JSON_URL
 				+ "/" + scope));
 	}
 
@@ -409,7 +416,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			String raison) throws JSONException, IOException {
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Début de création d'un incident.");
-		HttpPost request = new HttpPost(this.urlService + "/incident");
+		HttpPost request = new HttpPost(this.urlService + "/api/incident");
 
 		JSONObject json = new JSONObject();
 		json.put("line_name", typeLigne + " " + numLigne);
@@ -424,7 +431,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 		request.setHeader("Accept", "application/json;charset=UTF-8");
 
-		String result = postToService(request);
+		String result = requestToService(request);
 		Log.d(getString(R.string.log_tag_name), "Résultat du serveur :"
 				+ result);
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
@@ -449,13 +456,13 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				+ TAG_SERVICE, "Début de vote pour un incident");
 
 		String url;
-		url = this.urlService + INCIDENT_JSON_URL + "/vote/" + incidentId + "/"
+		url = this.urlService  + "/api" + INCIDENT_JSON_URL + "/vote/" + incidentId + "/"
 				+ action;
 
 		HttpPost request = new HttpPost(url);
 
 		try {
-			postToService(request);
+			requestToService(request);
 			Log.i(getApplicationContext().getString(R.string.log_tag_name)
 					+ " " + TAG_SERVICE, "Fin de vote pour un incident");
 			return true;
@@ -492,49 +499,29 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	/**
-	 * Envoi d'une requête HTTP en GET au serveur
+	 * Envoi d'une requête HTTP au serveur
 	 * 
 	 * @param request
 	 *            La requête à envoyer
 	 * @return La réponse du serveur
 	 * @throws IOException
 	 */
-	private String getFromService(HttpGet request) throws IOException {
+	private String requestToService(HttpUriRequest request) throws IOException {
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
-				+ TAG_SERVICE, "Début de requête en GET.");
-		HttpClient httpclient = new DefaultHttpClient();
+				+ TAG_SERVICE, "Début de requête.");	
 
 		String result = null;
-
-		ResponseHandler<String> handler = new BasicResponseHandler();
-			result = httpclient.execute(request, handler);
-
-		httpclient.getConnectionManager().shutdown();
-		Log.i(getString(R.string.log_tag_name), result);
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
-				+ TAG_SERVICE, "Fin de requête en GET " + result);
-		return result;
-	}
-
-	/**
-	 * Envoi d'une requête HTTP en POST au serveur
-	 * 
-	 * @param request
-	 *            La requête à envoyer
-	 * @return La réponse du serveur
-	 * @throws IOException
-	 */
-	private String postToService(HttpPost request) throws IOException {
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
-				+ TAG_SERVICE, "Début de requête en POST.");
-		HttpClient httpclient = new DefaultHttpClient();
-
-		String result = null;
+		
+		HttpParams httpParameters = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParameters, TIMEOUT_CONNECTION);
+		HttpConnectionParams.setSoTimeout(httpParameters, TIMEOUT_SOCKET);
+		
+		HttpClient httpclient = new DefaultHttpClient(httpParameters);
 
 		ResponseHandler<String> handler = new BasicResponseHandler();
 		result = httpclient.execute(request, handler);
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
-				+ TAG_SERVICE, "Fin de requête en POST " + result);
+				+ TAG_SERVICE, "Fin de requête : " + result);
 
 		httpclient.getConnectionManager().shutdown();
 
@@ -756,5 +743,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		} else {
 			this.urlService = SERVICE_URL_BASE_PRE_PRODUCTION;
 		}
+	}
+	
+	@Override
+	public String getUrlService() {
+		return urlService;
 	}
 }

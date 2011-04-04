@@ -180,6 +180,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 		this.mBtnJour.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				mModeChargement = ModeChargement.NORMAL;
 				mCurrentScope = IncidentModel.SCOPE_JOUR;
 				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
@@ -188,6 +189,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 		this.mBtnHeure.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				mModeChargement = ModeChargement.NORMAL;
 				mCurrentScope = IncidentModel.SCOPE_HOUR;
 				startGetIncidentsFromServiceAsync(mCurrentScope);
 			}
@@ -413,7 +415,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 			share.putExtra(Intent.EXTRA_TEXT, String.format(
 					getString(R.string.msg_share), incident.getLigne()
 							.toString(),
-					"http://openreact.alwaysdata.net/incident/detail/"
+					mBoundService.getUrlService() + "incident/detail/"
 							+ incident.getId()));
 
 			startActivity(Intent.createChooser(share,
@@ -438,7 +440,13 @@ public class IncidentsEnCoursActivity extends Activity implements
 							try {
 								Log.i(getString(R.string.log_tag_name),
 										"Début du chargement des incidents.");
-								setIncidents(incidentsService);
+								if(incidentsService == null) {
+									Toast.makeText(IncidentsEnCoursActivity.this, R.string.msg_incident_en_cours_list_load_incidents_KO, Toast.LENGTH_LONG).show();
+								}
+								else {
+									setIncidents(incidentsService);
+								}
+							
 								loadingDialog.dismiss();
 								Log.i(getString(R.string.log_tag_name),
 										"Chargement des incidents réussi.");
@@ -478,6 +486,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 								Toast.makeText(IncidentsEnCoursActivity.this,
 										R.string.msg_vote_OK,
 										Toast.LENGTH_SHORT).show();
+								startGetIncidentsFromServiceAsync(mCurrentScope);
 							} else {
 								Log.i(getString(R.string.log_tag_name) + " "
 										+ TAG_ACTIVITY,

@@ -64,14 +64,24 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 			
 			if (imgTypeLigne != null) {
 				imageResource = getContext().getResources().getIdentifier(LigneModelService.getTypeLigneImage(incident.getLigne().getTypeLigne()), "drawable", getContext().getPackageName());
-				image = getContext().getResources().getDrawable(imageResource);
-				imgTypeLigne.setImageDrawable(image);
+				if(imageResource != 0) {
+					image = getContext().getResources().getDrawable(imageResource);
+					imgTypeLigne.setImageDrawable(image);
+				}
+				else {
+					imgNumLigne.setImageDrawable(null);
+				}
 			}
 			
 			if (imgNumLigne != null) {
 				imageResource = getContext().getResources().getIdentifier(LigneModelService.getNumLigneImage(incident.getLigne()), "drawable", getContext().getPackageName());
-				image = getContext().getResources().getDrawable(imageResource);
-				imgNumLigne.setImageDrawable(image);
+				if(imageResource != 0) {
+					image = getContext().getResources().getDrawable(imageResource);
+					imgNumLigne.setImageDrawable(image);
+				}			
+				else {
+					imgNumLigne.setImageDrawable(null);
+				}
 			}
 
 			if (txtReason != null) {
