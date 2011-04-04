@@ -34,7 +34,7 @@ public class IncidentQuickAction extends QuickAction {
 	private void initializeActionItem() {
 		final ActionItem votePlusAction = new ActionItem();
 
-		votePlusAction.setTitle("Plus");
+		votePlusAction.setTitle("Confirmer");
 		votePlusAction.setIcon(mView.getContext().getResources().getDrawable(
 				R.drawable.ic_vote_plus));
 		
@@ -48,7 +48,7 @@ public class IncidentQuickAction extends QuickAction {
 		
 		final ActionItem voteMinusAction = new ActionItem();
 
-		voteMinusAction.setTitle("Moins");
+		voteMinusAction.setTitle("Infirmer");
 		voteMinusAction.setIcon(mView.getContext().getResources().getDrawable(
 				R.drawable.ic_vote_minus));
 		
