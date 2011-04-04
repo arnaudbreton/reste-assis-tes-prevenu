@@ -74,7 +74,7 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 			}
 			
 			if (imgNumLigne != null) {
-				imageResource = getContext().getResources().getIdentifier(LigneModelService.getNumLigneImage(incident.getLigne()), "drawable", getContext().getPackageName());
+				imageResource = getContext().getResources().getIdentifier(LigneModelService.getNumLigneImage(incident.getLigne().getTypeLigne(),incident.getLigne().getNumLigne()), "drawable", getContext().getPackageName());
 				if(imageResource != 0) {
 					image = getContext().getResources().getDrawable(imageResource);
 					imgNumLigne.setImageDrawable(image);
