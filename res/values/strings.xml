@@ -155,7 +155,7 @@
 	
 		<string name="msg_share_title">Partager cet incident avec...</string>
 	<string name="msg_share">Un incident a été déclaré sur la ligne %1$s. Détail
-		: %2$s.</string>
+		: %2$s (partagé via Reste Assis T\'es Prévenu pour Android).</string>
 		
 
 	<!-- Valeur pour le menu "Choix du serveur" -->
