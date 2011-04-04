@@ -83,19 +83,19 @@ public class LigneModelService {
 		return "ic_" + typeLigneDrawable;
 	}
 	
-	public static String getNumLigneImage(LigneModelService ligne) {
+	public static String getNumLigneImage(String typeLigne, String numLigne) {
 		String typeLigneDrawable;
 		
-		if(ligne.getTypeLigne().equals(TYPE_LIGNE_METRO) || ligne.getTypeLigne().equals("Metro")) {
+		if(typeLigne.equals(TYPE_LIGNE_METRO) || typeLigne.equals("Metro")) {
 			typeLigneDrawable = "metro";
 		}
-		else if(ligne.getTypeLigne().equals(TYPE_LIGNE_BUS)) {
+		else if(typeLigne.equals(TYPE_LIGNE_BUS)) {
 			return "";
 		}
 		else {
-			typeLigneDrawable = ligne.getTypeLigne().toLowerCase();
+			typeLigneDrawable = typeLigne.toLowerCase();
 		}
 		
-		return "ic_" + typeLigneDrawable + "_" +  ligne.getNumLigne().toLowerCase();
+		return "ic_" + typeLigneDrawable + "_" +  numLigne.toLowerCase();
 	}
 }
