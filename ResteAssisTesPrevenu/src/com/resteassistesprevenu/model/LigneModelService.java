@@ -89,9 +89,13 @@ public class LigneModelService {
 		if(ligne.getTypeLigne().equals(TYPE_LIGNE_METRO) || ligne.getTypeLigne().equals("Metro")) {
 			typeLigneDrawable = "metro";
 		}
+		else if(ligne.getTypeLigne().equals(TYPE_LIGNE_BUS)) {
+			return "ic_" +  ligne.getTypeLigne().toLowerCase();
+		}
 		else {
 			typeLigneDrawable = ligne.getTypeLigne().toLowerCase();
 		}
+		
 		return "ic_" + typeLigneDrawable + "_" +  ligne.getNumLigne().toLowerCase();
 	}
 }
