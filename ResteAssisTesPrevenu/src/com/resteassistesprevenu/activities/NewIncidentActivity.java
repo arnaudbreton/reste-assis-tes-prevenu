@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -20,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -172,6 +174,11 @@ public class NewIncidentActivity extends Activity {
 
 							if (spinTypeLigne.getSelectedItem() != null) {
 								mBoundService.startGetLignesAsync(LigneModelService.TYPE_LIGNE_RER);
+								int imageResource = NewIncidentActivity.this.getResources().getIdentifier(LigneModelService.getTypeLigneImage(LigneModelService.TYPE_LIGNE_RER), "drawable", NewIncidentActivity.this.getPackageName());
+								if(imageResource != 0) {
+									Drawable image = NewIncidentActivity.this.getResources().getDrawable(imageResource);
+									((ImageView)findViewById(R.id.imgTypeLigne)).setImageDrawable(image);
+								}	
 							}
 						}
 					});
@@ -204,6 +211,12 @@ public class NewIncidentActivity extends Activity {
 									lignes.toArray(new String[lignes.size()]));
 							adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 							mSpinLignes.setAdapter(adapter);
+							
+							int imageResource = NewIncidentActivity.this.getResources().getIdentifier(LigneModelService.getNumLigneImage(mSpinTypeLignes.getSelectedItem().toString(), mSpinLignes.getSelectedItem().toString()), "drawable", NewIncidentActivity.this.getPackageName());
+							if(imageResource != 0) {
+								Drawable image = NewIncidentActivity.this.getResources().getDrawable(imageResource);
+								((ImageView)findViewById(R.id.imgNumLigne)).setImageDrawable(image);
+							}	
 							
 							mSpinTypeLignes
 							.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -286,4 +299,11 @@ public class NewIncidentActivity extends Activity {
 		public void onServiceDisconnected(ComponentName className) {
 		}
 	};
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		
+		mSpinTypeLignes.setOnItemSelectedListener(null);
+	}
 }
