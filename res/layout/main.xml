@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:ads="http://schemas.android.com/apk/res/com.resteassistesprevenu"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical">
 	<RelativeLayout android:layout_width="fill_parent"
@@ -21,6 +22,7 @@
 			android:layout_width="60dp" android:layout_height="wrap_content"
 			android:text="+" android:layout_alignParentRight="true" />
 	</RelativeLayout>
+	
 	<LinearLayout
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:orientation="vertical">
@@ -29,7 +31,13 @@
 		<Button android:id="@+id/btnIgnorerFavoris" android:text="Ignorer les favoris"
 			android:layout_width="fill_parent" android:layout_height="wrap_content" android:visibility="gone" />
 	</LinearLayout>
+	
 	<ListView android:id="@+id/listViewIncidentEnCours"
 		android:layout_width="fill_parent" android:layout_height="wrap_content" />
 
+	<com.google.ads.AdView android:id="@+id/adView"
+                         android:layout_width="fill_parent"
+                         android:layout_height="wrap_content"
+                         ads:adUnitId="a14d9cd6fea894b"
+                         ads:adSize="BANNER" android:layout_alignParentBottom="true"/>
 </LinearLayout>

@@ -120,6 +120,9 @@
 		VALUES(\'N\',3);
 		INSERT INTO
 		lignes(nom,id_type_ligne)
+		VALUES(\'P\',3);
+		INSERT INTO
+		lignes(nom,id_type_ligne)
 		VALUES(\'R\',3);
 		INSERT INTO
 		lignes(nom,id_type_ligne)
