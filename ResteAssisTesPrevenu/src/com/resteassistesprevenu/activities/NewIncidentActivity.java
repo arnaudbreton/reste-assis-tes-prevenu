@@ -25,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.LigneModelService;
@@ -81,6 +83,12 @@ public class NewIncidentActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_incident_view);
+		
+		 // Look up the AdView as a resource and load a request.
+	    AdView adView = (AdView)this.findViewById(R.id.adView);
+	    AdRequest request = new AdRequest();
+	    request.setTesting(true);
+	    adView.loadAd(request);
 
 		mSpinTypeLignes = (Spinner) this.findViewById(R.id.spinnerTypeLigne);
 		

@@ -24,6 +24,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.activities.listeners.IIncidentActionListener;
 import com.resteassistesprevenu.model.IncidentAction;
@@ -133,7 +135,13 @@ public class IncidentsEnCoursActivity extends Activity implements
 		setContentView(R.layout.main);
 
 		initialize();
-
+		
+		 // Look up the AdView as a resource and load a request.
+	    AdView adView = (AdView)this.findViewById(R.id.adView);
+	    AdRequest request = new AdRequest();
+	    request.setTesting(true);
+	    adView.loadAd(request);
+	    
 		bindService(new Intent(getApplicationContext(),
 				IncidentsTransportsBackgroundService.class),
 				new ServiceIncidentConnection(), Context.BIND_AUTO_CREATE);
