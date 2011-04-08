@@ -17,6 +17,8 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.Toast;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.FavorisExpandableListAdapter;
@@ -64,6 +66,12 @@ public class FavorisActivity extends Activity implements OnChildClickListener, V
 		mAdapter = new FavorisExpandableListAdapter(FavorisActivity.this);
 		
 		mExpandableListView.setAdapter(mAdapter);
+		
+		 // Look up the AdView as a resource and load a request.
+	    AdView adView = (AdView)this.findViewById(R.id.adViewBanner);
+	    AdRequest request = new AdRequest();
+	    request.setTesting(true);
+	    adView.loadAd(request);
 
 		bindService(new Intent(getApplicationContext(),
 				IncidentsTransportsBackgroundService.class), new IncidentServiceConnection(),

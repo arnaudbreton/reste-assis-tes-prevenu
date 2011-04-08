@@ -85,7 +85,7 @@ public class NewIncidentActivity extends Activity {
 		setContentView(R.layout.new_incident_view);
 		
 		 // Look up the AdView as a resource and load a request.
-	    AdView adView = (AdView)this.findViewById(R.id.adView);
+	    AdView adView = (AdView)this.findViewById(R.id.adViewBanner);
 	    AdRequest request = new AdRequest();
 	    request.setTesting(true);
 	    adView.loadAd(request);
