@@ -137,7 +137,7 @@ public class IncidentsEnCoursActivity extends Activity implements
 		initialize();
 		
 		 // Look up the AdView as a resource and load a request.
-	    AdView adView = (AdView)this.findViewById(R.id.adView);
+	    AdView adView = (AdView)this.findViewById(R.id.adViewBanner);
 	    AdRequest request = new AdRequest();
 	    request.setTesting(true);
 	    adView.loadAd(request);
@@ -383,15 +383,20 @@ public class IncidentsEnCoursActivity extends Activity implements
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 				"Début chargement des incidents.");
 		
-		this.loadingDialog = ProgressDialog
-				.show(IncidentsEnCoursActivity.this,
-						"",
-						getString(R.string.msg_incident_en_cours_list_loading_incidents));
-		
-		this.mBtnIgnorerFavoris.setVisibility(View.GONE);
-		this.mTxtAucunIncident.setVisibility(View.GONE);
-		
-		this.mBoundService.startGetIncidentsAsync(scope);
+		if(this.mBoundService != null) {
+			this.loadingDialog = ProgressDialog
+					.show(IncidentsEnCoursActivity.this,
+							"",
+							getString(R.string.msg_incident_en_cours_list_loading_incidents));
+			
+			this.mBtnIgnorerFavoris.setVisibility(View.GONE);
+			this.mTxtAucunIncident.setVisibility(View.GONE);
+			
+			this.mBoundService.startGetIncidentsAsync(scope);
+		}
+		else {
+			Toast.makeText(this, R.string.msg_incident_en_cours_list_loading_incidents, Toast.LENGTH_LONG).show();
+		}
 	}
 
 	@Override
@@ -429,7 +434,12 @@ public class IncidentsEnCoursActivity extends Activity implements
 			startActivity(Intent.createChooser(share,
 					getString(R.string.msg_share_title)));
 		} else {
-			mBoundService.startVoteIncident(incident.getId(), action);
+			if(this.mBoundService != null) {
+				this.mBoundService.startVoteIncident(incident.getId(), action);
+			}
+			else {
+				Toast.makeText(this, R.string.msg_incident_en_cours_list_loading_incidents, Toast.LENGTH_LONG).show();
+			}
 		}
 	}
 

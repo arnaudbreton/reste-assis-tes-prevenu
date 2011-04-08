@@ -1,43 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:ads="http://schemas.android.com/apk/res/com.resteassistesprevenu"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"	
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical">
-	<RelativeLayout android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:orientation="horizontal">
-		<RadioGroup android:id="@+id/radioGroup1"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:orientation="horizontal">
-			<RadioButton android:text="Heure" android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:textSize="15.0sp"
-				android:id="@+id/radioHeure" android:checked="true"></RadioButton>
-			<RadioButton android:text="Minutes" android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:textSize="15.0sp"
-				android:id="@+id/radioMinute"></RadioButton>
-			<RadioButton android:text="Jour" android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:textSize="15.0sp"
-				android:id="@+id/radioJour"></RadioButton>
-		</RadioGroup>
-		<Button android:id="@+id/btnAjouterIncident"
-			android:layout_width="60dp" android:layout_height="wrap_content"
-			android:text="+" android:layout_alignParentRight="true" />
-	</RelativeLayout>
-	
-	<LinearLayout
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:orientation="vertical">
-		<TextView android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:id="@+id/txtAucunIncident" android:visibility="gone" />
-		<Button android:id="@+id/btnIgnorerFavoris" android:text="Ignorer les favoris"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" android:visibility="gone" />
-	</LinearLayout>
-	
-	<ListView android:id="@+id/listViewIncidentEnCours"
-		android:layout_width="fill_parent" android:layout_height="wrap_content" />
 
-	<com.google.ads.AdView android:id="@+id/adView"
-                         android:layout_width="fill_parent"
-                         android:layout_height="wrap_content"
-                         ads:adUnitId="a14d9cd6fea894b"
-                         ads:adSize="BANNER" android:layout_alignParentBottom="true"/>
-</LinearLayout>
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:orientation="vertical">
+		<RelativeLayout android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:orientation="horizontal">
+			<RadioGroup android:id="@+id/radioGroup1"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:orientation="horizontal">
+				<RadioButton android:text="Heure" android:layout_width="wrap_content"
+					android:layout_height="wrap_content" android:textSize="15.0sp"
+					android:id="@+id/radioHeure" android:checked="true"></RadioButton>
+				<RadioButton android:text="Minutes"
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:textSize="15.0sp" android:id="@+id/radioMinute"></RadioButton>
+				<RadioButton android:text="Jour" android:layout_width="wrap_content"
+					android:layout_height="wrap_content" android:textSize="15.0sp"
+					android:id="@+id/radioJour"></RadioButton>
+			</RadioGroup>
+			<Button android:id="@+id/btnAjouterIncident"
+				android:layout_width="60dp" android:layout_height="wrap_content"
+				android:text="+" android:layout_alignParentRight="true" />
+		</RelativeLayout>
+
+		<TextView android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:id="@+id/txtAucunIncident"
+			android:visibility="gone" />
+		<Button android:id="@+id/btnIgnorerFavoris" android:text="Ignorer les favoris"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:visibility="gone" />
+
+		<ListView android:id="@+id/listViewIncidentEnCours"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+	</LinearLayout>
+
+	<include android:id="@+id/adView" layout="@layout/ad_view" />
+</RelativeLayout>
