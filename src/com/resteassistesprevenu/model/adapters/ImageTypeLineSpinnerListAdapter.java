@@ -11,7 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.resteassistesprevenu.R;
-import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.LigneModelService;
 
 public class ImageTypeLineSpinnerListAdapter extends ArrayAdapter<String> {
@@ -39,7 +38,7 @@ public class ImageTypeLineSpinnerListAdapter extends ArrayAdapter<String> {
 			}
 		}
 		
-		return null;
+		return v;
 	}
 	
 	public Drawable getImage(String typeLigne) {

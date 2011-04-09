@@ -1,5 +1,6 @@
 package com.resteassistesprevenu.activities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -16,16 +17,16 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.LigneModelService;
-import com.resteassistesprevenu.model.adapters.ImageNumLineSpinnerListAdapter;
 import com.resteassistesprevenu.model.adapters.ImageNumLineSpinnerListAdapter;
 import com.resteassistesprevenu.model.adapters.ImageTypeLineSpinnerListAdapter;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
@@ -101,6 +102,8 @@ public class NewIncidentActivity extends Activity {
 		mSpinTypeLignes = (Spinner) this.findViewById(R.id.spinnerTypeLigne);
 
 		mSpinLignes = (Spinner) this.findViewById(R.id.spinnerNumeroLigne);
+		
+		this.lignes = new ArrayList<LigneModel>();
 		mImgLignesAdapter = new ImageNumLineSpinnerListAdapter(
 				NewIncidentActivity.this,
 				R.layout.new_incident_view,
