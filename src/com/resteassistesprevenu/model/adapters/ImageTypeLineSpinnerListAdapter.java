@@ -21,37 +21,46 @@ public class ImageTypeLineSpinnerListAdapter extends ArrayAdapter<String> {
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
+		return getGenericView(convertView, position);
+	}
+	
+	@Override
+	public View getDropDownView(int position, View convertView, ViewGroup parent) {
+		return getGenericView(convertView, position);
+	}
+
+	private View getGenericView(View convertView, int position) {
 		View v = convertView;
-		
+
 		if (v == null) {
 			LayoutInflater vi = (LayoutInflater) getContext().getSystemService(
 					Context.LAYOUT_INFLATER_SERVICE);
 			v = vi.inflate(R.layout.spinner_ligne_image_view, null);
 		}
-		
+
 		String typeLigne = getItem(position);
-		if(typeLigne != null) {
+		if (typeLigne != null) {
 			ImageView imgLigne = (ImageView) v.findViewById(R.id.imgLigne);
-			
-			if(imgLigne != null) {
+
+			if (imgLigne != null) {
 				imgLigne.setImageDrawable(getImage(typeLigne));
 			}
 		}
-		
+
 		return v;
 	}
-	
+
 	public Drawable getImage(String typeLigne) {
-		if(typeLigne  != null) {
-			int imageResource = getContext().getResources().getIdentifier(LigneModelService.getTypeLigneImage(typeLigne), "drawable", getContext().getPackageName());
-			if(imageResource != 0) {
+		if (typeLigne != null) {
+			int imageResource = getContext().getResources().getIdentifier(
+					LigneModelService.getTypeLigneImage(typeLigne), "drawable",
+					getContext().getPackageName());
+			if (imageResource != 0) {
 				return getContext().getResources().getDrawable(imageResource);
-			}	
-			else {
+			} else {
 				return null;
-			}			
-		}
-		else {
+			}
+		} else {
 			return null;
 		}
 	}

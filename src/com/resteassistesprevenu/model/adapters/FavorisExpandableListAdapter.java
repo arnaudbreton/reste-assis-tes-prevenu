@@ -124,8 +124,17 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	        else
 	            v = inflater.inflate(R.layout.favoris_group_view, parent, false); 
 		  	String typeLigne = (String)getGroup(groupPosition);
+		  	
+		  	int nbFavorisGroup = 0;
+		  	for(LigneModel ligne : this.lignesChildrenGroups.get(groupPosition)) {
+		  		if(ligne.isFavoris()) {
+		  			nbFavorisGroup++;
+		  		}
+		  	}
 	        
 			ImageView imgTypeLigne = (ImageView)v.findViewById( R.id.imgTypeLigne );
+			TextView lblNbFavoris = (TextView)v.findViewById(R.id.lblNbFavoris);
+			ImageView imgFavoris = (ImageView)v.findViewById(R.id.imgFavoris);
 			
 			int imageResource;
 			Drawable image;			
@@ -137,6 +146,15 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 				imgTypeLigne.setImageDrawable(image);
 				imgTypeLigne.setPadding(60, 0, 0, 0);
 			}					
+			
+			lblNbFavoris.setText(String.valueOf(nbFavorisGroup));
+			
+			if(nbFavorisGroup > 0) {
+				imgFavoris.setImageDrawable(ctx.getResources().getDrawable(android.R.drawable.star_big_on));
+			}
+			else {
+				imgFavoris.setImageDrawable(ctx.getResources().getDrawable(android.R.drawable.star_big_off));
+			}
 			
 	        return v;
 	}
