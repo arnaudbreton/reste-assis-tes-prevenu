@@ -14,12 +14,15 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.google.ads.AdRequest;
@@ -62,11 +65,16 @@ public class NewIncidentActivity extends Activity {
 	 * Spinner contenant les lignes
 	 */
 	private Spinner mSpinLignes;
-	
+
 	/**
 	 * L'adapteur de LigneModel en image
 	 */
 	private ImageNumLineSpinnerListAdapter mImgLignesAdapter;
+
+	/**
+	 * L'adapteur de type de ligne en image
+	 */
+	private ImageTypeLineSpinnerListAdapter mImgTypeLignesAdapter;
 
 	/**
 	 * Texte contenant la raison
@@ -82,36 +90,49 @@ public class NewIncidentActivity extends Activity {
 	 * ProgressDialog de création de l'incident
 	 */
 	private ProgressDialog mPdRapporter;
-	
+
 	/**
 	 * Ensemble des lignes affichés
 	 */
 	private List<LigneModel> lignes;
 
+	/**
+	 * Ensemble des types lignes affichés
+	 */
+	private List<String> typeLignes;
+	
+	/**
+	 * La publicité
+	 */
+	private AdView adView;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_incident_view);
 
 		// Look up the AdView as a resource and load a request.
-		AdView adView = (AdView) this.findViewById(R.id.adViewBanner);
+		adView = (AdView) this.findViewById(R.id.adViewBanner);
 		AdRequest request = new AdRequest();
 		request.setTesting(true);
 		adView.loadAd(request);
 
 		mSpinTypeLignes = (Spinner) this.findViewById(R.id.spinnerTypeLigne);
+		this.typeLignes = new ArrayList<String>();
+		mImgTypeLignesAdapter = new ImageTypeLineSpinnerListAdapter(
+				NewIncidentActivity.this, R.layout.new_incident_view,
+				this.typeLignes);
+		mSpinTypeLignes.setAdapter(mImgTypeLignesAdapter);
 
 		mSpinLignes = (Spinner) this.findViewById(R.id.spinnerNumeroLigne);
-		
 		this.lignes = new ArrayList<LigneModel>();
 		mImgLignesAdapter = new ImageNumLineSpinnerListAdapter(
-				NewIncidentActivity.this,
-				R.layout.new_incident_view,
+				NewIncidentActivity.this, R.layout.new_incident_view,
 				this.lignes);
-		mImgLignesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mSpinLignes.setAdapter(mImgLignesAdapter);
-		
+
 		mTxtRaison = (EditText) this.findViewById(R.id.txtRaison);
+
 
 		mBtnRapporter = (Button) this.findViewById(R.id.btnRapporterIncident);
 		mBtnRapporter.setOnClickListener(new OnClickListener() {
@@ -124,12 +145,12 @@ public class NewIncidentActivity extends Activity {
 
 				if (mSpinTypeLignes != null
 						&& mSpinTypeLignes.getSelectedItem() != null) {
-					typeLigne = mSpinTypeLignes.getSelectedItem().toString();
+					typeLigne = mImgTypeLignesAdapter.getItem(mSpinTypeLignes.getSelectedItemPosition());
 				}
 
 				if (mSpinLignes != null
 						&& mSpinLignes.getSelectedItem() != null) {
-					numLigne = mSpinLignes.getSelectedItem().toString();
+					numLigne = mImgLignesAdapter.getItem(mSpinLignes.getSelectedItemPosition()).getNumLigne();
 				}
 
 				if (mTxtRaison != null) {
@@ -187,14 +208,12 @@ public class NewIncidentActivity extends Activity {
 						public void dataChanged(List<String> data) {
 							Log.i(getString(R.string.log_tag_name) + " "
 									+ TAG_ACTIVITY,
-									"Chargement des types de lignes : ");
+									"Chargement des types de lignes");
 
-							ImageTypeLineSpinnerListAdapter adapter = new ImageTypeLineSpinnerListAdapter(
-									NewIncidentActivity.this,
-									R.layout.new_incident_view,
-									data);
-							adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-							mSpinTypeLignes.setAdapter(adapter);
+							typeLignes.clear();
+							typeLignes.addAll(data);
+							mImgTypeLignesAdapter.notifyDataSetChanged();
+							mSpinTypeLignes.setAdapter(mImgTypeLignesAdapter);
 
 							mBoundService
 									.startGetLignesAsync(LigneModelService.TYPE_LIGNE_RER);
@@ -209,9 +228,12 @@ public class NewIncidentActivity extends Activity {
 									+ TAG_ACTIVITY,
 									"Début de chargement des lignes.");
 
-							lignes = data;
-							mImgLignesAdapter.notifyDataSetChanged(); 
+							lignes.clear();
+							lignes.addAll(data);
+							mImgLignesAdapter.notifyDataSetChanged();
 							
+							mSpinLignes.setSelection(0);
+
 							mSpinTypeLignes
 									.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
@@ -225,9 +247,9 @@ public class NewIncidentActivity extends Activity {
 															+ parent.getSelectedItem()
 																	.toString());
 											mBoundService
-													.startGetLignesAsync(parent
-															.getSelectedItem()
-															.toString());
+													.startGetLignesAsync(mImgTypeLignesAdapter
+															.getItem(mSpinTypeLignes
+																	.getSelectedItemPosition()));
 										}
 
 										@Override

@@ -465,7 +465,9 @@ public class IncidentsEnCoursActivity extends Activity implements
 									setIncidents(incidentsService);
 								}
 							
-								loadingDialog.dismiss();
+								if(loadingDialog != null && loadingDialog.isShowing())
+									loadingDialog.dismiss();
+								
 								Log.i(getString(R.string.log_tag_name),
 										"Chargement des incidents réussi.");
 							} catch (Exception e) {
@@ -549,4 +551,13 @@ public class IncidentsEnCoursActivity extends Activity implements
 		public void onServiceDisconnected(ComponentName className) {
 		}
 	};
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		if(loadingDialog != null) {
+			loadingDialog.dismiss();
+		}
+	}
 }
