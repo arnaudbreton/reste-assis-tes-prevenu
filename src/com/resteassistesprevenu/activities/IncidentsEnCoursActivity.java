@@ -24,8 +24,6 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdView;
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.activities.listeners.IIncidentActionListener;
 import com.resteassistesprevenu.model.IncidentAction;
@@ -45,7 +43,7 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
  * @author Arnaud
  * 
  */
-public class IncidentsEnCoursActivity extends Activity implements
+public class IncidentsEnCoursActivity extends BaseActivity implements
 		IIncidentActionListener {
 	private enum ModeChargement {
 		NORMAL, IGNORER_FAVORIS
@@ -135,12 +133,6 @@ public class IncidentsEnCoursActivity extends Activity implements
 		setContentView(R.layout.main);
 
 		initialize();
-		
-		 // Look up the AdView as a resource and load a request.
-	    AdView adView = (AdView)this.findViewById(R.id.adViewBanner);
-	    AdRequest request = new AdRequest();
-	    request.setTesting(true);
-	    adView.loadAd(request);
 	    
 		bindService(new Intent(getApplicationContext(),
 				IncidentsTransportsBackgroundService.class),
@@ -169,6 +161,8 @@ public class IncidentsEnCoursActivity extends Activity implements
 		this.mCurrentScope = IncidentModel.SCOPE_HOUR;
 
 		this.mModeChargement = ModeChargement.NORMAL;
+		
+		startAd();
 
 		this.mAdapter = new IncidentModelArrayAdapter(this,
 				R.id.listViewIncidentEnCours, this.incidentsService, this);
