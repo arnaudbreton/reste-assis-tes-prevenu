@@ -3,7 +3,6 @@ package com.resteassistesprevenu.activities;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +16,6 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.Toast;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdView;
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.FavorisExpandableListAdapter;
@@ -34,7 +31,7 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
  * @author Arnaud
  * 
  */
-public class FavorisActivity extends Activity implements OnChildClickListener, View.OnClickListener {
+public class FavorisActivity extends BaseActivity implements OnChildClickListener, View.OnClickListener {
 	private static final String TAG_ACTIVITY = "FavorisActivity";
 	/**
 	 * Service
@@ -60,18 +57,14 @@ public class FavorisActivity extends Activity implements OnChildClickListener, V
 		setContentView(R.layout.favoris_view);
 
 		this.isModified = false;
+		
+		startAd();
 
 		mBtnOK = (Button) findViewById(R.id.btnFavorisViewOK);
 		mExpandableListView = (ExpandableListView) findViewById(R.id.expandableFavorisView);
 		mAdapter = new FavorisExpandableListAdapter(FavorisActivity.this);
 		
 		mExpandableListView.setAdapter(mAdapter);
-		
-		 // Look up the AdView as a resource and load a request.
-	    AdView adView = (AdView)this.findViewById(R.id.adViewBanner);
-	    AdRequest request = new AdRequest();
-	    request.setTesting(true);
-	    adView.loadAd(request);
 
 		bindService(new Intent(getApplicationContext(),
 				IncidentsTransportsBackgroundService.class), new IncidentServiceConnection(),

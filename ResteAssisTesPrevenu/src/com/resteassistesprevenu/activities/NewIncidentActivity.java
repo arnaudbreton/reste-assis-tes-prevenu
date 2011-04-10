@@ -3,7 +3,6 @@ package com.resteassistesprevenu.activities;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -14,19 +13,14 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdView;
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.LigneModelService;
@@ -45,7 +39,7 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
  * @author Arnaud
  * 
  */
-public class NewIncidentActivity extends Activity {
+public class NewIncidentActivity extends BaseActivity {
 	/**
 	 * TAG de log propre à l'activité
 	 */
@@ -101,21 +95,13 @@ public class NewIncidentActivity extends Activity {
 	 */
 	private List<String> typeLignes;
 	
-	/**
-	 * La publicité
-	 */
-	private AdView adView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_incident_view);
-
-		// Look up the AdView as a resource and load a request.
-		adView = (AdView) this.findViewById(R.id.adViewBanner);
-		AdRequest request = new AdRequest();
-		request.setTesting(true);
-		adView.loadAd(request);
+		
+		startAd();
 
 		mSpinTypeLignes = (Spinner) this.findViewById(R.id.spinnerTypeLigne);
 		this.typeLignes = new ArrayList<String>();
