@@ -291,7 +291,7 @@ public class NewIncidentActivity extends BaseActivity {
 
 					typeLignes.clear();
 					typeLignes.addAll(data);
-					mImgTypeLignesAdapter.notifyDataSetChanged();
+					mImgTypeLignesAdapter.notifyDataSetChanged();					
 					
 					mSpinTypeLignes.setSelection(0);
 					mBoundService.startGetLignesAsync(LigneModel.TYPE_LIGNE_RER);
@@ -320,11 +320,16 @@ public class NewIncidentActivity extends BaseActivity {
 						
 						mSpinTypeLignes.setSelection(0);
 						mSpinLignes.setSelection(0);
+						
+						isFavorisFiltered = true;
 					}
 					// Sinon on affiche toutes les lignes
 					else {
 						LinearLayout layout = (LinearLayout) findViewById(R.id.layout_radioGroupNewIncident);
 						layout.setVisibility(View.GONE);
+						
+						isFavorisFiltered = false;
+												
 						mBoundService.startGetTypeLignesAsync();
 					}
 				}
@@ -335,12 +340,13 @@ public class NewIncidentActivity extends BaseActivity {
 				@Override
 				public void dataChanged(List<LigneModel> data) {
 					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-							"Début de chargement des lignes.");
-
+							"Début de chargement des lignes.");			
+					
 					lignes.clear();
 					lignes.addAll(data);
-
-					mImgLignesAdapter.getFilter().filter("");
+					
+					mImgLignesAdapter.getFilter().filter(null);
+					
 					mImgTypeLignesAdapter.notifyDataSetChanged();
 					mImgLignesAdapter.notifyDataSetChanged();					
 					

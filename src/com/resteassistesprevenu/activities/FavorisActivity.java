@@ -84,7 +84,7 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 
 		mBtnOK = (Button) findViewById(R.id.btnFavorisViewOK);
 		mExpandableListView = (ExpandableListView) findViewById(R.id.expandableFavorisView);
-		mAdapter = new FavorisExpandableListAdapter(FavorisActivity.this);
+		mAdapter = new FavorisExpandableListAdapter(FavorisActivity.this, mExpandableListView);
 		
 		mExpandableListView.setAdapter(mAdapter);
 
