@@ -160,13 +160,14 @@
 	<string name="msg_share">Un incident a été déclaré sur la ligne %1$s. Détail
 		: %2$s (partagé via Reste Assis T\'es Prévenu pour Android).</string>
 		
+	<!-- Valeurs pour l'ajout d'incident -->
+	<string name="title_filter_lines">Filtrer les lignes :</string>	
 
 	<!-- Valeur pour le menu "Choix du serveur" -->
 	<string name="title_choose_serveur">Choix du serveur</string>	
 
-
 	<!-- Valeurs pour le menu Favoris -->
-	<string name="title_menu_favoris">Favoris</string>
+	<string name="title_menu_favoris">Mes Lignes</string>
 	<string name="msg_favoris_registered">Favoris mis à jour.</string>	
 
 	<!-- Valeurs pour le menu "A propos" -->

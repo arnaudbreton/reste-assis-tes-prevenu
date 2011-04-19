@@ -126,7 +126,27 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	 * Mode de chargement (avec/sans favoris)
 	 */
 	private ModeChargement mModeChargement;
-
+	
+	/**
+	 * Le gestionnaire de connexion
+	 */
+	private ServiceIncidentConnection conn;
+	
+	/**
+	 * Listener de récupération des incidents
+	 */
+	private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener getIncidentsEnCoursListener;
+	
+	/**
+	 * Listener de vote pour les incidents
+	 */
+	private IIncidentsTransportsBackgroundServiceVoteIncidentListener voteIncidentListener;
+	
+	/**
+	 * Listener de récupération des favoris
+	 */
+	private IIncidentsTransportsBackgroundServiceGetFavorisListener getFavorisListener;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -134,9 +154,10 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 
 		initialize();
 	    
+		this.conn = new ServiceIncidentConnection();
 		bindService(new Intent(getApplicationContext(),
 				IncidentsTransportsBackgroundService.class),
-				new ServiceIncidentConnection(), Context.BIND_AUTO_CREATE);
+				this.conn, Context.BIND_AUTO_CREATE);
 	}
 
 	private void initialize() {
@@ -444,114 +465,120 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 					.getService();
 
-			mBoundService
-					.addGetIncidentsListener(new IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener() {
-						@Override
-						public void dataChanged(
-								List<IncidentModel> incidentsService) {
-							try {
-								Log.i(getString(R.string.log_tag_name),
-										"Début du chargement des incidents.");
-								if(incidentsService == null) {
-									Toast.makeText(IncidentsEnCoursActivity.this, R.string.msg_incident_en_cours_list_load_incidents_KO, Toast.LENGTH_LONG).show();
-								}
-								else {
-									setIncidents(incidentsService);
-								}
-							
-								if(loadingDialog != null && loadingDialog.isShowing())
-									loadingDialog.dismiss();
-								
-								Log.i(getString(R.string.log_tag_name),
-										"Chargement des incidents réussi.");
-							} catch (Exception e) {
-								Log.e(getString(R.string.log_tag_name),
-										"Problème de chargement des incidents",
-										e);
-								AlertDialog.Builder builder = new AlertDialog.Builder(
-										IncidentsEnCoursActivity.this);
-								builder.setMessage(
-										getString(R.string.msg_incident_en_cours_list_load_incidents_KO))
-										.setCancelable(false)
-										.setPositiveButton(
-												"Ok",
-												new DialogInterface.OnClickListener() {
-													public void onClick(
-															DialogInterface dialog,
-															int id) {
-													}
-												});
-								builder.show();
-							}
+			getIncidentsEnCoursListener = new IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener() {
+				@Override
+				public void dataChanged(
+						List<IncidentModel> incidentsService) {
+					try {
+						Log.i(getString(R.string.log_tag_name),
+								"Début du chargement des incidents.");
+						if(incidentsService == null) {
+							Toast.makeText(IncidentsEnCoursActivity.this, R.string.msg_incident_en_cours_list_load_incidents_KO, Toast.LENGTH_LONG).show();
 						}
-					});
-
-			mBoundService
-					.addVoteIncidentListener(new IIncidentsTransportsBackgroundServiceVoteIncidentListener() {
-
-						@Override
-						public void dataChanged(boolean voteSent) {
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Retour de demande de vote.");
-							if (voteSent) {
-								Log.i(getString(R.string.log_tag_name),
-										"Demande de vote réussi.");
-								Toast.makeText(IncidentsEnCoursActivity.this,
-										R.string.msg_vote_OK,
-										Toast.LENGTH_SHORT).show();
-								startGetIncidentsFromServiceAsync(mCurrentScope);
-							} else {
-								Log.i(getString(R.string.log_tag_name) + " "
-										+ TAG_ACTIVITY,
-										"Echec de la demande de vote.");
-								Toast.makeText(IncidentsEnCoursActivity.this,
-										R.string.msg_vote_KO,
-										Toast.LENGTH_SHORT).show();
-							}
+						else {
+							setIncidents(incidentsService);
 						}
-					});
+					
+						if(loadingDialog != null && loadingDialog.isShowing())
+							loadingDialog.dismiss();
+						
+						Log.i(getString(R.string.log_tag_name),
+								"Chargement des incidents réussi.");
+					} catch (Exception e) {
+						Log.e(getString(R.string.log_tag_name),
+								"Problème de chargement des incidents",
+								e);
+						AlertDialog.Builder builder = new AlertDialog.Builder(
+								IncidentsEnCoursActivity.this);
+						builder.setMessage(
+								getString(R.string.msg_incident_en_cours_list_load_incidents_KO))
+								.setCancelable(false)
+								.setPositiveButton(
+										"Ok",
+										new DialogInterface.OnClickListener() {
+											public void onClick(
+													DialogInterface dialog,
+													int id) {
+											}
+										});
+						builder.show();
+					}
+				}
+			};
+			mBoundService.addGetIncidentsListener(getIncidentsEnCoursListener);
 
-			mBoundService
-					.addGetFavorisListener(new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
-						@Override
-						public void dataChanged(List<LigneModel> lignes) {
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Retour de demande de chargement des favoris.");
+			voteIncidentListener = new IIncidentsTransportsBackgroundServiceVoteIncidentListener() {
 
-							if (lignesFavoris != null) {
-								lignesFavoris.clear();
-							}
+				@Override
+				public void dataChanged(boolean voteSent) {
+					Log.i(getString(R.string.log_tag_name) + " "
+							+ TAG_ACTIVITY,
+							"Retour de demande de vote.");
+					if (voteSent) {
+						Log.i(getString(R.string.log_tag_name),
+								"Demande de vote réussi.");
+						Toast.makeText(IncidentsEnCoursActivity.this,
+								R.string.msg_vote_OK,
+								Toast.LENGTH_SHORT).show();
+						startGetIncidentsFromServiceAsync(mCurrentScope);
+					} else {
+						Log.i(getString(R.string.log_tag_name) + " "
+								+ TAG_ACTIVITY,
+								"Echec de la demande de vote.");
+						Toast.makeText(IncidentsEnCoursActivity.this,
+								R.string.msg_vote_KO,
+								Toast.LENGTH_SHORT).show();
+					}
+				}
+			};
+			mBoundService.addVoteIncidentListener(voteIncidentListener);
 
-							if (lignes != null && lignes.size() > 0) {
-								Log.d(getString(R.string.log_tag_name) + " "
-										+ TAG_ACTIVITY, "Chargement de "
-										+ lignes.size() + " favoris.");
-								lignesFavoris = new ArrayList<LigneModel>();
-								lignesFavoris.addAll(lignes);
-								Log.d(getString(R.string.log_tag_name) + " "
-										+ TAG_ACTIVITY,
-										"Fin de chargement des favoris.");
-							}
+			getFavorisListener = new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
+				@Override
+				public void dataChanged(List<LigneModel> lignes) {
+					Log.i(getString(R.string.log_tag_name) + " "
+							+ TAG_ACTIVITY,
+							"Retour de demande de chargement des favoris.");
 
-							startGetIncidentsFromServiceAsync(mCurrentScope);
-						}
-					});
+					if (lignesFavoris != null) {
+						lignesFavoris.clear();
+					}
+
+					if (lignes != null && lignes.size() > 0) {
+						Log.d(getString(R.string.log_tag_name) + " "
+								+ TAG_ACTIVITY, "Chargement de "
+								+ lignes.size() + " favoris.");
+						lignesFavoris = new ArrayList<LigneModel>();
+						lignesFavoris.addAll(lignes);
+						Log.d(getString(R.string.log_tag_name) + " "
+								+ TAG_ACTIVITY,
+								"Fin de chargement des favoris.");
+					}
+
+					startGetIncidentsFromServiceAsync(mCurrentScope);
+				}
+			};
+			mBoundService.addGetFavorisListener(getFavorisListener);
 
 			mBoundService.startGetFavorisAsync();
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-		}
+			mBoundService.removeGetIncidentsListener(getIncidentsEnCoursListener);
+			mBoundService.removeVoteIncidentListener(voteIncidentListener);
+			mBoundService.removeGetFavorisListener(getFavorisListener);
+			mBoundService = null;
+;		}
 	};
 	
 	@Override
-	protected void onPause() {
-		super.onPause();
+	protected void onDestroy() {
+		super.onDestroy();
 		
 		if(loadingDialog != null) {
 			loadingDialog.dismiss();
-		}
+		}		
+		
+		unbindService(conn);
 	}
 }
