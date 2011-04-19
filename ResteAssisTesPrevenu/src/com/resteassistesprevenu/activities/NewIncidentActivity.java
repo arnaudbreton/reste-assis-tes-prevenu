@@ -18,17 +18,20 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
-import com.resteassistesprevenu.model.LigneModelService;
 import com.resteassistesprevenu.model.adapters.ImageNumLineSpinnerListAdapter;
 import com.resteassistesprevenu.model.adapters.ImageTypeLineSpinnerListAdapter;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
@@ -71,6 +74,16 @@ public class NewIncidentActivity extends BaseActivity {
 	private ImageTypeLineSpinnerListAdapter mImgTypeLignesAdapter;
 
 	/**
+	 * RadioButton pour filtrer uniquement par favoris
+	 */
+	private RadioButton radioFavoris;
+
+	/**
+	 * RadioButton pour afficher toutes les lignes
+	 */
+	private RadioButton radioAll;
+
+	/**
 	 * Texte contenant la raison
 	 */
 	private EditText mTxtRaison;
@@ -94,34 +107,111 @@ public class NewIncidentActivity extends BaseActivity {
 	 * Ensemble des types lignes affichés
 	 */
 	private List<String> typeLignes;
-	
-	
+
+	/**
+	 * Le gestionnaire de connexion au service
+	 */
+	private ServiceIncidentConnection conn;
+	/**
+	 * Listener de récupération des types de ligne
+	 */
+	private IIncidentsTransportsBackgroundServiceGetTypeLignesListener getTypeLignesListener;
+
+	/**
+	 * Listener de récupération des lignes
+	 */
+	private IIncidentsTransportsBackgroundServiceGetLignesListener getLignesListener;
+
+	/**
+	 * Listener de récupération des favoris
+	 */
+	private IIncidentsTransportsBackgroundServiceGetFavorisListener getFavorisListener;
+
+	/**
+	 * Listener de création d'un incident
+	 */
+	private IIncidentsTransportsBackgroundServiceReportNewIncidentListener reportNewIncidentListener;
+
+	/**
+	 * Indicateur de filtre par favoris
+	 */
+	private boolean isFavorisFiltered;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_incident_view);
-		
-		startAd();
 
-		mSpinTypeLignes = (Spinner) this.findViewById(R.id.spinnerTypeLigne);
+		super.startAd();
+
+		this.lignes = new ArrayList<LigneModel>();
 		this.typeLignes = new ArrayList<String>();
-		mImgTypeLignesAdapter = new ImageTypeLineSpinnerListAdapter(
+
+		this.isFavorisFiltered = true;
+
+		this.radioFavoris = (RadioButton) this.findViewById(R.id.radioFavoris);
+		this.radioFavoris.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				isFavorisFiltered = true;
+				mBoundService.startGetFavorisAsync();
+			}
+		});
+
+		this.radioAll = (RadioButton) this.findViewById(R.id.radioAll);
+		this.radioAll.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				isFavorisFiltered = false;
+				mBoundService.startGetTypeLignesAsync();
+			}
+		});
+
+		this.mSpinTypeLignes = (Spinner) this
+				.findViewById(R.id.spinnerTypeLigne);
+		this.mImgTypeLignesAdapter = new ImageTypeLineSpinnerListAdapter(
 				NewIncidentActivity.this, R.layout.new_incident_view,
 				this.typeLignes);
-		mSpinTypeLignes.setAdapter(mImgTypeLignesAdapter);
+		this.mSpinTypeLignes.setAdapter(mImgTypeLignesAdapter);
 
-		mSpinLignes = (Spinner) this.findViewById(R.id.spinnerNumeroLigne);
-		this.lignes = new ArrayList<LigneModel>();
-		mImgLignesAdapter = new ImageNumLineSpinnerListAdapter(
+		this.mSpinLignes = (Spinner) this.findViewById(R.id.spinnerNumeroLigne);
+		this.mImgLignesAdapter = new ImageNumLineSpinnerListAdapter(
 				NewIncidentActivity.this, R.layout.new_incident_view,
 				this.lignes);
-		mSpinLignes.setAdapter(mImgLignesAdapter);
+		this.mSpinLignes.setAdapter(mImgLignesAdapter);
 
-		mTxtRaison = (EditText) this.findViewById(R.id.txtRaison);
+		this.mSpinTypeLignes
+				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+					@Override
+					public void onItemSelected(AdapterView<?> parent,
+							View arg1, int arg2, long arg3) {
+						Log.i(getString(R.string.log_tag_name) + " "
+								+ TAG_ACTIVITY,
+								"Chargement des lignes du type : "
+										+ parent.getSelectedItem().toString());
+						String typeLigne = mImgTypeLignesAdapter
+								.getItem(mSpinTypeLignes
+										.getSelectedItemPosition());
 
+						if (isFavorisFiltered) {
+							mImgLignesAdapter.getFilter().filter(typeLigne);
+						} else {
+							mBoundService.startGetLignesAsync(typeLigne);
+						}
+					}
 
-		mBtnRapporter = (Button) this.findViewById(R.id.btnRapporterIncident);
-		mBtnRapporter.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onNothingSelected(AdapterView<?> arg0) {
+					}
+				});
+
+		this.mTxtRaison = (EditText) this.findViewById(R.id.txtRaison);
+
+		this.mBtnRapporter = (Button) this
+				.findViewById(R.id.btnRapporterIncident);
+		this.mBtnRapporter.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -131,12 +221,15 @@ public class NewIncidentActivity extends BaseActivity {
 
 				if (mSpinTypeLignes != null
 						&& mSpinTypeLignes.getSelectedItem() != null) {
-					typeLigne = mImgTypeLignesAdapter.getItem(mSpinTypeLignes.getSelectedItemPosition());
+					typeLigne = mImgTypeLignesAdapter.getItem(mSpinTypeLignes
+							.getSelectedItemPosition());
 				}
 
 				if (mSpinLignes != null
 						&& mSpinLignes.getSelectedItem() != null) {
-					numLigne = mImgLignesAdapter.getItem(mSpinLignes.getSelectedItemPosition()).getNumLigne();
+					numLigne = mImgLignesAdapter.getItem(
+							mSpinLignes.getSelectedItemPosition())
+							.getNumLigne();
 				}
 
 				if (mTxtRaison != null) {
@@ -174,9 +267,11 @@ public class NewIncidentActivity extends BaseActivity {
 
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 				"Début de lien au service.");
+
+		this.conn = new ServiceIncidentConnection();
 		bindService(
 				new Intent(this, IncidentsTransportsBackgroundService.class),
-				new ServiceIncidentConnection(), Context.BIND_AUTO_CREATE);
+				this.conn, Context.BIND_AUTO_CREATE);
 	}
 
 	private class ServiceIncidentConnection implements ServiceConnection {
@@ -188,129 +283,138 @@ public class NewIncidentActivity extends BaseActivity {
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 					.getService();
 
-			mBoundService
-					.addGetTypeLignesListener(new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
-						@Override
-						public void dataChanged(List<String> data) {
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Chargement des types de lignes");
+			getTypeLignesListener = new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
+				@Override
+				public void dataChanged(List<String> data) {
+					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+							"Chargement des types de lignes");
 
-							typeLignes.clear();
-							typeLignes.addAll(data);
-							mImgTypeLignesAdapter.notifyDataSetChanged();
-							mSpinTypeLignes.setAdapter(mImgTypeLignesAdapter);
+					typeLignes.clear();
+					typeLignes.addAll(data);
+					mImgTypeLignesAdapter.notifyDataSetChanged();
+					
+					mSpinTypeLignes.setSelection(0);
+					mBoundService.startGetLignesAsync(LigneModel.TYPE_LIGNE_RER);
+				}
+			};
+			mBoundService.addGetTypeLignesListener(getTypeLignesListener);
 
-							mBoundService
-									.startGetLignesAsync(LigneModelService.TYPE_LIGNE_RER);
-						}
-					});
-
-			mBoundService
-					.addGetLignesListener(new IIncidentsTransportsBackgroundServiceGetLignesListener() {
-						@Override
-						public void dataChanged(List<LigneModel> data) {
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Début de chargement des lignes.");
-
-							lignes.clear();
-							lignes.addAll(data);
-							mImgLignesAdapter.notifyDataSetChanged();
-							
-							mSpinLignes.setSelection(0);
-
-							mSpinTypeLignes
-									.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-										@Override
-										public void onItemSelected(
-												AdapterView<?> parent,
-												View arg1, int arg2, long arg3) {
-											Log.i(getString(R.string.log_tag_name)
-													+ " " + TAG_ACTIVITY,
-													"Chargement des lignes du type : "
-															+ parent.getSelectedItem()
-																	.toString());
-											mBoundService
-													.startGetLignesAsync(mImgTypeLignesAdapter
-															.getItem(mSpinTypeLignes
-																	.getSelectedItemPosition()));
-										}
-
-										@Override
-										public void onNothingSelected(
-												AdapterView<?> arg0) {
-										}
-									});
-
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Fin de chargement des lignes.");
-
-						}
-
-					});
-
-			mBoundService
-					.addReportNewIncidentListener(new IIncidentsTransportsBackgroundServiceReportNewIncidentListener() {
-						@Override
-						public void dataChanged(String idIncident) {
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Début de création d'un incident.");
-							if (mPdRapporter != null) {
-								mPdRapporter.dismiss();
+			getFavorisListener = new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
+				@Override
+				public void dataChanged(List<LigneModel> lignesData) {
+					// S'il existe des favoris, on les affiche
+					if (lignesData.size() > 0) {
+						typeLignes.clear();
+						for (LigneModel ligne : lignesData) {
+							if (!typeLignes.contains(ligne.getTypeLigne())) {
+								typeLignes.add(ligne.getTypeLigne());
 							}
-
-							if (idIncident == null) {
-								Log.e(getString(R.string.log_tag_name) + " "
-										+ TAG_ACTIVITY,
-										"Erreur de création de l'incident : numéro null.");
-								AlertDialog.Builder builder = new AlertDialog.Builder(
-										NewIncidentActivity.this);
-								builder.setMessage(
-										getString(R.string.msg_report_new_incident_KO))
-										.setCancelable(false)
-										.setPositiveButton(
-												"Ok",
-												new DialogInterface.OnClickListener() {
-													public void onClick(
-															DialogInterface dialog,
-															int id) {
-													}
-												});
-								builder.show();
-							} else {
-								Log.i(getString(R.string.log_tag_name) + " "
-										+ TAG_ACTIVITY,
-										"Création de l'incident OK.");
-								Toast.makeText(
-										NewIncidentActivity.this,
-										String.format(getString(
-												R.string.msg_report_new_incident_OK,
-												idIncident)), Toast.LENGTH_LONG)
-										.show();
-								NewIncidentActivity.this.setResult(RESULT_OK);
-								NewIncidentActivity.this.finish();
-							}
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Fin de création d'un incident.");
 						}
-					});
 
-			mBoundService.startGetTypeLignesAsync();
+						lignes.clear();
+						lignes.addAll(lignesData);						
+						mImgLignesAdapter.notifyDataSetChanged();
+						
+						mImgTypeLignesAdapter.notifyDataSetChanged();
+						mImgLignesAdapter.getFilter().filter(typeLignes.get(0));
+						
+						mSpinTypeLignes.setSelection(0);
+						mSpinLignes.setSelection(0);
+					}
+					// Sinon on affiche toutes les lignes
+					else {
+						LinearLayout layout = (LinearLayout) findViewById(R.id.layout_radioGroupNewIncident);
+						layout.setVisibility(View.GONE);
+						mBoundService.startGetTypeLignesAsync();
+					}
+				}
+			};
+			mBoundService.addGetFavorisListener(getFavorisListener);
+
+			getLignesListener = new IIncidentsTransportsBackgroundServiceGetLignesListener() {
+				@Override
+				public void dataChanged(List<LigneModel> data) {
+					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+							"Début de chargement des lignes.");
+
+					lignes.clear();
+					lignes.addAll(data);
+
+					mImgLignesAdapter.getFilter().filter("");
+					mImgTypeLignesAdapter.notifyDataSetChanged();
+					mImgLignesAdapter.notifyDataSetChanged();					
+					
+					mSpinLignes.setSelection(0);
+
+					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+							"Fin de chargement des lignes.");
+
+				}
+
+			};
+			mBoundService.addGetLignesListener(getLignesListener);
+
+			reportNewIncidentListener = new IIncidentsTransportsBackgroundServiceReportNewIncidentListener() {
+				@Override
+				public void dataChanged(String idIncident) {
+					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+							"Début de création d'un incident.");
+					if (mPdRapporter != null) {
+						mPdRapporter.dismiss();
+					}
+
+					if (idIncident == null) {
+						Log.e(getString(R.string.log_tag_name) + " "
+								+ TAG_ACTIVITY,
+								"Erreur de création de l'incident : numéro null.");
+						AlertDialog.Builder builder = new AlertDialog.Builder(
+								NewIncidentActivity.this);
+						builder.setMessage(
+								getString(R.string.msg_report_new_incident_KO))
+								.setCancelable(false)
+								.setPositiveButton("Ok",
+										new DialogInterface.OnClickListener() {
+											public void onClick(
+													DialogInterface dialog,
+													int id) {
+											}
+										});
+						builder.show();
+					} else {
+						Log.i(getString(R.string.log_tag_name) + " "
+								+ TAG_ACTIVITY, "Création de l'incident OK.");
+						Toast.makeText(
+								NewIncidentActivity.this,
+								String.format(getString(
+										R.string.msg_report_new_incident_OK,
+										idIncident)), Toast.LENGTH_LONG).show();
+						NewIncidentActivity.this.setResult(RESULT_OK);
+						NewIncidentActivity.this.finish();
+					}
+					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
+							"Fin de création d'un incident.");
+				}
+			};
+			mBoundService
+					.addReportNewIncidentListener(reportNewIncidentListener);
+
+			// mBoundService.startGetTypeLignesAsync();
+			mBoundService.startGetFavorisAsync();
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
+			mBoundService.removeGetTypeLignesListener(getTypeLignesListener);
+			mBoundService.removeGetLignesListener(getLignesListener);
+			mBoundService
+					.removeReportNewIncidentListener(reportNewIncidentListener);
+			mBoundService = null;
 		}
 	};
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
+	protected void onDestroy() {
+		super.onDestroy();
 
-		mSpinTypeLignes.setOnItemSelectedListener(null);
+		unbindService(conn);
 	}
 }

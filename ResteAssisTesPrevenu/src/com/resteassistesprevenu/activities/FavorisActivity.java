@@ -48,9 +48,31 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 	 */
 	private boolean isModified;
 	
+	/**
+	 * ExpandableListView
+	 */
 	private ExpandableListView mExpandableListView;
+	
+	/**
+	 * Bouton de validation
+	 */
 	private Button mBtnOK;
-
+	
+	/**
+	 * Le gestionnaire de connexion
+	 */
+	private IncidentServiceConnection conn;
+	
+	/**
+	 * Listener de récupération des types de lignes
+	 */
+	private IIncidentsTransportsBackgroundServiceGetTypeLignesListener getTypeLignesListener;
+	
+	/**
+	 * Listener de récupération des lignes
+	 */
+	private IIncidentsTransportsBackgroundServiceGetLignesListener getLignesListener;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -66,8 +88,9 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 		
 		mExpandableListView.setAdapter(mAdapter);
 
+		conn = new IncidentServiceConnection();
 		bindService(new Intent(getApplicationContext(),
-				IncidentsTransportsBackgroundService.class), new IncidentServiceConnection(),
+				IncidentsTransportsBackgroundService.class), conn ,
 				Context.BIND_AUTO_CREATE);
 		
 		mBtnOK.setOnClickListener(this);
@@ -110,62 +133,64 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 					.getService();
 
-			mBoundService
-					.addGetTypeLignesListener(new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
-						@Override
-						public void dataChanged(List<String> data) {
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Chargement des types de lignes");
-							for (String typeLigne : data) {
-								mAdapter.getTypeLignesGroups().add(
-										typeLigne);
-								mAdapter.getLignesChildrenGroups().add(
-										new ArrayList<LigneModel>());
-								mBoundService
-										.startGetLignesAsync(typeLigne);
-							}
-							mAdapter.notifyDataSetChanged();
+			getTypeLignesListener = new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
+					@Override
+					public void dataChanged(List<String> data) {
+						Log.i(getString(R.string.log_tag_name) + " "
+								+ TAG_ACTIVITY,
+								"Chargement des types de lignes");
+						for (String typeLigne : data) {
+							mAdapter.getTypeLignesGroups().add(
+									typeLigne);
+							mAdapter.getLignesChildrenGroups().add(
+									new ArrayList<LigneModel>());
+							mBoundService
+									.startGetLignesAsync(typeLigne);
 						}
-					});
+						mAdapter.notifyDataSetChanged();
+					}
+				};
+			mBoundService.addGetTypeLignesListener(getTypeLignesListener);
 
-			mBoundService
-					.addGetLignesListener(new IIncidentsTransportsBackgroundServiceGetLignesListener() {
-						@Override
-						public void dataChanged(List<LigneModel> lignesModel) {
-							Log.i(getString(R.string.log_tag_name) + " "
-									+ TAG_ACTIVITY,
-									"Chargement des lignes.");
-							if (lignesModel.size() > 0) {
-								Log.i(getString(R.string.log_tag_name)
-										+ " " + TAG_ACTIVITY,
-										"Chargement de "
-												+ lignesModel.size()
-												+ " lignes.");
-								int indexType = mAdapter
-										.getTypeLignesGroups().indexOf(
-												lignesModel.get(0)
-														.getTypeLigne());
+			getLignesListener = new IIncidentsTransportsBackgroundServiceGetLignesListener() {
+				@Override
+				public void dataChanged(List<LigneModel> lignesModel) {
+					Log.i(getString(R.string.log_tag_name) + " "
+							+ TAG_ACTIVITY,
+							"Chargement des lignes.");
+					if (lignesModel.size() > 0) {
+						Log.i(getString(R.string.log_tag_name)
+								+ " " + TAG_ACTIVITY,
+								"Chargement de "
+										+ lignesModel.size()
+										+ " lignes.");
+						int indexType = mAdapter
+								.getTypeLignesGroups().indexOf(
+										lignesModel.get(0)
+												.getTypeLigne());
 
-								if (mAdapter.getLignesChildrenGroups()
-										.get(indexType).size() == 0) {
-									List<LigneModel> lignes = mAdapter
-											.getLignesChildrenGroups().get(
-													indexType);
+						if (mAdapter.getLignesChildrenGroups()
+								.get(indexType).size() == 0) {
+							List<LigneModel> lignes = mAdapter
+									.getLignesChildrenGroups().get(
+											indexType);
 
-									lignes.addAll(lignesModel);
-								}
-
-								mAdapter.notifyDataSetChanged();
-							}
+							lignes.addAll(lignesModel);
 						}
-					});
+
+						mAdapter.notifyDataSetChanged();
+					}
+				}
+			};
+			mBoundService.addGetLignesListener(getLignesListener);
 
 			mBoundService.startGetTypeLignesAsync();
-
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
+			mBoundService.removeGetLignesListener(getLignesListener);
+			mBoundService.removeGetTypeLignesListener(getTypeLignesListener);
+			mBoundService = null;
 		}
 	}
 
@@ -177,4 +202,11 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 		
 		this.finish();		
 	};
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		unbindService(conn);
+	}
 }
