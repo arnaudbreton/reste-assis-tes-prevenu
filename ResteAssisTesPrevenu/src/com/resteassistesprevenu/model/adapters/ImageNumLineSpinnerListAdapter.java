@@ -115,7 +115,7 @@ public class ImageNumLineSpinnerListAdapter extends ArrayAdapter<LigneModel> {
 			filter = new TypeLigneFilter();
 		return filter;
 	}
-
+	
 	private class TypeLigneFilter extends Filter {
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {

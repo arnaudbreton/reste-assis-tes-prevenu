@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,12 +27,24 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	private Context ctx;
 	private LayoutInflater inflater;	
 
-	public FavorisExpandableListAdapter(Context ctx) {
+	/**
+	 * Dernier groupe ouvert
+	 */
+	private int lastExpandedGroupPosition;
+	
+	/**
+	 * ExpandableListView
+	 */
+	private ExpandableListView expandableListView;
+	
+	public FavorisExpandableListAdapter(Context ctx, ExpandableListView v) {
 		this.ctx = ctx;
 		this.inflater = LayoutInflater.from(ctx);
 		
 		this.typeLignesGroups = new ArrayList<String>();
 		this.lignesChildrenGroups = new ArrayList<List<LigneModel>>();
+		
+		this.expandableListView = v;
 	}
 
 
@@ -191,4 +204,15 @@ public class FavorisExpandableListAdapter extends BaseExpandableListAdapter {
 	public List<List<LigneModel>> getLignesChildrenGroups() {
 		return lignesChildrenGroups;
 	}
+	
+	public void onGroupExpanded(int groupPosition){
+        //collapse the old expanded group, if not the same
+        //as new group to expand
+        if(groupPosition != lastExpandedGroupPosition){
+        	this.expandableListView.collapseGroup(lastExpandedGroupPosition);
+        }
+
+        super.onGroupExpanded(groupPosition);           
+        lastExpandedGroupPosition = groupPosition;
+    }
 }
