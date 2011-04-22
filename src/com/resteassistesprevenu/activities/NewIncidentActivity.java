@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -264,10 +263,14 @@ public class NewIncidentActivity extends BaseActivity {
 				}
 			}
 		});
-
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-				"Début de lien au service.");
-
+		"Début de lien au service.");
 		this.conn = new ServiceIncidentConnection();
 		bindService(
 				new Intent(this, IncidentsTransportsBackgroundService.class),
@@ -418,8 +421,8 @@ public class NewIncidentActivity extends BaseActivity {
 	};
 
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onStop() {
+		super.onStop();
 
 		unbindService(conn);
 	}

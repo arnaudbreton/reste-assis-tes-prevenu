@@ -86,16 +86,21 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 		mExpandableListView = (ExpandableListView) findViewById(R.id.expandableFavorisView);
 		mAdapter = new FavorisExpandableListAdapter(FavorisActivity.this, mExpandableListView);
 		
-		mExpandableListView.setAdapter(mAdapter);
-
-		conn = new IncidentServiceConnection();
-		bindService(new Intent(getApplicationContext(),
-				IncidentsTransportsBackgroundService.class), conn ,
-				Context.BIND_AUTO_CREATE);
+		mExpandableListView.setAdapter(mAdapter);	
 		
 		mBtnOK.setOnClickListener(this);
 	
 		mExpandableListView.setOnChildClickListener(this);
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		
+		conn = new IncidentServiceConnection();
+		bindService(new Intent(getApplicationContext(),
+				IncidentsTransportsBackgroundService.class), conn ,
+				Context.BIND_AUTO_CREATE);
 	}
 
 	public boolean onChildClick(ExpandableListView parent, View v,
@@ -204,8 +209,8 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 	};
 	
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onStop() {
+		super.onStop();
 		
 		unbindService(conn);
 	}

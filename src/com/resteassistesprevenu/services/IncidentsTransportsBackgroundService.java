@@ -277,6 +277,13 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		super.onDestroy();
 
 		this.mBinder = null;
+		
+		this.getFavorislisteners.clear();
+		this.getIncidentslisteners.clear();
+		this.getLigneslisteners.clear();
+		this.getReportNewIncidentlisteners.clear();
+		this.getTypeLigneslisteners.clear();
+		this.getVoteIncidentlisteners.clear();
 	}
 
 	private String getIncidentsEnCoursFromService(String scope)
@@ -743,6 +750,35 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		} else {
 			this.urlService = SERVICE_URL_BASE_PRE_PRODUCTION;
 		}
+	}
+	
+	@Override
+	public boolean onUnbind(Intent intent) {
+		if(this.getFavorislisteners.contains(intent)) {
+			this.getFavorislisteners.remove(intent);
+		}
+		
+		if(this.getIncidentslisteners.contains(intent)) {
+			this.getIncidentslisteners.remove(intent);
+		}
+		
+		if(this.getLigneslisteners.contains(intent)) {
+			this.getLigneslisteners.remove(intent);
+		}
+		
+		if(this.getReportNewIncidentlisteners.contains(intent)) {
+			this.getReportNewIncidentlisteners.remove(intent);
+		}
+		
+		if(this.getTypeLigneslisteners.contains(intent)) {
+			this.getTypeLigneslisteners.remove(intent);
+		}
+		
+		if(this.getVoteIncidentlisteners.contains(intent)) {
+			this.getVoteIncidentlisteners.remove(intent);
+		}
+		
+		return true;
 	}
 	
 	@Override

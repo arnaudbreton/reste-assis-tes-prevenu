@@ -54,6 +54,11 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	/**
 	 * Ensemble des incidents affichés
 	 */
+	private List<IncidentModel> incidentsServiceDisplay;
+	
+	/**
+	 * Liste des incidents chargés
+	 */
 	private List<IncidentModel> incidentsService;
 
 	/**
@@ -152,8 +157,14 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		initialize();
-	    
+		initialize();   
+	}
+	
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+		
 		this.conn = new ServiceIncidentConnection();
 		bindService(new Intent(getApplicationContext(),
 				IncidentsTransportsBackgroundService.class),
@@ -177,6 +188,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 
 		this.mTxtAucunIncident = (TextView) findViewById(R.id.txtAucunIncident);
 
+		this.incidentsServiceDisplay = new ArrayList<IncidentModel>();
 		this.incidentsService = new ArrayList<IncidentModel>();
 
 		this.mCurrentScope = IncidentModel.SCOPE_HOUR;
@@ -186,7 +198,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		startAd();
 
 		this.mAdapter = new IncidentModelArrayAdapter(this,
-				R.id.listViewIncidentEnCours, this.incidentsService, this);
+				R.id.listViewIncidentEnCours, this.incidentsServiceDisplay, this);
 		((android.widget.ListView) this
 				.findViewById(R.id.listViewIncidentEnCours))
 				.setAdapter(mAdapter);
@@ -231,7 +243,8 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			@Override
 			public void onClick(View v) {
 				mModeChargement = ModeChargement.IGNORER_FAVORIS;
-				startGetIncidentsFromServiceAsync(mCurrentScope);
+				//startGetIncidentsFromServiceAsync(mCurrentScope);
+				setIncidents(incidentsService);
 			}
 		});
 	}
@@ -340,7 +353,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	 * @return the incidents
 	 */
 	public List<IncidentModel> getIncidents() {
-		return incidentsService;
+		return incidentsServiceDisplay;
 	}
 
 	/**
@@ -348,10 +361,11 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	 *            the incidents to set
 	 */
 	public void setIncidents(List<IncidentModel> incidents) {
-		if (this.incidentsService == null) {
-			this.incidentsService = new ArrayList<IncidentModel>();
+		if (this.incidentsServiceDisplay == null) {
+			this.incidentsServiceDisplay = new ArrayList<IncidentModel>();
 		}
 
+		this.incidentsServiceDisplay.clear();
 		this.incidentsService.clear();
 		
 		if (incidents != null && incidents.size() > 0) {		
@@ -363,11 +377,13 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 
 				for (IncidentModel incident : incidents) {
 					if (this.lignesFavoris.contains(incident.getLigne())) {
-						this.incidentsService.add(incident);
+						this.incidentsServiceDisplay.add(incident);
 					}
 				}
 
-				if (this.incidentsService.size() == 0) {
+				// Si moins d'incidents que ceux du service, on donne la possibilité de tout voir
+				if (this.incidentsServiceDisplay.size() < incidents.size()) {
+					this.incidentsService.addAll(incidents);
 					this.mTxtAucunIncident
 							.setText(getString(R.string.msg_no_incident_favoris));
 					this.mBtnIgnorerFavoris.setVisibility(View.VISIBLE);
@@ -375,9 +391,9 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			} else {
 				Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 						"Aucun favoris");
-				this.incidentsService.addAll(incidents);
+				this.incidentsServiceDisplay.addAll(this.incidentsService);
 				
-				if (this.incidentsService.size() == 0) {
+				if (this.incidentsServiceDisplay.size() == 0) {
 					this.mTxtAucunIncident.setText(getString(R.string.msg_no_incident));
 				}
 			}
@@ -385,7 +401,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			this.mTxtAucunIncident.setText(getString(R.string.msg_no_incident));
 		}
 
-		if (this.incidentsService.size() == 0) {
+		if (this.incidentsServiceDisplay.size() == 0) {
 			this.mTxtAucunIncident.setVisibility(View.VISIBLE);
 		} else {
 			this.mTxtAucunIncident.setVisibility(View.GONE);
@@ -572,8 +588,8 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	};
 	
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onStop() {
+		super.onStop();
 		
 		if(loadingDialog != null) {
 			loadingDialog.dismiss();
