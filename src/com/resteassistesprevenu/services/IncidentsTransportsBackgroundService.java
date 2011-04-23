@@ -278,12 +278,23 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 		this.mBinder = null;
 		
-		this.getFavorislisteners.clear();
-		this.getIncidentslisteners.clear();
-		this.getLigneslisteners.clear();
-		this.getReportNewIncidentlisteners.clear();
-		this.getTypeLigneslisteners.clear();
-		this.getVoteIncidentlisteners.clear();
+		if(this.getFavorislisteners != null) 
+			this.getFavorislisteners.clear();
+		
+		if(this.getIncidentslisteners != null)
+			this.getIncidentslisteners.clear();
+		
+		if(this.getLigneslisteners != null)
+			this.getLigneslisteners.clear();
+		
+		if(this.getReportNewIncidentlisteners != null)
+			this.getReportNewIncidentlisteners.clear();
+		
+		if(this.getTypeLigneslisteners != null)
+			this.getTypeLigneslisteners.clear();
+		
+		if(this.getVoteIncidentlisteners != null)
+			this.getVoteIncidentlisteners.clear();
 	}
 
 	private String getIncidentsEnCoursFromService(String scope)
@@ -754,27 +765,27 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	
 	@Override
 	public boolean onUnbind(Intent intent) {
-		if(this.getFavorislisteners.contains(intent)) {
+		if(this.getFavorislisteners != null && this.getFavorislisteners.contains(intent)) {
 			this.getFavorislisteners.remove(intent);
 		}
 		
-		if(this.getIncidentslisteners.contains(intent)) {
+		if(this.getIncidentslisteners != null && this.getIncidentslisteners.contains(intent)) {
 			this.getIncidentslisteners.remove(intent);
 		}
 		
-		if(this.getLigneslisteners.contains(intent)) {
+		if(this.getLigneslisteners != null && this.getLigneslisteners.contains(intent)) {
 			this.getLigneslisteners.remove(intent);
 		}
 		
-		if(this.getReportNewIncidentlisteners.contains(intent)) {
+		if(this.getReportNewIncidentlisteners != null && this.getReportNewIncidentlisteners.contains(intent)) {
 			this.getReportNewIncidentlisteners.remove(intent);
 		}
 		
-		if(this.getTypeLigneslisteners.contains(intent)) {
+		if(this.getTypeLigneslisteners != null && this.getTypeLigneslisteners.contains(intent)) {
 			this.getTypeLigneslisteners.remove(intent);
 		}
 		
-		if(this.getVoteIncidentlisteners.contains(intent)) {
+		if(this.getVoteIncidentlisteners != null && this.getVoteIncidentlisteners.contains(intent)) {
 			this.getVoteIncidentlisteners.remove(intent);
 		}
 		

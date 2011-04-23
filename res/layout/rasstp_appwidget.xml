@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:orientation="horizontal" android:background="#FFFFFF">
+	android:layout_width="fill_parent" android:layout_height="wrap_content"
+	android:orientation="horizontal" android:background="@drawable/widget_bg_4x1"
+	android:layout_gravity="center">
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:orientation="horizontal">
+		android:orientation="horizontal" android:layout_marginTop="5dip"
+		android:padding="10dip">
 		<ImageButton android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:src="@drawable/ic_logo" android:background="@null" />
+			android:layout_height="wrap_content" android:src="@drawable/ic_logo"
+			android:background="@null" />
 		<Button android:layout_width="wrap_content"
 			android:layout_height="fill_parent" android:text="+" />
-	</LinearLayout>
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:orientation="vertical">
+
 		<include android:id="@+id/incidentItemView" layout="@layout/incident_item_view" />
 	</LinearLayout>
 </LinearLayout>
