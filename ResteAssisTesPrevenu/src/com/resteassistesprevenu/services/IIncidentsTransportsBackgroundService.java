@@ -18,67 +18,42 @@ public interface IIncidentsTransportsBackgroundService {
 	/**
 	 * Récupération des incidents, asynchrone
 	 */
-	public void startGetIncidentsAsync(String scope);
-	
-	public void addGetIncidentsListener(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener);
-	public void removeGetIncidentsListener(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener);
-	
+	public void startGetIncidentsAsync(String scope, IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback);
 	
 	/**
 	 * Récupération des type de lignes, asynchrone
 	 */
-	public void startGetTypeLignesAsync();	
+	public void startGetTypeLignesAsync(IIncidentsTransportsBackgroundServiceGetTypeLignesListener callback);	
 
-	public void addGetTypeLignesListener(IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener);
-	public void removeGetTypeLignesListener(IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener);
-	
-	
 	/**
 	 * Récupération des lignes, asynchrone
 	 */
-	public void startGetLignesAsync(String typeLigne);
-	
-	public void addGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener);
-	public void removeGetLignesListener(IIncidentsTransportsBackgroundServiceGetLignesListener listener);
-	
+	public void startGetLignesAsync(String typeLigne, IIncidentsTransportsBackgroundServiceGetLignesListener callback);
+
 	/**
 	 * Création d'un incident, asynchrone
 	 * @param typeLigne
 	 * @param numLigne
 	 * @param raison
 	 */
-	public void startReportIncident(String typeLigne,String numLigne, String raison);
-	
-	public void addReportNewIncidentListener(IIncidentsTransportsBackgroundServiceReportNewIncidentListener listener);
-	public void removeReportNewIncidentListener(IIncidentsTransportsBackgroundServiceReportNewIncidentListener listener);
+	public void startReportIncident(String typeLigne,String numLigne, String raison, IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback);
 	
 	/**
 	 * Vote pour un incident, asynchrone
 	 * @param incidentId
 	 * @param action "plus","minus","end"
 	 */
-	public void startVoteIncident(int incidentId, IncidentAction action);
-	
-	public void addVoteIncidentListener(IIncidentsTransportsBackgroundServiceVoteIncidentListener listener);
-	public void removeVoteIncidentListener(IIncidentsTransportsBackgroundServiceVoteIncidentListener listener);
+	public void startVoteIncident(int incidentId, IncidentAction action, IIncidentsTransportsBackgroundServiceVoteIncidentListener callback);
 	
 	/** 
 	 * Enregistrement d'un favoris, asynchrone.
-	 * @return
 	 */
 	public void startRegisterFavoris(LigneModel ligne);
 	
 	/** 
 	 * Lecture des favoris, asynchrone.
-	 * @return
 	 */
-	/**
-	 * Récupération des favoris, asynchrone
-	 */
-	public void startGetFavorisAsync();
-	
-	public void addGetFavorisListener(IIncidentsTransportsBackgroundServiceGetFavorisListener listener);
-	public void removeGetFavorisListener(IIncidentsTransportsBackgroundServiceGetFavorisListener listener);
+	public void startGetFavorisAsync(IIncidentsTransportsBackgroundServiceGetFavorisListener callback);
 
 	/**
 	 * Indique si le service pointe sur la production

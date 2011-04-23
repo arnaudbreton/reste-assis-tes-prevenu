@@ -1,6 +1,7 @@
 package com.resteassistesprevenu.activities;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import android.app.Activity;
@@ -161,7 +162,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	/**
 	 * Durée de validité des données chargés (10 minutes)
 	 */
-	private static final int MAX_DATA_VALIDITY_PERIOD = 1;
+	private static final int MAX_DATA_VALIDITY_PERIOD = 10;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -231,7 +232,12 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			@Override
 			public void onClick(View v) {
 				mModeChargement = ModeChargement.NORMAL;
-				mCurrentScope = IncidentModel.SCOPE_JOUR;
+				
+				if (mCurrentScope != IncidentModel.SCOPE_JOUR) {
+					mCurrentScope = IncidentModel.SCOPE_JOUR;
+					lastLoadingTimestamp = 0;
+				}
+				
 				startGetIncidentsFromServiceAsync();
 			}
 		});
@@ -240,7 +246,12 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			@Override
 			public void onClick(View v) {
 				mModeChargement = ModeChargement.NORMAL;
-				mCurrentScope = IncidentModel.SCOPE_HOUR;
+
+				if (mCurrentScope != IncidentModel.SCOPE_HOUR) {
+					mCurrentScope = IncidentModel.SCOPE_HOUR;
+					lastLoadingTimestamp = 0;
+				}
+
 				startGetIncidentsFromServiceAsync();
 			}
 		});
@@ -248,8 +259,13 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		this.mBtnMinute.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mCurrentScope = IncidentModel.SCOPE_MINUTE;
 				mModeChargement = ModeChargement.NORMAL;
+
+				if (mCurrentScope != IncidentModel.SCOPE_MINUTE) {
+					lastLoadingTimestamp = 0;
+					mCurrentScope = IncidentModel.SCOPE_MINUTE;
+				}
+
 				startGetIncidentsFromServiceAsync();
 			}
 		});
@@ -448,7 +464,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		if (this.mBoundService != null) {
 			if (this.loadingDialog != null) {
 				loadingDialog.dismiss();
-			}		
+			}
 
 			this.mBtnIgnorerFavoris.setVisibility(View.GONE);
 			this.mTxtAucunIncident.setVisibility(View.GONE);
@@ -457,10 +473,11 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				showIncidents();
 			} else {
 				this.loadingDialog = ProgressDialog
-				.show(IncidentsEnCoursActivity.this,
-						"",
-						getString(R.string.msg_incident_en_cours_list_loading_incidents));
-				this.mBoundService.startGetIncidentsAsync(mCurrentScope);
+						.show(IncidentsEnCoursActivity.this,
+								"",
+								getString(R.string.msg_incident_en_cours_list_loading_incidents));
+				this.mBoundService.startGetIncidentsAsync(mCurrentScope,
+						getIncidentsEnCoursListener);
 			}
 		} else {
 			Toast.makeText(this,
@@ -475,7 +492,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 					"Fin activité Favoris : " + resultCode);
 			if (resultCode == Activity.RESULT_OK) {
-				mBoundService.startGetFavorisAsync();
+				mBoundService.startGetFavorisAsync(getFavorisListener);
 			}
 		} else if (requestCode == REQUEST_NEW_INCIDENT) {
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
@@ -503,7 +520,8 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					getString(R.string.msg_share_title)));
 		} else {
 			if (this.mBoundService != null) {
-				this.mBoundService.startVoteIncident(incident.getId(), action);
+				this.mBoundService.startVoteIncident(incident.getId(), action,
+						voteIncidentListener);
 			} else {
 				Toast.makeText(this,
 						R.string.msg_incident_en_cours_list_loading_incidents,
@@ -531,7 +549,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 									R.string.msg_incident_en_cours_list_load_incidents_KO,
 									Toast.LENGTH_LONG).show();
 						} else {
-							lastLoadingTimestamp = System.currentTimeMillis();
+							lastLoadingTimestamp = Calendar.getInstance().getTime().getTime();
 
 							IncidentsEnCoursActivity.this.incidentsService
 									.clear();
@@ -565,7 +583,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					}
 				}
 			};
-			mBoundService.addGetIncidentsListener(getIncidentsEnCoursListener);
 
 			voteIncidentListener = new IIncidentsTransportsBackgroundServiceVoteIncidentListener() {
 
@@ -589,7 +606,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					}
 				}
 			};
-			mBoundService.addVoteIncidentListener(voteIncidentListener);
 
 			getFavorisListener = new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
 				@Override
@@ -615,24 +631,30 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					startGetIncidentsFromServiceAsync();
 				}
 			};
-			mBoundService.addGetFavorisListener(getFavorisListener);
 
-			mBoundService.startGetFavorisAsync();
+			mBoundService.startGetFavorisAsync(getFavorisListener);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			mBoundService
-					.removeGetIncidentsListener(getIncidentsEnCoursListener);
-			mBoundService.removeVoteIncidentListener(voteIncidentListener);
-			mBoundService.removeGetFavorisListener(getFavorisListener);
 			mBoundService = null;
-			;
 		}
 	};
 
-	private boolean isDataValid() {
-		return lastLoadingTimestamp != 0 && (lastLoadingTimestamp + MAX_DATA_VALIDITY_PERIOD * 60) < System
-				.currentTimeMillis();
+	private boolean isDataValid() {		
+		if(lastLoadingTimestamp > 0) {
+			Calendar c1 = Calendar.getInstance();
+			c1.setTimeInMillis(lastLoadingTimestamp);
+			c1.add(Calendar.MINUTE, MAX_DATA_VALIDITY_PERIOD);
+			
+			Calendar c2 = Calendar.getInstance();
+			c2.setTimeInMillis(System.currentTimeMillis());
+			
+			return c2.after(c1);
+		}
+		else {
+			return false;
+		}
+		
 	}
 
 	@Override

@@ -60,6 +60,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class LoadIncidentsAsyncTask extends
 			AsyncTask<String, Void, List<IncidentModel>> {
+		private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback;
+
+		public LoadIncidentsAsyncTask(
+				IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
+			this.callback = callback;
+		}
 
 		@Override
 		protected List<IncidentModel> doInBackground(String... params) {
@@ -76,7 +82,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected void onPostExecute(List<IncidentModel> result) {
 			super.onPostExecute(result);
-			fireIncidentsChanged(result);
+			this.callback.dataChanged(result);
 		}
 	}
 
@@ -86,6 +92,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class LoadTypeLignesAsyncTask extends
 			AsyncTask<Void, Void, List<String>> {
+		private IIncidentsTransportsBackgroundServiceGetTypeLignesListener callback;
+
+		public LoadTypeLignesAsyncTask(
+				IIncidentsTransportsBackgroundServiceGetTypeLignesListener callback) {
+			this.callback = callback;
+		}
 
 		@Override
 		protected List<String> doInBackground(Void... params) {
@@ -101,7 +113,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected void onPostExecute(List<String> result) {
 			super.onPostExecute(result);
-			fireTypeLignesChanged(result);
+			this.callback.dataChanged(result);
 		}
 	}
 
@@ -111,6 +123,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class LoadLignesAsyncTask extends
 			AsyncTask<String, Void, List<LigneModel>> {
+		private IIncidentsTransportsBackgroundServiceGetLignesListener callback;
+
+		public LoadLignesAsyncTask(
+				IIncidentsTransportsBackgroundServiceGetLignesListener callback) {
+			this.callback = callback;
+		}
 
 		@Override
 		protected List<LigneModel> doInBackground(String... params) {
@@ -132,7 +150,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected void onPostExecute(List<LigneModel> result) {
 			super.onPostExecute(result);
-			fireLignesChanged(result);
+			this.callback.dataChanged(result);
 		}
 	}
 
@@ -142,6 +160,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class ReportIncidentAsyncTask extends
 			AsyncTask<String, Void, String> {
+		private IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback;
+		
+		public ReportIncidentAsyncTask(
+				IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback) {
+			this.callback = callback;
+		}
 
 		@Override
 		protected String doInBackground(String... params) {
@@ -157,7 +181,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
-			fireReportNewIncidentChanged(result);
+			this.callback.dataChanged(result);
 		}
 	}
 
@@ -167,6 +191,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class GetFavorisAsyncTask extends
 			AsyncTask<Void, Void, List<LigneModel>> {
+		private IIncidentsTransportsBackgroundServiceGetFavorisListener callback;
+
+		public GetFavorisAsyncTask(
+				IIncidentsTransportsBackgroundServiceGetFavorisListener callback) {
+			this.callback = callback;
+		}
 
 		@Override
 		protected List<LigneModel> doInBackground(Void... params) {
@@ -183,7 +213,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected void onPostExecute(List<LigneModel> result) {
 			super.onPostExecute(result);
-			fireFavorisChanged(result);
+			this.callback.dataChanged(result);
 		}
 	}
 
@@ -220,6 +250,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class VoteIncidentAsyncTask extends
 			AsyncTask<String, Void, Boolean> {
+		private IIncidentsTransportsBackgroundServiceVoteIncidentListener callback;
+
+		public VoteIncidentAsyncTask(
+				IIncidentsTransportsBackgroundServiceVoteIncidentListener callback) {
+			this.callback = callback;
+		}
 
 		@Override
 		protected Boolean doInBackground(String... params) {
@@ -236,7 +272,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
-			fireVoteIncidentChanged(result);
+			this.callback.dataChanged(result);
 		}
 	}
 
@@ -277,30 +313,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		super.onDestroy();
 
 		this.mBinder = null;
-		
-		if(this.getFavorislisteners != null) 
-			this.getFavorislisteners.clear();
-		
-		if(this.getIncidentslisteners != null)
-			this.getIncidentslisteners.clear();
-		
-		if(this.getLigneslisteners != null)
-			this.getLigneslisteners.clear();
-		
-		if(this.getReportNewIncidentlisteners != null)
-			this.getReportNewIncidentlisteners.clear();
-		
-		if(this.getTypeLigneslisteners != null)
-			this.getTypeLigneslisteners.clear();
-		
-		if(this.getVoteIncidentlisteners != null)
-			this.getVoteIncidentlisteners.clear();
 	}
 
 	private String getIncidentsEnCoursFromService(String scope)
 			throws IOException {
-		return requestToService(new HttpGet(this.urlService + "/api" + INCIDENTS_JSON_URL
-				+ "/" + scope));
+		return requestToService(new HttpGet(this.urlService + "/api"
+				+ INCIDENTS_JSON_URL + "/" + scope));
 	}
 
 	/**
@@ -474,8 +492,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				+ TAG_SERVICE, "Début de vote pour un incident");
 
 		String url;
-		url = this.urlService  + "/api" + INCIDENT_JSON_URL + "/vote/" + incidentId + "/"
-				+ action;
+		url = this.urlService + "/api" + INCIDENT_JSON_URL + "/vote/"
+				+ incidentId + "/" + action;
 
 		HttpPost request = new HttpPost(url);
 
@@ -526,14 +544,15 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private String requestToService(HttpUriRequest request) throws IOException {
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
-				+ TAG_SERVICE, "Début de requête.");	
+				+ TAG_SERVICE, "Début de requête.");
 
 		String result = null;
-		
+
 		HttpParams httpParameters = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(httpParameters, TIMEOUT_CONNECTION);
+		HttpConnectionParams.setConnectionTimeout(httpParameters,
+				TIMEOUT_CONNECTION);
 		HttpConnectionParams.setSoTimeout(httpParameters, TIMEOUT_SOCKET);
-		
+
 		HttpClient httpclient = new DefaultHttpClient(httpParameters);
 
 		ResponseHandler<String> handler = new BasicResponseHandler();
@@ -547,206 +566,42 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	@Override
-	public void startGetIncidentsAsync(String scope) {
-		new LoadIncidentsAsyncTask().execute(scope);
+	public void startGetIncidentsAsync(
+			String scope,
+			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
+		new LoadIncidentsAsyncTask(callback).execute(scope);
 	}
-
-	private List<IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener> getIncidentslisteners = null;
-
-	// Ajout d'un listener
-	public void addGetIncidentsListener(
-			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener) {
-		if (getIncidentslisteners == null) {
-			getIncidentslisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener>();
-		}
-		getIncidentslisteners.add(listener);
-	}
-
-	// Suppression d'un listener
-	public void removeGetIncidentsListener(
-			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener) {
-		if (getIncidentslisteners != null) {
-			getIncidentslisteners.remove(listener);
-		}
-	}
-
-	// Notification des listeners
-	private void fireIncidentsChanged(List<IncidentModel> data) {
-		if (getIncidentslisteners != null) {
-			for (IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener listener : getIncidentslisteners) {
-				listener.dataChanged(data);
-			}
-		}
+	@Override
+	public void startGetTypeLignesAsync(
+			IIncidentsTransportsBackgroundServiceGetTypeLignesListener callback) {
+		new LoadTypeLignesAsyncTask(callback).execute();
 	}
 
 	@Override
-	public void startGetTypeLignesAsync() {
-		new LoadTypeLignesAsyncTask().execute();
-	}
-
-	private List<IIncidentsTransportsBackgroundServiceGetTypeLignesListener> getTypeLigneslisteners = null;
-
-	// Ajout d'un listener
-	public void addGetTypeLignesListener(
-			IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener) {
-		if (getTypeLigneslisteners == null) {
-			getTypeLigneslisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetTypeLignesListener>();
-		}
-		getTypeLigneslisteners.add(listener);
-	}
-
-	// Suppression d'un listener
-	public void removeGetTypeLignesListener(
-			IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener) {
-		if (getTypeLigneslisteners != null) {
-			getTypeLigneslisteners.remove(listener);
-		}
-	}
-
-	// Notification des listeners
-	private void fireTypeLignesChanged(List<String> data) {
-		if (getTypeLigneslisteners != null) {
-			for (IIncidentsTransportsBackgroundServiceGetTypeLignesListener listener : getTypeLigneslisteners) {
-				listener.dataChanged(data);
-			}
-		}
-	}
-
-	private List<IIncidentsTransportsBackgroundServiceGetLignesListener> getLigneslisteners = null;
-
-	// Ajout d'un listener
-	public void addGetLignesListener(
-			IIncidentsTransportsBackgroundServiceGetLignesListener listener) {
-		if (getLigneslisteners == null) {
-			getLigneslisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetLignesListener>();
-		}
-		getLigneslisteners.add(listener);
-	}
-
-	// Suppression d'un listener
-	public void removeGetLignesListener(
-			IIncidentsTransportsBackgroundServiceGetLignesListener listener) {
-		if (getLigneslisteners != null) {
-			getLigneslisteners.remove(listener);
-		}
-	}
-
-	// Notification des listeners
-	private void fireLignesChanged(List<LigneModel> data) {
-		if (getLigneslisteners != null) {
-			for (IIncidentsTransportsBackgroundServiceGetLignesListener listener : getLigneslisteners) {
-				listener.dataChanged(data);
-			}
-		}
+	public void startGetLignesAsync(String typeLigne,
+			IIncidentsTransportsBackgroundServiceGetLignesListener callback) {
+		new LoadLignesAsyncTask(callback).execute(typeLigne);
 	}
 
 	@Override
-	public void startGetLignesAsync(String typeLigne) {
-		new LoadLignesAsyncTask().execute(typeLigne);
+	public void startReportIncident(String typeLigne,String numLigne, String raison, IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback) {
+		new ReportIncidentAsyncTask(callback).execute(typeLigne, numLigne, raison);
 	}
 
 	@Override
-	public void startReportIncident(String typeLigne, String numLigne,
-			String raison) {
-		new ReportIncidentAsyncTask().execute(typeLigne, numLigne, raison);
-	}
-
-	private List<IIncidentsTransportsBackgroundServiceReportNewIncidentListener> getReportNewIncidentlisteners = null;
-
-	// Ajout d'un listener
-	public void addReportNewIncidentListener(
-			IIncidentsTransportsBackgroundServiceReportNewIncidentListener listener) {
-		if (getReportNewIncidentlisteners == null) {
-			getReportNewIncidentlisteners = new ArrayList<IIncidentsTransportsBackgroundServiceReportNewIncidentListener>();
-		}
-		getReportNewIncidentlisteners.add(listener);
-	}
-
-	// Suppression d'un listener
-	public void removeReportNewIncidentListener(
-			IIncidentsTransportsBackgroundServiceReportNewIncidentListener listener) {
-		if (getReportNewIncidentlisteners != null) {
-			getReportNewIncidentlisteners.remove(listener);
-		}
-	}
-
-	// Notification des listeners
-	private void fireReportNewIncidentChanged(String data) {
-		if (getReportNewIncidentlisteners != null) {
-			for (IIncidentsTransportsBackgroundServiceReportNewIncidentListener listener : getReportNewIncidentlisteners) {
-				listener.dataChanged(data);
-			}
-		}
-	}
-
-	@Override
-	public void startVoteIncident(int idIncident, IncidentAction action) {
-		new VoteIncidentAsyncTask().execute(String.valueOf(idIncident),
+	public void startVoteIncident(int incidentId, IncidentAction action,
+			IIncidentsTransportsBackgroundServiceVoteIncidentListener callback) {
+		new VoteIncidentAsyncTask(callback).execute(String.valueOf(incidentId),
 				action.toString());
-	}
-
-	private List<IIncidentsTransportsBackgroundServiceVoteIncidentListener> getVoteIncidentlisteners = null;
-
-	// Ajout d'un listener
-	public void addVoteIncidentListener(
-			IIncidentsTransportsBackgroundServiceVoteIncidentListener listener) {
-		if (getVoteIncidentlisteners == null) {
-			getVoteIncidentlisteners = new ArrayList<IIncidentsTransportsBackgroundServiceVoteIncidentListener>();
-		}
-		getVoteIncidentlisteners.add(listener);
-	}
-
-	// Suppression d'un listener
-	public void removeVoteIncidentListener(
-			IIncidentsTransportsBackgroundServiceVoteIncidentListener listener) {
-		if (getVoteIncidentlisteners != null) {
-			getVoteIncidentlisteners.remove(listener);
-		}
-	}
-
-	// Notification des listeners
-	private void fireVoteIncidentChanged(boolean voteSent) {
-		if (getVoteIncidentlisteners != null) {
-			for (IIncidentsTransportsBackgroundServiceVoteIncidentListener listener : getVoteIncidentlisteners) {
-				listener.dataChanged(voteSent);
-			}
-		}
-	}
+	}	
 
 	public void startRegisterFavoris(LigneModel ligne) {
 		new RegisterFavorisAsyncTask().execute(ligne);
 	}
 
-	public void startGetFavorisAsync() {
-		new GetFavorisAsyncTask().execute();
-	}
-
-	private List<IIncidentsTransportsBackgroundServiceGetFavorisListener> getFavorislisteners = null;
-
-	// Ajout d'un listener
-	public void addGetFavorisListener(
-			IIncidentsTransportsBackgroundServiceGetFavorisListener listener) {
-		if (getFavorislisteners == null) {
-			getFavorislisteners = new ArrayList<IIncidentsTransportsBackgroundServiceGetFavorisListener>();
-		}
-		getFavorislisteners.add(listener);
-	}
-
-	// Suppression d'un listener
-	public void removeGetFavorisListener(
-			IIncidentsTransportsBackgroundServiceGetFavorisListener listener) {
-		if (getFavorislisteners != null) {
-			getFavorislisteners.remove(listener);
-		}
-	}
-
-	// Notification des listeners
-	private void fireFavorisChanged(List<LigneModel> data) {
-		if (getFavorislisteners != null) {
-			for (IIncidentsTransportsBackgroundServiceGetFavorisListener listener : getFavorislisteners) {
-				listener.dataChanged(data);
-			}
-		}
+	public void startGetFavorisAsync(
+			IIncidentsTransportsBackgroundServiceGetFavorisListener callback) {
+		new GetFavorisAsyncTask(callback).execute();
 	}
 
 	@Override
@@ -762,36 +617,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			this.urlService = SERVICE_URL_BASE_PRE_PRODUCTION;
 		}
 	}
-	
-	@Override
-	public boolean onUnbind(Intent intent) {
-		if(this.getFavorislisteners != null && this.getFavorislisteners.contains(intent)) {
-			this.getFavorislisteners.remove(intent);
-		}
-		
-		if(this.getIncidentslisteners != null && this.getIncidentslisteners.contains(intent)) {
-			this.getIncidentslisteners.remove(intent);
-		}
-		
-		if(this.getLigneslisteners != null && this.getLigneslisteners.contains(intent)) {
-			this.getLigneslisteners.remove(intent);
-		}
-		
-		if(this.getReportNewIncidentlisteners != null && this.getReportNewIncidentlisteners.contains(intent)) {
-			this.getReportNewIncidentlisteners.remove(intent);
-		}
-		
-		if(this.getTypeLigneslisteners != null && this.getTypeLigneslisteners.contains(intent)) {
-			this.getTypeLigneslisteners.remove(intent);
-		}
-		
-		if(this.getVoteIncidentlisteners != null && this.getVoteIncidentlisteners.contains(intent)) {
-			this.getVoteIncidentlisteners.remove(intent);
-		}
-		
-		return true;
-	}
-	
+
 	@Override
 	public String getUrlService() {
 		return urlService;
