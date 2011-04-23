@@ -407,7 +407,6 @@ public class NewIncidentActivity extends BaseActivity {
 			mBoundService
 					.addReportNewIncidentListener(reportNewIncidentListener);
 
-			// mBoundService.startGetTypeLignesAsync();
 			mBoundService.startGetFavorisAsync();
 		}
 
