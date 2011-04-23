@@ -154,7 +154,7 @@ public class NewIncidentActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				isFavorisFiltered = true;
-				mBoundService.startGetFavorisAsync();
+				mBoundService.startGetFavorisAsync(getFavorisListener);
 			}
 		});
 
@@ -164,7 +164,7 @@ public class NewIncidentActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				isFavorisFiltered = false;
-				mBoundService.startGetTypeLignesAsync();
+				mBoundService.startGetTypeLignesAsync(getTypeLignesListener);
 			}
 		});
 
@@ -197,7 +197,7 @@ public class NewIncidentActivity extends BaseActivity {
 						if (isFavorisFiltered) {
 							mImgLignesAdapter.getFilter().filter(typeLigne);
 						} else {
-							mBoundService.startGetLignesAsync(typeLigne);
+							mBoundService.startGetLignesAsync(typeLigne, getLignesListener);
 						}
 					}
 
@@ -243,7 +243,7 @@ public class NewIncidentActivity extends BaseActivity {
 									"",
 									getString(R.string.msg_report_new_incident_reporting_incident));
 					mBoundService.startReportIncident(typeLigne, numLigne,
-							raison);
+							raison, reportNewIncidentListener);
 				} else {
 					if (raison == null || raison.equals("")) {
 						AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -297,10 +297,10 @@ public class NewIncidentActivity extends BaseActivity {
 					mImgTypeLignesAdapter.notifyDataSetChanged();					
 					
 					mSpinTypeLignes.setSelection(0);
-					mBoundService.startGetLignesAsync(LigneModel.TYPE_LIGNE_RER);
+					mBoundService.startGetLignesAsync(LigneModel.TYPE_LIGNE_RER, getLignesListener);
 				}
 			};
-			mBoundService.addGetTypeLignesListener(getTypeLignesListener);
+			//mBoundService.addGetTypeLignesListener(getTypeLignesListener);
 
 			getFavorisListener = new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
 				@Override
@@ -333,11 +333,11 @@ public class NewIncidentActivity extends BaseActivity {
 						
 						isFavorisFiltered = false;
 												
-						mBoundService.startGetTypeLignesAsync();
+						mBoundService.startGetTypeLignesAsync(getTypeLignesListener);
 					}
 				}
 			};
-			mBoundService.addGetFavorisListener(getFavorisListener);
+//			mBoundService.addGetFavorisListener(getFavorisListener);
 
 			getLignesListener = new IIncidentsTransportsBackgroundServiceGetLignesListener() {
 				@Override
@@ -361,7 +361,7 @@ public class NewIncidentActivity extends BaseActivity {
 				}
 
 			};
-			mBoundService.addGetLignesListener(getLignesListener);
+			//mBoundService.addGetLignesListener(getLignesListener);
 
 			reportNewIncidentListener = new IIncidentsTransportsBackgroundServiceReportNewIncidentListener() {
 				@Override
@@ -404,17 +404,16 @@ public class NewIncidentActivity extends BaseActivity {
 							"Fin de création d'un incident.");
 				}
 			};
-			mBoundService
-					.addReportNewIncidentListener(reportNewIncidentListener);
+//			mBoundService.addReportNewIncidentListener(reportNewIncidentListener);
 
-			mBoundService.startGetFavorisAsync();
+			mBoundService.startGetFavorisAsync(getFavorisListener);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			mBoundService.removeGetTypeLignesListener(getTypeLignesListener);
-			mBoundService.removeGetLignesListener(getLignesListener);
-			mBoundService
-					.removeReportNewIncidentListener(reportNewIncidentListener);
+//			mBoundService.removeGetTypeLignesListener(getTypeLignesListener);
+//			mBoundService.removeGetLignesListener(getLignesListener);
+//			mBoundService
+//					.removeReportNewIncidentListener(reportNewIncidentListener);
 			mBoundService = null;
 		}
 	};

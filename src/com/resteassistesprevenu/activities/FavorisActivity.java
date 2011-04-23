@@ -150,12 +150,12 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 							mAdapter.getLignesChildrenGroups().add(
 									new ArrayList<LigneModel>());
 							mBoundService
-									.startGetLignesAsync(typeLigne);
+									.startGetLignesAsync(typeLigne, getLignesListener);
 						}
 						mAdapter.notifyDataSetChanged();
 					}
 				};
-			mBoundService.addGetTypeLignesListener(getTypeLignesListener);
+//			mBoundService.addGetTypeLignesListener(getTypeLignesListener);
 
 			getLignesListener = new IIncidentsTransportsBackgroundServiceGetLignesListener() {
 				@Override
@@ -187,14 +187,14 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 					}
 				}
 			};
-			mBoundService.addGetLignesListener(getLignesListener);
+			//mBoundService.addGetLignesListener(getLignesListener);
 
-			mBoundService.startGetTypeLignesAsync();
+			mBoundService.startGetTypeLignesAsync(getTypeLignesListener);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			mBoundService.removeGetLignesListener(getLignesListener);
-			mBoundService.removeGetTypeLignesListener(getTypeLignesListener);
+			//mBoundService.removeGetLignesListener(getLignesListener);
+			//mBoundService.removeGetTypeLignesListener(getTypeLignesListener);
 			mBoundService = null;
 		}
 	}
