@@ -42,12 +42,12 @@
 		<provider android:name=".provider.DefaultContentProvider"
 			android:authorities="com.resteassistesprevenu.provider" />
 
-<!-- 		<receiver android:name=".appwidget.provider.RASSTPWidgetProvider"> -->
-<!-- 			<intent-filter> -->
-<!-- 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" /> -->
-<!-- 			</intent-filter> -->
-<!-- 			<meta-data android:name="android.appwidget.provider" -->
-<!-- 				android:resource="@xml/rasstp_appwidget_info" /> -->
-<!-- 		</receiver> -->
+		<receiver android:name=".appwidget.provider.RASSTPWidgetProvider">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+			</intent-filter>
+			<meta-data android:name="android.appwidget.provider"
+				android:resource="@xml/rasstp_appwidget_info" />
+		</receiver>
 	</application>
 </manifest> 
