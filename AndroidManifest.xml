@@ -38,7 +38,13 @@
 			<intent-filter>
 				<action android:name=".IncidentsBackgroundService.ACTION" />
 			</intent-filter>
+		</service>		
+		<service android:name=".appwidget.service.UpdateService">
+			<intent-filter>
+				<action android:name=".UpdateService.ACTION" />
+			</intent-filter>
 		</service>
+		
 		<provider android:name=".provider.DefaultContentProvider"
 			android:authorities="com.resteassistesprevenu.provider" />
 
