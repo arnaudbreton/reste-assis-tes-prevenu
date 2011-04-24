@@ -161,7 +161,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	private long lastLoadingTimestamp;
 
 	/**
-	 * Durée de validité des données chargés (10 minutes)
+	 * Durée de validité des données chargées (10 minutes)
 	 */
 	private static final int MAX_DATA_VALIDITY_PERIOD = 10;
 
