@@ -2,6 +2,7 @@ package com.resteassistesprevenu.activities;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.app.Activity;
@@ -234,9 +235,10 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				mModeChargement = ModeChargement.NORMAL;
 				
 				if (mCurrentScope != IncidentModel.SCOPE_JOUR) {
-					mCurrentScope = IncidentModel.SCOPE_JOUR;
-					lastLoadingTimestamp = 0;
+					mCurrentScope = IncidentModel.SCOPE_JOUR;					
 				}
+				
+				lastLoadingTimestamp = 0;
 				
 				startGetIncidentsFromServiceAsync();
 			}
@@ -248,9 +250,10 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				mModeChargement = ModeChargement.NORMAL;
 
 				if (mCurrentScope != IncidentModel.SCOPE_HOUR) {
-					mCurrentScope = IncidentModel.SCOPE_HOUR;
-					lastLoadingTimestamp = 0;
+					mCurrentScope = IncidentModel.SCOPE_HOUR;					
 				}
+				
+				lastLoadingTimestamp = 0;
 
 				startGetIncidentsFromServiceAsync();
 			}
@@ -262,9 +265,10 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				mModeChargement = ModeChargement.NORMAL;
 
 				if (mCurrentScope != IncidentModel.SCOPE_MINUTE) {
-					lastLoadingTimestamp = 0;
 					mCurrentScope = IncidentModel.SCOPE_MINUTE;
 				}
+				
+				lastLoadingTimestamp = 0;
 
 				startGetIncidentsFromServiceAsync();
 			}
@@ -374,6 +378,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 								mBoundService.setProduction(false);
 							}
 
+							lastLoadingTimestamp = 0;
 							IncidentsEnCoursActivity.this
 									.startGetIncidentsFromServiceAsync();
 						}
@@ -498,7 +503,8 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 					"Fin activité NewIncident : " + resultCode);
 			if (resultCode == Activity.RESULT_OK) {
-				startGetIncidentsFromServiceAsync();
+				lastLoadingTimestamp = 0;
+				//startGetIncidentsFromServiceAsync();
 			}
 		}
 	}
@@ -641,15 +647,15 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	};
 
 	private boolean isDataValid() {		
-		if(lastLoadingTimestamp > 0) {
-			Calendar c1 = Calendar.getInstance();
-			c1.setTimeInMillis(lastLoadingTimestamp);
+		if(this.lastLoadingTimestamp > 0) {
+			GregorianCalendar c1 = new GregorianCalendar();
+			c1.setTimeInMillis(this.lastLoadingTimestamp);
 			c1.add(Calendar.MINUTE, MAX_DATA_VALIDITY_PERIOD);
 			
-			Calendar c2 = Calendar.getInstance();
+			GregorianCalendar c2 = new GregorianCalendar();
 			c2.setTimeInMillis(System.currentTimeMillis());
 			
-			return c2.after(c1);
+			return c2.before(c1);
 		}
 		else {
 			return false;
