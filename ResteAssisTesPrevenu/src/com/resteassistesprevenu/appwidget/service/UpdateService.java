@@ -101,6 +101,7 @@ public class UpdateService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 
+		
 		context.bindService(new Intent(context, IncidentsTransportsBackgroundService.class), conn, Context.BIND_AUTO_CREATE);	
 		
 		return START_STICKY;
