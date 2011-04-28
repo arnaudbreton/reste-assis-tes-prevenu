@@ -98,6 +98,12 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	 * Bouton d'ajout d'incident
 	 */
 	private ImageButton mBtnAddIncident;
+	
+	/**
+	 * ImageButton de rafraîchissement
+	 */
+	private ImageButton mBtnRefresh;
+
 
 	/**
 	 * Texte indiquant qu'il n'y a aucun incident (parmis les favoris ou sur le
@@ -159,6 +165,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	 * Timestamp du dernier chargement
 	 */
 	private long lastLoadingTimestamp;
+	
 
 	/**
 	 * Durée de validité des données chargées (10 minutes)
@@ -198,6 +205,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		this.mBtnMinute = (RadioButton) this.findViewById(R.id.radioMinute);
 		this.mBtnAddIncident = (ImageButton) this
 				.findViewById(R.id.btnAjouterIncident);
+		this.mBtnRefresh = (ImageButton) this.findViewById(R.id.btnRefreshIncident);
 		this.mBtnIgnorerFavoris = (Button) this
 				.findViewById(R.id.btnIgnorerFavoris);
 
@@ -218,6 +226,15 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		((android.widget.ListView) this
 				.findViewById(R.id.listViewIncidentEnCours))
 				.setAdapter(mAdapter);
+		
+		this.mBtnRefresh.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {		
+				lastLoadingTimestamp = 0;
+				startGetIncidentsFromServiceAsync();
+			}
+		});
 
 		this.mBtnAddIncident.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -561,6 +578,8 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 									.clear();
 							IncidentsEnCoursActivity.this.incidentsService
 									.addAll(incidentsService);
+							
+							mBtnRefresh.clearAnimation();
 
 							showIncidents();
 						}
