@@ -1,6 +1,7 @@
 package com.resteassistesprevenu.services;
 
 import com.resteassistesprevenu.model.IncidentAction;
+import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
@@ -40,10 +41,10 @@ public interface IIncidentsTransportsBackgroundService {
 	
 	/**
 	 * Vote pour un incident, asynchrone
-	 * @param incidentId
+	 * @param incident L'incident sur lequel on souhaite voter
 	 * @param action "plus","minus","end"
 	 */
-	public void startVoteIncident(int incidentId, IncidentAction action, IIncidentsTransportsBackgroundServiceVoteIncidentListener callback);
+	public void startVoteIncident(IncidentModel incident, IncidentAction action, IIncidentsTransportsBackgroundServiceVoteIncidentListener callback);
 	
 	/** 
 	 * Enregistrement d'un favoris, asynchrone.

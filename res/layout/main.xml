@@ -20,6 +20,7 @@
 					android:layout_height="wrap_content" android:textSize="15.0sp"
 					android:id="@+id/radioJour"></RadioButton>
 			</RadioGroup>
+			
 			<ImageButton android:id="@+id/btnAjouterIncident"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@drawable/ic_add" android:layout_alignParentRight="true" android:paddingRight="15dip" android:paddingTop="5dip" android:background="@null" />

@@ -249,29 +249,52 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 * 
 	 */
 	private class VoteIncidentAsyncTask extends
-			AsyncTask<String, Void, Boolean> {
+			AsyncTask<IncidentAction, Void, Boolean> {
+		
 		private IIncidentsTransportsBackgroundServiceVoteIncidentListener callback;
-
-		public VoteIncidentAsyncTask(
+		private IncidentModel incident;
+		private IncidentAction action;
+		
+		public VoteIncidentAsyncTask(IncidentModel incident,
 				IIncidentsTransportsBackgroundServiceVoteIncidentListener callback) {
+			this.incident = incident;
 			this.callback = callback;
 		}
 
 		@Override
-		protected Boolean doInBackground(String... params) {
+		protected Boolean doInBackground(IncidentAction... params) {
 			try {
-				return voteIncident(Integer.parseInt(params[0]), params[1]);
+				this.action = params[0];
+				return voteIncident(this.incident.getId(), this.action);		
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
-						"Erreur lors du vote pour l'incident n°" + params[0]
-								+ " action : " + params[1], e);
-				return null;
+						"Erreur lors du vote pour l'incident n°" + this.incident.getId()
+								+ " action : " + params[0], e);
+				return false;
 			}
 		}
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			super.onPostExecute(result);
+			super.onPostExecute(result);	
+			
+			if(result) {
+				switch (this.action) {
+				case VOTE_PLUS:
+					this.incident.addVotePlus();
+					break;
+				case VOTE_MINUS:
+					this.incident.addVoteMinus();
+					break;
+				case VOTE_END:
+					this.incident.addVoteEnded();
+					break;
+
+				default:
+					break;
+				}
+			}
+			
 			this.callback.dataChanged(result);
 		}
 	}
@@ -486,14 +509,14 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 * @throws UnsupportedEncodingException
 	 * @throws JSONException
 	 */
-	private Boolean voteIncident(int incidentId, String action)
+	private Boolean voteIncident(int incidentId, IncidentAction action)
 			throws UnsupportedEncodingException, JSONException {
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Début de vote pour un incident");
 
 		String url;
 		url = this.urlService + "/api" + INCIDENT_JSON_URL + "/vote/"
-				+ incidentId + "/" + action;
+				+ incidentId + "/" + action.toString();
 
 		HttpPost request = new HttpPost(url);
 
@@ -589,10 +612,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	@Override
-	public void startVoteIncident(int incidentId, IncidentAction action,
+	public void startVoteIncident(IncidentModel incident, IncidentAction action,
 			IIncidentsTransportsBackgroundServiceVoteIncidentListener callback) {
-		new VoteIncidentAsyncTask(callback).execute(String.valueOf(incidentId),
-				action.toString());
+		new VoteIncidentAsyncTask(incident, callback).execute(action);
 	}	
 
 	public void startRegisterFavoris(LigneModel ligne) {
