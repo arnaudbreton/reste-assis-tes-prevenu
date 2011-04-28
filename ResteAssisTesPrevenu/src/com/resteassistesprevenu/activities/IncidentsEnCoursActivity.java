@@ -526,7 +526,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					getString(R.string.msg_share_title)));
 		} else {
 			if (this.mBoundService != null) {
-				this.mBoundService.startVoteIncident(incident.getId(), action,
+				this.mBoundService.startVoteIncident(incident, action,
 						voteIncidentListener);
 			} else {
 				Toast.makeText(this,
@@ -602,6 +602,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 						Toast.makeText(IncidentsEnCoursActivity.this,
 								R.string.msg_vote_OK, Toast.LENGTH_SHORT)
 								.show();
+						
 						startGetIncidentsFromServiceAsync();
 					} else {
 						Log.i(getString(R.string.log_tag_name) + " "

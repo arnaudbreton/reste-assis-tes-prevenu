@@ -172,8 +172,8 @@ public class IncidentModel {
 	 * @param votePlus
 	 *            the votePlus to set
 	 */
-	public void setVotePlus(int votePlus) {
-		this.votePlus = votePlus;
+	public void addVotePlus() {
+		this.votePlus++;
 	}
 
 	/**
@@ -187,8 +187,8 @@ public class IncidentModel {
 	 * @param voteMinus
 	 *            the voteMinus to set
 	 */
-	public void setVoteMinus(int voteMinus) {
-		this.voteMinus = voteMinus;
+	public void addVoteMinus() {
+		this.voteMinus++;
 	}
 
 	/**
@@ -202,8 +202,8 @@ public class IncidentModel {
 	 * @param voteEnded
 	 *            the voteEnded to set
 	 */
-	public void setVoteEnded(int voteEnded) {
-		this.voteEnded = voteEnded;
+	public void addVoteEnded() {
+		this.voteEnded++;
 	}
 
 	/**
