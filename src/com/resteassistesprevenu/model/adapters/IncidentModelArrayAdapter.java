@@ -24,7 +24,6 @@ import com.resteassistesprevenu.quick_action.IncidentQuickAction;
 public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 	private ArrayList<IncidentModel> incidents;
 	private IIncidentActionListener listener;
-	private IncidentModel incident;
 
 	public IncidentModelArrayAdapter(Context context, int textViewResourceId,
 			List<IncidentModel> objects, IIncidentActionListener listener) {
@@ -42,7 +41,8 @@ public class IncidentModelArrayAdapter extends ArrayAdapter<IncidentModel> {
 					Context.LAYOUT_INFLATER_SERVICE);
 			v = vi.inflate(R.layout.incident_item_view, null);
 		}
-		incident = incidents.get(position);
+		
+		final IncidentModel incident = incidents.get(position);
 		if (incident != null) {			
 			ImageView imgTypeLigne = (ImageView) v.findViewById(R.id.imgTypeLigne);
 			ImageView imgNumLigne = (ImageView) v.findViewById(R.id.imgNumLigne);
