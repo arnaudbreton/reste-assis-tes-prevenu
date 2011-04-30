@@ -2,6 +2,8 @@ package com.resteassistesprevenu.appwidget.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -12,7 +14,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 import com.resteassistesprevenu.R;
@@ -37,9 +38,15 @@ public class UpdateService extends Service {
 	 * Les incidents du service
 	 */
 	private List<IncidentModel> incidents;
+	
+	/**
+	 * 
+	 */
+	private int lastIncidentIndex;
 
 	public UpdateService() {
 		this.incidents = new ArrayList<IncidentModel>();
+		this.lastIncidentIndex = 0;
 	}
 	
 	/**
@@ -70,13 +77,20 @@ public class UpdateService extends Service {
 						incidents.addAll(incidentsService);
 						
 						// Build the widget update for today
-						RemoteViews updateViews = buildUpdate();
-						
-						// Push update for this widget to the home screen
-						ComponentName thisWidget = new ComponentName(getApplicationContext(),
-								RASSTPWidgetProvider.class);
-						AppWidgetManager manager = AppWidgetManager.getInstance(getApplicationContext());
-						manager.updateAppWidget(thisWidget, updateViews);
+						new TimerTask() {
+							
+							@Override
+							public void run() {
+								RemoteViews updateViews = buildUpdate();
+								
+								// Push update for this widget to the home screen
+								ComponentName thisWidget = new ComponentName(getApplicationContext(),
+										RASSTPWidgetProvider.class);
+								AppWidgetManager manager = AppWidgetManager.getInstance(getApplicationContext());
+								manager.updateAppWidget(thisWidget, updateViews);								
+							}
+						};
+					
 
 						Log.i(getApplicationContext().getString(R.string.log_tag_name),
 								"Chargement des incidents réussi.");
@@ -99,8 +113,8 @@ public class UpdateService extends Service {
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
 		
-		this.conn = new ServiceIncidentConnection();
-		
+		Log.d(getResources().getString(R.string.log_tag_name), "UpdateService : onStart()");
+		this.conn = new ServiceIncidentConnection();		
 		getApplicationContext().bindService(new Intent(getApplicationContext(), IncidentsTransportsBackgroundService.class), conn, Context.BIND_AUTO_CREATE);	
 	}		
 
@@ -108,7 +122,9 @@ public class UpdateService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		
+		Log.d(getResources().getString(R.string.log_tag_name), "UpdateService : onDestroy()");
 		getApplicationContext().unbindService(conn);
+		this.conn = null;		
 	}
 
 	/**
@@ -135,10 +151,13 @@ public class UpdateService extends Service {
 		updateViews.setOnClickPendingIntent(R.id.btnWidgetAddIncident,
 				newIncidentPendingIntent);
 		
-		IncidentModel incident = incidents.get(0);			
-		
-		updateViews.addView(R.id.layout_widget_container, IncidentModelAdapter.getIncidentRemoteView(getApplicationContext(), incident));
-		
+		if(this.incidents.size() > 0 ) {
+			Log.d(getResources().getString(R.string.log_tag_name), "Affichage de l'incident numéro " + lastIncidentIndex);
+			IncidentModel incident = incidents.get(lastIncidentIndex);		
+			IncidentModelAdapter.getIncidentRemoteView(getApplicationContext(), updateViews, incident);
+			lastIncidentIndex++;
+		}
+				
 		return updateViews;
 	}
 
