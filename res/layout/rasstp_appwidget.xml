@@ -3,7 +3,7 @@
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="horizontal" android:background="@drawable/widget_bg_4x1"
 	android:layout_gravity="center" android:layout_marginTop="5dip"
-	android:padding="10dip">
+	android:padding="10dip" android:id="@+id/layout_widget_container">
 	<ImageButton android:id="@+id/btnWidgetLogo" android:layout_width="wrap_content"
 		android:layout_height="wrap_content" android:src="@drawable/ic_logo"
 		android:background="@null" android:layout_gravity="center_vertical" />
@@ -11,5 +11,5 @@
 		android:layout_height="wrap_content" android:src="@drawable/ic_add"
 		android:background="@null" android:layout_gravity="center_vertical" />
 
-	<include android:id="@+id/incidentItemView" layout="@layout/incident_item_view" android:layout_gravity="center_vertical"/>
+	<!-- <include android:id="@+id/incidentItemView" layout="@layout/incident_item_view" android:layout_gravity="center_vertical"/> -->
 </LinearLayout>

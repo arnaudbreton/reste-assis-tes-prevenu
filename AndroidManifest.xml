@@ -31,6 +31,7 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
+		
 		<!-- AdMobActivity definition -->
 		<activity android:name="com.google.ads.AdActivity"
 			android:configChanges="keyboard|keyboardHidden|orientation" />
@@ -38,17 +39,9 @@
 			<intent-filter>
 				<action android:name=".IncidentsBackgroundService.ACTION" />
 			</intent-filter>
-		</service>	
-		
-		<service android:name=".appwidget.services.UpdateService">
-			<intent-filter>
-				<action android:name=".UpdateService.ACTION" />
-			</intent-filter>
-		</service>					
-		
-		<provider android:name=".provider.DefaultContentProvider"
-			android:authorities="com.resteassistesprevenu.provider" />
+		</service>
 
+		<!-- Widget -->
 		<receiver android:name=".appwidget.provider.RASSTPWidgetProvider">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -56,5 +49,20 @@
 			<meta-data android:name="android.appwidget.provider"
 				android:resource="@xml/rasstp_appwidget_info" />
 		</receiver>
+
+		<service android:name=".appwidget.service.UpdateService">
+			<intent-filter>
+				<action android:name=".UpdateService.ACTION" />
+			</intent-filter>
+		</service>
+
+		<activity android:name=".appwidget.provider.RASSTPWidgetConfigureActivity">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+			</intent-filter>
+		</activity>
+
+		<provider android:name=".provider.DefaultContentProvider"
+			android:authorities="com.resteassistesprevenu.provider" />
 	</application>
 </manifest> 

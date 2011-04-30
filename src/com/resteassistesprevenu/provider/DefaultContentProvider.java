@@ -79,10 +79,16 @@ public class DefaultContentProvider extends ContentProvider {
 	@Override
 	public String getType(Uri uri) {
 		switch (uriMatcher.match(uri)) {
+		case TYPE_LIGNES:
+			return "vnd.android.cursor.dir/vnd.resteassistesprevenu.type_lignes";
 		case LIGNES:
 			return "vnd.android.cursor.dir/vnd.resteassistesprevenu.lignes";
 		case LIGNES_ID:
 			return "vnd.android.cursor.item/vnd.resteassistesprevenu.lignes";
+		case FAVORIS:
+			return "vnd.android.cursor.dir/vnd.resteassistesprevenu.favoris";
+		case FAVORIS_ID:
+			return "vnd.android.cursor.item/vnd.resteassistesprevenu.favoris";
 		default:
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
 		}
