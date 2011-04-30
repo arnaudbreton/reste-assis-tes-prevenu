@@ -97,12 +97,10 @@ public class IncidentModelAdapter {
 		return v;
 	}
 
-	public static RemoteViews getIncidentRemoteView(Context context,
+	public static RemoteViews getIncidentRemoteView(Context context, RemoteViews v,
 			IncidentModel incident) {
-		RemoteViews v;
-
-		v = new RemoteViews(context.getPackageName(),
-				R.layout.incident_item_view);
+		//v = new RemoteViews(context.getPackageName(),
+				//R.layout.incident_item_view);
 
 		if (incident != null) {
 			int imageResource;
@@ -126,7 +124,7 @@ public class IncidentModelAdapter {
 				v.setImageViewResource(R.id.imgNumLigne, imageResource);
 			}
 
-			v.setTextViewText(R.id.txtRaison, incident.getReason());
+			v.setTextViewText(R.id.txtIncidentItemViewRaison, incident.getReason());
 
 			v.setTextViewText(R.id.txtHeureIncident,
 					("@" + new SimpleDateFormat("HH:mm").format(incident

@@ -6,11 +6,16 @@ import android.content.Intent;
 
 import com.resteassistesprevenu.appwidget.service.UpdateService;
 
-public class RASSTPWidgetProvider extends AppWidgetProvider {	
+public class RASSTPWidgetProvider extends AppWidgetProvider {
 	@Override
-	public void onUpdate(Context context,
-			android.appwidget.AppWidgetManager appWidgetManager,
-			int[] appWidgetIds) {		
+	public void onEnabled(Context context) {
+		super.onEnabled(context);
 		context.startService(new Intent(context, UpdateService.class));	
+	}
+
+	@Override
+	public void onDisabled(Context context) {
+		super.onDisabled(context);
+		context.stopService(new Intent(context, UpdateService.class));	
 	}
 }
