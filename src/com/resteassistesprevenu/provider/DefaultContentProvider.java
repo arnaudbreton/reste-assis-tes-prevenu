@@ -27,9 +27,30 @@ public class DefaultContentProvider extends ContentProvider {
 	public static final String PROVIDER_NAME = "com.resteassistesprevenu.provider";
 	
 	/**
-	 * URL du provider
+	 * URI du provider
 	 */
 	public static final String CONTENT_URI = "content://" + PROVIDER_NAME;
+	
+	/**
+	 * URI pour les types de lignes
+	 */
+	public static final String TYPE_LIGNES_URI = "type_lignes";
+	
+	/**
+	 * URI pour les favoris
+	 */
+	public static final String FAVORIS_URI = "favoris";
+	
+	/**
+	 * URI pour les lignes
+	 */
+	public static final String LIGNES_URI = "favoris";
+	
+	/**
+	 * URI pour les incidents
+	 */
+	public static final String INCIDENTS_URI = "incidents";
+
 
 	/**
 	 * Identifiant de l'URL de récupération des types de ligne
@@ -55,15 +76,21 @@ public class DefaultContentProvider extends ContentProvider {
 	 * Identifiant de l'URL de récupération d'enregistrement ou de suppression d'un favoris
 	 */
 	private static final int FAVORIS_ID = 5;
-
+	
+	/**
+	 * Identifiant de l'URI d'ajout des incidents
+	 */
+	private static final int INCIDENTS = 5;
+	
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI(PROVIDER_NAME, "type_lignes", TYPE_LIGNES);
-		uriMatcher.addURI(PROVIDER_NAME, "favoris", FAVORIS);
-		uriMatcher.addURI(PROVIDER_NAME, "favoris/#", FAVORIS_ID);
-		uriMatcher.addURI(PROVIDER_NAME, "lignes", LIGNES);
-		uriMatcher.addURI(PROVIDER_NAME, "lignes/#", LIGNES_ID);
+		uriMatcher.addURI(PROVIDER_NAME, TYPE_LIGNES_URI, TYPE_LIGNES);
+		uriMatcher.addURI(PROVIDER_NAME, FAVORIS_URI, FAVORIS);
+		uriMatcher.addURI(PROVIDER_NAME, FAVORIS_URI.concat("/#"), FAVORIS_ID);
+		uriMatcher.addURI(PROVIDER_NAME, LIGNES_URI, LIGNES);
+		uriMatcher.addURI(PROVIDER_NAME, LIGNES_URI.concat("/#"), LIGNES_ID);
+		uriMatcher.addURI(PROVIDER_NAME, INCIDENTS_URI, INCIDENTS);
 	}
 
 	/**
@@ -149,8 +176,8 @@ public class DefaultContentProvider extends ContentProvider {
 		case FAVORIS_ID:
 			Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début mise à jour d'un favoris : " + uri.getPathSegments().get(1));
 			count = this.dbHelper.getWritableDatabase().update(
-					LigneBaseColumns.NOM_TABLE, values,
-					LigneBaseColumns._ID + "=" + uri.getPathSegments().get(1),
+					LigneBDDHelper.NOM_TABLE, values,
+					LigneBDDHelper._ID + "=" + uri.getPathSegments().get(1),
 					selectionArgs);
 			break;
 		}

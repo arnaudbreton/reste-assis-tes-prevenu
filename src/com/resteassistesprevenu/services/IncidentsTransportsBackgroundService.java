@@ -2,6 +2,7 @@ package com.resteassistesprevenu.services;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +36,9 @@ import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.provider.DefaultContentProvider;
-import com.resteassistesprevenu.provider.LigneBaseColumns;
-import com.resteassistesprevenu.provider.TypeLigneBaseColumns;
+import com.resteassistesprevenu.provider.IncidentsBDDHelper;
+import com.resteassistesprevenu.provider.LigneBDDHelper;
+import com.resteassistesprevenu.provider.TypeLigneBDDHelper;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
@@ -70,8 +72,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		@Override
 		protected List<IncidentModel> doInBackground(String... params) {
 			try {
-				return IncidentModel
-						.deserializeFromArray(getIncidentsEnCoursFromService(params[0]));
+				return getIncidentsEnCoursFromProviderOrService(params[0]);
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
 						"Erreur au chargement des incidents par le service", e);
@@ -161,7 +162,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	private class ReportIncidentAsyncTask extends
 			AsyncTask<String, Void, String> {
 		private IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback;
-		
+
 		public ReportIncidentAsyncTask(
 				IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback) {
 			this.callback = callback;
@@ -250,12 +251,13 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class VoteIncidentAsyncTask extends
 			AsyncTask<IncidentAction, Void, Boolean> {
-		
+
 		private IIncidentsTransportsBackgroundServiceVoteIncidentListener callback;
 		private IncidentModel incident;
 		private IncidentAction action;
-		
-		public VoteIncidentAsyncTask(IncidentModel incident,
+
+		public VoteIncidentAsyncTask(
+				IncidentModel incident,
 				IIncidentsTransportsBackgroundServiceVoteIncidentListener callback) {
 			this.incident = incident;
 			this.callback = callback;
@@ -265,20 +267,21 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		protected Boolean doInBackground(IncidentAction... params) {
 			try {
 				this.action = params[0];
-				return voteIncident(this.incident.getId(), this.action);		
+				return voteIncident(this.incident.getId(), this.action);
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
-						"Erreur lors du vote pour l'incident n°" + this.incident.getId()
-								+ " action : " + params[0], e);
+						"Erreur lors du vote pour l'incident n°"
+								+ this.incident.getId() + " action : "
+								+ params[0], e);
 				return false;
 			}
 		}
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			super.onPostExecute(result);	
-			
-			if(result) {
+			super.onPostExecute(result);
+
+			if (result) {
 				switch (this.action) {
 				case VOTE_PLUS:
 					this.incident.addVotePlus();
@@ -294,7 +297,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 					break;
 				}
 			}
-			
+
 			this.callback.dataChanged(result);
 		}
 	}
@@ -338,10 +341,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		this.mBinder = null;
 	}
 
-	private String getIncidentsEnCoursFromService(String scope)
-			throws IOException {
-		return requestToService(new HttpGet(this.urlService + "/api"
-				+ INCIDENTS_JSON_URL + "/" + scope));
+	private List<IncidentModel> getIncidentsEnCoursFromService(String scope)
+			throws IOException, JSONException, ParseException {
+		return IncidentModel.deserializeFromArray(requestToService(new HttpGet(
+				this.urlService + "/api" + INCIDENTS_JSON_URL + "/" + scope)));
 	}
 
 	/**
@@ -352,8 +355,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	private List<String> getTypeLignesFromProvider() {
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Début récupération type lignes");
+
 		ContentResolver cr = getContentResolver();
-		String[] projection = new String[] { TypeLigneBaseColumns.TYPE_LIGNE };
+		String[] projection = new String[] { TypeLigneBDDHelper.TYPE_LIGNE };
+
 		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Envoi d'une requête au service");
 		Cursor c = cr.query(
@@ -367,9 +372,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 						+ " " + TAG_SERVICE,
 						"Ajout de la ligne : "
 								+ c.getString(c
-										.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)));
+										.getColumnIndex(TypeLigneBDDHelper.TYPE_LIGNE)));
 				lignes.add(c.getString(c
-						.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)));
+						.getColumnIndex(TypeLigneBDDHelper.TYPE_LIGNE)));
 			} while (c.moveToNext());
 		}
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
@@ -387,42 +392,84 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				+ TAG_SERVICE, "Début récupération lignes");
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
-				LigneBaseColumns.NOM_TABLE.concat("."
-						.concat(LigneBaseColumns._ID)),
-				TypeLigneBaseColumns.TYPE_LIGNE, LigneBaseColumns.NOM_LIGNE,
-				LigneBaseColumns.IS_FAVORIS };
-		String selection = null;
+				LigneBDDHelper.NOM_TABLE.concat(".".concat(LigneBDDHelper._ID)),
+				TypeLigneBDDHelper.TYPE_LIGNE, LigneBDDHelper.COL_NOM_LIGNE,
+				LigneBDDHelper.COL_IS_FAVORIS };
 
+		String selection = null;
 		if (!typeLigne.equals("")) {
 			Log.d(getApplicationContext().getString(R.string.log_tag_name)
 					+ " " + TAG_SERVICE, "Ligne du type : " + typeLigne);
 			selection = "type_ligne = '" + typeLigne + "'";
+
+			Log.d(getApplicationContext().getString(R.string.log_tag_name)
+					+ " " + TAG_SERVICE,
+					"Envoi d'une requête au ContentProvider");
+			Cursor c = cr.query(Uri.withAppendedPath(
+					Uri.parse(DefaultContentProvider.CONTENT_URI),
+					DefaultContentProvider.LIGNES_URI), projection, selection,
+					null, null);
+
+			ArrayList<LigneModel> lignes = new ArrayList<LigneModel>();
+			if (c.moveToFirst()) {
+				do {
+					LigneModel ligne = LigneBDDHelper.cursorToLigneModel(c);
+					Log.d(getApplicationContext().getString(
+							R.string.log_tag_name)
+							+ " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
+					lignes.add(ligne);
+				} while (c.moveToNext());
+			}
+			Log.i(getApplicationContext().getString(R.string.log_tag_name)
+					+ " " + TAG_SERVICE, "Fin récupération lignes");
+
+			return lignes;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Retourne les incidents en cours, du provider ou du service si les données sont expirées
+	 * @param scope Le scope des incidents voulus (jour, heure, minute)
+	 * @return La liste des incidents
+	 * @throws ParseException 
+	 * @throws JSONException 
+	 * @throws IOException 
+	 */
+	private List<IncidentModel> getIncidentsEnCoursFromProviderOrService(String scope) throws IOException, JSONException, ParseException {
+		boolean shouldUpdate = true;
+
+		List<IncidentModel> incidentsService;
+		ContentResolver cr = getContentResolver();
+
+		Uri uriContentProvider = Uri.withAppendedPath(
+				Uri.parse(DefaultContentProvider.CONTENT_URI),
+				DefaultContentProvider.INCIDENTS_URI);
+
+		if (shouldUpdate) {
+			incidentsService = getIncidentsEnCoursFromService(scope);
+
+			cr.delete(uriContentProvider, null, null);
+			
+			for (IncidentModel incidentService : incidentsService) {
+				ContentValues cvIncident = IncidentsBDDHelper
+						.getContentValues(incidentService);
+				cr.insert(uriContentProvider, cvIncident);
+			}
+		} else {
+			Cursor c = cr.query(uriContentProvider, null, null, null, null);
+			incidentsService = new ArrayList<IncidentModel>();
+
+			if (c.moveToFirst()) {
+				do {
+					incidentsService.add(IncidentsBDDHelper
+							.getIncidentModelFromCursor(c));
+				} while (c.moveToNext());
+			}
 		}
 
-		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
-				+ TAG_SERVICE, "Envoi d'une requête au ContentProvider");
-		Cursor c = cr.query(
-				Uri.parse(DefaultContentProvider.CONTENT_URI + "/lignes"),
-				projection, selection, null, null);
-
-		ArrayList<LigneModel> lignes = new ArrayList<LigneModel>();
-		if (c.moveToFirst()) {
-			do {
-				LigneModel ligne = new LigneModel(
-						c.getInt(c.getColumnIndex(LigneBaseColumns._ID)),
-						c.getString(c
-								.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)),
-						c.getString(c
-								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)),
-						c.getInt(c.getColumnIndex(LigneBaseColumns.IS_FAVORIS)) != 0);
-				Log.d(getApplicationContext().getString(R.string.log_tag_name)
-						+ " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
-				lignes.add(ligne);
-			} while (c.moveToNext());
-		}
-		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
-				+ TAG_SERVICE, "Fin récupération lignes");
-		return lignes;
+		return incidentsService;
 	}
 
 	/**
@@ -435,26 +482,19 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				+ TAG_SERVICE, "Début récupération des favoris");
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
-				LigneBaseColumns.NOM_TABLE.concat("."
-						.concat(LigneBaseColumns._ID)),
-				TypeLigneBaseColumns.TYPE_LIGNE, LigneBaseColumns.NOM_LIGNE,
-				LigneBaseColumns.IS_FAVORIS };
-		String selection = null;
+				LigneBDDHelper.NOM_TABLE.concat(".".concat(LigneBDDHelper._ID)),
+				TypeLigneBDDHelper.TYPE_LIGNE, LigneBDDHelper.COL_NOM_LIGNE,
+				LigneBDDHelper.COL_IS_FAVORIS };
 
-		Cursor c = cr.query(
-				Uri.parse(DefaultContentProvider.CONTENT_URI + "/favoris"),
-				projection, selection, null, null);
+		Cursor c = cr.query(Uri.withAppendedPath(
+				Uri.parse(DefaultContentProvider.CONTENT_URI),
+				DefaultContentProvider.FAVORIS_URI), projection, null, null,
+				null);
 
 		ArrayList<LigneModel> lignes = new ArrayList<LigneModel>();
 		if (c.moveToFirst()) {
 			do {
-				LigneModel ligne = new LigneModel(
-						c.getInt(c.getColumnIndex(LigneBaseColumns._ID)),
-						c.getString(c
-								.getColumnIndex(TypeLigneBaseColumns.TYPE_LIGNE)),
-						c.getString(c
-								.getColumnIndex(LigneBaseColumns.NOM_LIGNE)),
-						c.getInt(c.getColumnIndex(LigneBaseColumns.IS_FAVORIS)) != 0);
+				LigneModel ligne = LigneBDDHelper.cursorToLigneModel(c);
 				Log.d(getApplicationContext().getString(R.string.log_tag_name)
 						+ " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
 				lignes.add(ligne);
@@ -545,8 +585,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Début enregistrement d'un favoris");
-		editedValues
-				.put(LigneBaseColumns.IS_FAVORIS, ligne.isFavoris() ? 1 : 0);
+		editedValues.put(LigneBDDHelper.COL_IS_FAVORIS, ligne.isFavoris() ? 1
+				: 0);
 		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Mise à jour d'un favoris : " + ligne + " "
 				+ ligne.isFavoris());
@@ -594,6 +634,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
 		new LoadIncidentsAsyncTask(callback).execute(scope);
 	}
+
 	@Override
 	public void startGetTypeLignesAsync(
 			IIncidentsTransportsBackgroundServiceGetTypeLignesListener callback) {
@@ -607,15 +648,21 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	@Override
-	public void startReportIncident(String typeLigne,String numLigne, String raison, IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback) {
-		new ReportIncidentAsyncTask(callback).execute(typeLigne, numLigne, raison);
+	public void startReportIncident(
+			String typeLigne,
+			String numLigne,
+			String raison,
+			IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback) {
+		new ReportIncidentAsyncTask(callback).execute(typeLigne, numLigne,
+				raison);
 	}
 
 	@Override
-	public void startVoteIncident(IncidentModel incident, IncidentAction action,
+	public void startVoteIncident(IncidentModel incident,
+			IncidentAction action,
 			IIncidentsTransportsBackgroundServiceVoteIncidentListener callback) {
 		new VoteIncidentAsyncTask(incident, callback).execute(action);
-	}	
+	}
 
 	public void startRegisterFavoris(LigneModel ligne) {
 		new RegisterFavorisAsyncTask().execute(ligne);
