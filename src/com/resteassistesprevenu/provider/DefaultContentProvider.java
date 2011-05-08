@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -15,73 +16,74 @@ import com.resteassistesprevenu.R;
 
 /**
  * Provider fournissant les données contenues dans la base
+ * 
  * @author Arnaud
- *
+ * 
  */
 public class DefaultContentProvider extends ContentProvider {
 	private final static String TAG_PROVIDER = "DefaultContentProvider";
-	
+
 	/**
 	 * Nom du provider
 	 */
 	public static final String PROVIDER_NAME = "com.resteassistesprevenu.provider";
-	
+
 	/**
 	 * URI du provider
 	 */
 	public static final String CONTENT_URI = "content://" + PROVIDER_NAME;
-	
+
 	/**
 	 * URI pour les types de lignes
 	 */
 	public static final String TYPE_LIGNES_URI = "type_lignes";
-	
+
 	/**
 	 * URI pour les favoris
 	 */
 	public static final String FAVORIS_URI = "favoris";
-	
+
 	/**
 	 * URI pour les lignes
 	 */
 	public static final String LIGNES_URI = "favoris";
-	
+
 	/**
 	 * URI pour les incidents
 	 */
 	public static final String INCIDENTS_URI = "incidents";
 
-
 	/**
 	 * Identifiant de l'URL de récupération des types de ligne
 	 */
 	private static final int TYPE_LIGNES = 1;
-	
+
 	/**
 	 * Identifiant de l'URL de récupération des lignes
 	 */
 	private static final int LIGNES = 2;
-	
+
 	/**
 	 * Identifiant de l'URL de récupération d'une ligne
 	 */
 	private static final int LIGNES_ID = 3;
-	
+
 	/**
 	 * Identifiant de l'URL de récupération des favoris
 	 */
 	private static final int FAVORIS = 4;
-	
+
 	/**
-	 * Identifiant de l'URL de récupération d'enregistrement ou de suppression d'un favoris
+	 * Identifiant de l'URL de récupération d'enregistrement ou de suppression
+	 * d'un favoris
 	 */
 	private static final int FAVORIS_ID = 5;
-	
+
 	/**
 	 * Identifiant de l'URI d'ajout des incidents
 	 */
 	private static final int INCIDENTS = 5;
-	
+
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -99,8 +101,19 @@ public class DefaultContentProvider extends ContentProvider {
 	private DatabaseHelper dbHelper;
 
 	@Override
-	public int delete(Uri arg0, String arg1, String[] arg2) {
-		throw new UnsupportedOperationException("Not implemented yet");
+	public int delete(Uri uri, String whereClause, String[] whereArgs) {
+		int nbRowDeleted = 0;
+
+		switch (uriMatcher.match(uri)) {
+		case INCIDENTS:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début de suppression des incidents");
+			nbRowDeleted = this.dbHelper.getWritableDatabase().delete(
+					IncidentsBDDHelper.NOM_TABLE, whereClause, whereArgs);
+			break;
+		}
+
+		return nbRowDeleted;
 	}
 
 	@Override
@@ -122,8 +135,27 @@ public class DefaultContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public Uri insert(Uri arg0, ContentValues arg1) {
-		throw new UnsupportedOperationException("Not implemented yet");
+	public Uri insert(Uri uri, ContentValues values) {
+		long rowId = 0;
+
+		switch (uriMatcher.match(uri)) {
+		case INCIDENTS:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début d'insertion de nouveaux incidents");
+			rowId = this.dbHelper.getWritableDatabase().insert(
+					IncidentsBDDHelper.NOM_TABLE, null, values);
+			break;
+		}
+
+		if (rowId > 0) {
+			Uri uriNewIncident = Uri.parse(CONTENT_URI);
+			uriNewIncident = Uri.withAppendedPath(uriNewIncident, INCIDENTS_URI
+					+ "/" + rowId);
+
+			return uriNewIncident;
+		}
+
+		throw new SQLException("Erreur à l'insertion :  " + uri);
 	}
 
 	@Override
@@ -142,22 +174,36 @@ public class DefaultContentProvider extends ContentProvider {
 
 		switch (uriMatcher.match(uri)) {
 		case TYPE_LIGNES:
-			Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début récupération type lignes");
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début récupération type lignes");
 			qb.setTables("type_ligne");
 			break;
 		case LIGNES:
-			Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début récupération lignes");
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début récupération lignes");
 			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
 			break;
 		case LIGNES_ID:
-			Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début récupération d'une ligne");
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début récupération d'une ligne");
 			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
 			qb.appendWhere("lignes._id = " + uri.getPathSegments().get(1));
 			break;
 		case FAVORIS:
-			Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début récupération favoris");
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début récupération favoris");
 			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
 			qb.appendWhere("isFavoris = 1");
+			break;
+		case INCIDENTS:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début récupération incidents");
+			qb.setTables(String.format("%s INNER JOIN %s ON (%s.%s=%s.%s)",
+					IncidentsBDDHelper.NOM_TABLE, LigneBDDHelper.NOM_TABLE,
+					IncidentsBDDHelper.NOM_TABLE,
+					IncidentsBDDHelper.COL_ID_LIGNE, LigneBDDHelper.NOM_TABLE,
+					LigneBDDHelper._ID));
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
 			break;
 		}
 
@@ -174,7 +220,9 @@ public class DefaultContentProvider extends ContentProvider {
 		int count = 0;
 		switch (uriMatcher.match(uri)) {
 		case FAVORIS_ID:
-			Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début mise à jour d'un favoris : " + uri.getPathSegments().get(1));
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début mise à jour d'un favoris : "
+					+ uri.getPathSegments().get(1));
 			count = this.dbHelper.getWritableDatabase().update(
 					LigneBDDHelper.NOM_TABLE, values,
 					LigneBDDHelper._ID + "=" + uri.getPathSegments().get(1),
@@ -183,21 +231,21 @@ public class DefaultContentProvider extends ContentProvider {
 		}
 
 		getContext().getContentResolver().notifyChange(uri, null);
-		
+
 		return count;
 	}
 
 	private SQLiteDatabase ratpDB;
-	
+
 	/**
 	 * Nom de la base
 	 */
 	private static final String DATABASE_NAME = "ResteAssisTesPrevenu";
-	
+
 	/**
 	 * Version de la base
 	 */
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 5;
 
 	private class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -213,36 +261,61 @@ public class DefaultContentProvider extends ContentProvider {
 		}
 
 		private void initializeData(SQLiteDatabase db) {
-			Log.i(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début peuplement de la base.");
+			Log.i(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début peuplement de la base.");
 			String[] reqsInsertTypeLignes = getContext().getString(
 					R.string.req_insert_type_ligne).split(";");
 			for (String reqInsertTypeLigne : reqsInsertTypeLignes) {
-				Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Exécution de : " + reqInsertTypeLigne);
+				Log.d(getContext().getString(R.string.log_tag_name) + " "
+						+ TAG_PROVIDER, "Exécution de : " + reqInsertTypeLigne);
 				db.execSQL(reqInsertTypeLigne);
 			}
 
 			String[] reqsInsertLignes = getContext().getString(
 					R.string.req_insert_lignes).split(";");
 			for (String reqInsertLigne : reqsInsertLignes) {
-				Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Exécution de : " + reqInsertLigne);
+				Log.d(getContext().getString(R.string.log_tag_name) + " "
+						+ TAG_PROVIDER, "Exécution de : " + reqInsertLigne);
 				db.execSQL(reqInsertLigne);
 			}
-			Log.i(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Fin peuplement de la base.");
+			Log.i(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Fin peuplement de la base.");
 		}
 
 		private void createTables(SQLiteDatabase db) {
-			Log.i(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début création de la base.");
+			Log.i(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début création de la base.");
 			db.execSQL(getContext().getString(
 					R.string.req_create_table_type_ligne));
 
-			Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Exécution de la requête : " + getContext().getString(R.string.req_create_table_lignes));
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Exécution de la requête : "
+					+ getContext().getString(R.string.req_create_table_lignes));
 			db.execSQL(getContext().getString(R.string.req_create_table_lignes));
-
-			Log.d(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Exécution de la requête : " + getContext().getString(R.string.req_create_table_terminus));
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Exécution de la requête : "
+					+ getContext()
+							.getString(R.string.req_create_table_terminus));
 			db.execSQL(getContext().getString(
 					R.string.req_create_table_terminus));
-			
-			Log.i(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Fin création de la base.");
+
+			db.execSQL("CREATE TABLE " + IncidentsBDDHelper.NOM_TABLE + "("
+					+ IncidentsBDDHelper._ID + " INTEGER PRIMARY KEY,"
+					+ IncidentsBDDHelper.COL_ID_LIGNE
+					+ " INTEGER REFERENCES lignes(_id),"
+					+ IncidentsBDDHelper.COL_RAISON + " VARCHAR NOT NULL,"
+					+ IncidentsBDDHelper.COL_STATUT + " VARCHAR NOT NULL,"
+					+ IncidentsBDDHelper.COL_NB_VOTE_PLUS
+					+ " INTEGER NOT NULL,"
+					+ IncidentsBDDHelper.COL_NB_VOTE_MINUS
+					+ " INTEGER NOT NULL,"
+					+ IncidentsBDDHelper.COL_NB_VOTE_ENDED
+					+ " INTEGER NOT NULL,"
+					+ IncidentsBDDHelper.COL_LAST_MODIFIED_TIME
+					+ " DATE NOT NULL" + ");");
+
+			Log.i(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Fin création de la base.");
 		}
 
 		@Override
@@ -255,11 +328,13 @@ public class DefaultContentProvider extends ContentProvider {
 		}
 
 		private void dropTables(SQLiteDatabase db) {
-			Log.i(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Début suppression de la base.");
+			Log.i(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début suppression de la base.");
 			db.execSQL("DROP TABLE IF EXISTS terminus");
 			db.execSQL("DROP TABLE IF EXISTS lignes");
 			db.execSQL("DROP TABLE IF EXISTS type_ligne");
-			Log.i(getContext().getString(R.string.log_tag_name) + " " + TAG_PROVIDER, "Fin suppression de la base.");
+			Log.i(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Fin suppression de la base.");
 		}
 
 	}

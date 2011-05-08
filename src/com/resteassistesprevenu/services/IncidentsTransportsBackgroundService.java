@@ -62,12 +62,6 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class LoadIncidentsAsyncTask extends
 			AsyncTask<String, Void, List<IncidentModel>> {
-		private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback;
-
-		public LoadIncidentsAsyncTask(
-				IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
-			this.callback = callback;
-		}
 
 		@Override
 		protected List<IncidentModel> doInBackground(String... params) {
@@ -78,12 +72,6 @@ public class IncidentsTransportsBackgroundService extends Service implements
 						"Erreur au chargement des incidents par le service", e);
 				return null;
 			}
-		}
-
-		@Override
-		protected void onPostExecute(List<IncidentModel> result) {
-			super.onPostExecute(result);
-			this.callback.dataChanged(result);
 		}
 	}
 
@@ -457,19 +445,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 						.getContentValues(incidentService);
 				cr.insert(uriContentProvider, cvIncident);
 			}
-		} else {
-			Cursor c = cr.query(uriContentProvider, null, null, null, null);
-			incidentsService = new ArrayList<IncidentModel>();
-
-			if (c.moveToFirst()) {
-				do {
-					incidentsService.add(IncidentsBDDHelper
-							.getIncidentModelFromCursor(c));
-				} while (c.moveToNext());
-			}
 		}
 
-		return incidentsService;
+		getContentResolver().notifyChange(uriContentProvider, null);
+		return null;
 	}
 
 	/**
@@ -632,7 +611,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	public void startGetIncidentsAsync(
 			String scope,
 			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
-		new LoadIncidentsAsyncTask(callback).execute(scope);
+		new LoadIncidentsAsyncTask().execute(scope);
 	}
 
 	@Override

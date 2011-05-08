@@ -40,6 +40,8 @@ public final class IncidentsBDDHelper implements BaseColumns {
 	public static ContentValues getContentValues(IncidentModel incident) {
 		ContentValues cv = new ContentValues();
 		
+		cv.put(_ID, incident.getId());
+		
 		return cv;
 	}
 	

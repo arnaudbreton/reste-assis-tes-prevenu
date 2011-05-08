@@ -2,19 +2,22 @@ package com.resteassistesprevenu.activities;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
@@ -33,11 +36,12 @@ import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
+import com.resteassistesprevenu.provider.DefaultContentProvider;
+import com.resteassistesprevenu.provider.IncidentsBDDHelper;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
 
 /**
@@ -53,6 +57,8 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	};
 
 	private static final String TAG_ACTIVITY = "IncidentEnCoursActivity";
+
+	private Handler handler;
 
 	/**
 	 * Ensemble des incidents affichés
@@ -98,12 +104,11 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	 * Bouton d'ajout d'incident
 	 */
 	private ImageButton mBtnAddIncident;
-	
+
 	/**
 	 * ImageButton de rafraîchissement
 	 */
 	private ImageButton mBtnRefresh;
-
 
 	/**
 	 * Texte indiquant qu'il n'y a aucun incident (parmis les favoris ou sur le
@@ -147,11 +152,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	private ServiceIncidentConnection conn;
 
 	/**
-	 * Listener de récupération des incidents
-	 */
-	private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener getIncidentsEnCoursListener;
-
-	/**
 	 * Listener de vote pour les incidents
 	 */
 	private IIncidentsTransportsBackgroundServiceVoteIncidentListener voteIncidentListener;
@@ -160,17 +160,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	 * Listener de récupération des favoris
 	 */
 	private IIncidentsTransportsBackgroundServiceGetFavorisListener getFavorisListener;
-
-	/**
-	 * Timestamp du dernier chargement
-	 */
-	private long lastLoadingTimestamp;
-	
-
-	/**
-	 * Durée de validité des données chargées (10 minutes)
-	 */
-	private static final int MAX_DATA_VALIDITY_PERIOD = 10;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -198,14 +187,15 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 				"Récupération des contrôles.");
 
-		this.lastLoadingTimestamp = 0;
+		this.handler = new Handler();
 
 		this.mBtnJour = (RadioButton) this.findViewById(R.id.radioJour);
 		this.mBtnHeure = (RadioButton) this.findViewById(R.id.radioHeure);
 		this.mBtnMinute = (RadioButton) this.findViewById(R.id.radioMinute);
 		this.mBtnAddIncident = (ImageButton) this
 				.findViewById(R.id.btnAjouterIncident);
-		this.mBtnRefresh = (ImageButton) this.findViewById(R.id.btnRefreshIncident);
+		this.mBtnRefresh = (ImageButton) this
+				.findViewById(R.id.btnRefreshIncident);
 		this.mBtnIgnorerFavoris = (Button) this
 				.findViewById(R.id.btnIgnorerFavoris);
 
@@ -226,12 +216,11 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		((android.widget.ListView) this
 				.findViewById(R.id.listViewIncidentEnCours))
 				.setAdapter(mAdapter);
-		
+
 		this.mBtnRefresh.setOnClickListener(new View.OnClickListener() {
-			
 			@Override
-			public void onClick(View v) {		
-				lastLoadingTimestamp = 0;
+			public void onClick(View v) {
+				mModeChargement = ModeChargement.NORMAL;
 				startGetIncidentsFromServiceAsync();
 			}
 		});
@@ -250,13 +239,11 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			@Override
 			public void onClick(View v) {
 				mModeChargement = ModeChargement.NORMAL;
-				
+
 				if (mCurrentScope != IncidentModel.SCOPE_JOUR) {
-					mCurrentScope = IncidentModel.SCOPE_JOUR;					
+					mCurrentScope = IncidentModel.SCOPE_JOUR;
 				}
-				
-				lastLoadingTimestamp = 0;
-				
+
 				startGetIncidentsFromServiceAsync();
 			}
 		});
@@ -267,10 +254,8 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				mModeChargement = ModeChargement.NORMAL;
 
 				if (mCurrentScope != IncidentModel.SCOPE_HOUR) {
-					mCurrentScope = IncidentModel.SCOPE_HOUR;					
+					mCurrentScope = IncidentModel.SCOPE_HOUR;
 				}
-				
-				lastLoadingTimestamp = 0;
 
 				startGetIncidentsFromServiceAsync();
 			}
@@ -284,8 +269,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				if (mCurrentScope != IncidentModel.SCOPE_MINUTE) {
 					mCurrentScope = IncidentModel.SCOPE_MINUTE;
 				}
-				
-				lastLoadingTimestamp = 0;
 
 				startGetIncidentsFromServiceAsync();
 			}
@@ -300,6 +283,11 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				startGetIncidentsFromServiceAsync();
 			}
 		});
+
+		ContentResolver cr = getContentResolver();
+		cr.registerContentObserver(
+				Uri.parse(DefaultContentProvider.CONTENT_URI), true,
+				new IncidentObserver(handler));
 	}
 
 	@Override
@@ -395,7 +383,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 								mBoundService.setProduction(false);
 							}
 
-							lastLoadingTimestamp = 0;
 							IncidentsEnCoursActivity.this
 									.startGetIncidentsFromServiceAsync();
 						}
@@ -491,16 +478,11 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			this.mBtnIgnorerFavoris.setVisibility(View.GONE);
 			this.mTxtAucunIncident.setVisibility(View.GONE);
 
-			if (isDataValid()) {
-				showIncidents();
-			} else {
-				this.loadingDialog = ProgressDialog
-						.show(IncidentsEnCoursActivity.this,
-								"",
-								getString(R.string.msg_incident_en_cours_list_loading_incidents));
-				this.mBoundService.startGetIncidentsAsync(mCurrentScope,
-						getIncidentsEnCoursListener);
-			}
+			this.loadingDialog = ProgressDialog
+					.show(IncidentsEnCoursActivity.this,
+							"",
+							getString(R.string.msg_incident_en_cours_list_loading_incidents));
+			this.mBoundService.startGetIncidentsAsync(mCurrentScope, null);
 		} else {
 			Toast.makeText(this,
 					R.string.msg_incident_en_cours_list_loading_incidents,
@@ -520,8 +502,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 					"Fin activité NewIncident : " + resultCode);
 			if (resultCode == Activity.RESULT_OK) {
-				lastLoadingTimestamp = 0;
-				//startGetIncidentsFromServiceAsync();
+				// startGetIncidentsFromServiceAsync();
 			}
 		}
 	}
@@ -560,55 +541,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 					.getService();
 
-			getIncidentsEnCoursListener = new IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener() {
-				@Override
-				public void dataChanged(List<IncidentModel> incidentsService) {
-					try {
-						Log.i(getString(R.string.log_tag_name),
-								"Début du chargement des incidents.");
-						if (incidentsService == null) {
-							Toast.makeText(
-									IncidentsEnCoursActivity.this,
-									R.string.msg_incident_en_cours_list_load_incidents_KO,
-									Toast.LENGTH_LONG).show();
-						} else {
-							lastLoadingTimestamp = Calendar.getInstance().getTime().getTime();
-
-							IncidentsEnCoursActivity.this.incidentsService
-									.clear();
-							IncidentsEnCoursActivity.this.incidentsService
-									.addAll(incidentsService);
-							
-							mBtnRefresh.clearAnimation();
-
-							showIncidents();
-						}
-
-						if (loadingDialog != null && loadingDialog.isShowing())
-							loadingDialog.dismiss();
-
-						Log.i(getString(R.string.log_tag_name),
-								"Chargement des incidents réussi.");
-					} catch (Exception e) {
-						Log.e(getString(R.string.log_tag_name),
-								"Problème de chargement des incidents", e);
-						AlertDialog.Builder builder = new AlertDialog.Builder(
-								IncidentsEnCoursActivity.this);
-						builder.setMessage(
-								getString(R.string.msg_incident_en_cours_list_load_incidents_KO))
-								.setCancelable(false)
-								.setPositiveButton("Ok",
-										new DialogInterface.OnClickListener() {
-											public void onClick(
-													DialogInterface dialog,
-													int id) {
-											}
-										});
-						builder.show();
-					}
-				}
-			};
-
 			voteIncidentListener = new IIncidentsTransportsBackgroundServiceVoteIncidentListener() {
 
 				@Override
@@ -621,7 +553,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 						Toast.makeText(IncidentsEnCoursActivity.this,
 								R.string.msg_vote_OK, Toast.LENGTH_SHORT)
 								.show();
-						
+
 						startGetIncidentsFromServiceAsync();
 					} else {
 						Log.i(getString(R.string.log_tag_name) + " "
@@ -666,23 +598,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		}
 	};
 
-	private boolean isDataValid() {		
-		if(this.lastLoadingTimestamp > 0) {
-			GregorianCalendar c1 = new GregorianCalendar();
-			c1.setTimeInMillis(this.lastLoadingTimestamp);
-			c1.add(Calendar.MINUTE, MAX_DATA_VALIDITY_PERIOD);
-			
-			GregorianCalendar c2 = new GregorianCalendar();
-			c2.setTimeInMillis(System.currentTimeMillis());
-			
-			return c2.before(c1);
-		}
-		else {
-			return false;
-		}
-		
-	}
-
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -693,4 +608,60 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 
 		unbindService(conn);
 	}
+
+	private class IncidentObserver extends ContentObserver {
+
+		public IncidentObserver(Handler handler) {
+			super(handler);
+		}
+
+		@Override
+		public void onChange(boolean selfChange) {
+			// TODO Auto-generated method stub
+			super.onChange(selfChange);
+
+			try {
+				Log.i(getString(R.string.log_tag_name),
+						"Début du chargement des incidents.");
+
+				IncidentsEnCoursActivity.this.incidentsService.clear();
+
+				Cursor c = managedQuery(Uri.withAppendedPath(
+						Uri.parse(DefaultContentProvider.CONTENT_URI),
+						DefaultContentProvider.INCIDENTS_URI), null, null,
+						null, null);
+
+				if (c.moveToFirst()) {
+					while (c.moveToNext()) {
+						IncidentsEnCoursActivity.this.incidentsService
+								.add(IncidentsBDDHelper
+										.getIncidentModelFromCursor(c));
+					}
+				}
+
+				showIncidents();
+
+				if (loadingDialog != null && loadingDialog.isShowing())
+					loadingDialog.dismiss();
+
+				Log.i(getString(R.string.log_tag_name),
+						"Chargement des incidents réussi.");
+			} catch (Exception e) {
+				Log.e(getString(R.string.log_tag_name),
+						"Problème de chargement des incidents", e);
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						IncidentsEnCoursActivity.this);
+				builder.setMessage(
+						getString(R.string.msg_incident_en_cours_list_load_incidents_KO))
+						.setCancelable(false)
+						.setPositiveButton("Ok",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+									}
+								});
+				builder.show();
+			}
+		}
+	};
 }
