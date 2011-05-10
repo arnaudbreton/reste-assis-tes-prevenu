@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 
 import com.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.model.LigneModelService;
 
 /**
  * Description des colonnes de la table des incidents
@@ -26,22 +27,29 @@ public final class IncidentsBDDHelper implements BaseColumns {
 	public static final int NUM_COL_ID = 0;
 	public static final int NUM_COL_ID_LIGNE = 1;
 	public static final int NUM_COL_RAISON = 2;
-	public static final int NUM_COL_NB_VOTE_PLUS = 3;
-	public static final int NUM_COL_NB_VOTE_MINUS = 4;
-	public static final int NUM_COL_NB_VOTE_ENDED = 5;
-	public static final int NUM_COL_LAST_MODIFIED_TIME = 6;
-	public static final int NUM_COL_STATUT = 7;
+	public static final int NUM_COL_STATUT = 3;
+	public static final int NUM_COL_NB_VOTE_PLUS = 4;
+	public static final int NUM_COL_NB_VOTE_MINUS = 5;
+	public static final int NUM_COL_NB_VOTE_ENDED = 6;
+	public static final int NUM_COL_LAST_MODIFIED_TIME = 7;
 	
 	/**
 	 * Retourne le contentvalues associé à l'incident
 	 * @param incident Le modèle d'incident
 	 * @return Un contentValues
 	 */
-	public static ContentValues getContentValues(IncidentModel incident) {
+	public static ContentValues getContentValues(IncidentModel incident, int ligneId) {
 		ContentValues cv = new ContentValues();
 		
 		cv.put(_ID, incident.getId());
-		
+		cv.put(COL_RAISON, incident.getReason());
+		cv.put(COL_STATUT, incident.getStatut());
+		cv.put(COL_NB_VOTE_PLUS, incident.getVotePlus());
+		cv.put(COL_NB_VOTE_MINUS, incident.getVoteMinus());
+		cv.put(COL_NB_VOTE_ENDED, incident.getVoteEnded());
+		cv.put(COL_LAST_MODIFIED_TIME, incident.getLastModifiedTime().getTime());
+		cv.put(COL_ID_LIGNE, ligneId);
+				
 		return cv;
 	}
 	
@@ -50,8 +58,13 @@ public final class IncidentsBDDHelper implements BaseColumns {
 		
 		incident.setId(c.getInt(NUM_COL_ID));
 		incident.setReason(c.getString(NUM_COL_RAISON));
-		incident.setLastModifiedTime(new Date(c.getInt(NUM_COL_LAST_MODIFIED_TIME)));
+		incident.setLastModifiedTime(new Date(c.getLong(NUM_COL_LAST_MODIFIED_TIME)));
 		incident.setStatut(c.getString(NUM_COL_STATUT));
+		incident.setVotePlus(c.getInt(NUM_COL_NB_VOTE_PLUS));
+		incident.setVoteMinus(c.getInt(NUM_COL_NB_VOTE_MINUS));
+		incident.setVoteEnded(c.getInt(NUM_COL_NB_VOTE_ENDED));
+
+		incident.setLigne(new LigneModelService("RER", "A"));
 		
 		return incident;
 	}

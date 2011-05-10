@@ -63,6 +63,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	private class LoadIncidentsAsyncTask extends
 			AsyncTask<String, Void, List<IncidentModel>> {
 
+		private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback; 
+		
+		public LoadIncidentsAsyncTask(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
+			this.callback = callback;
+		}
+		
 		@Override
 		protected List<IncidentModel> doInBackground(String... params) {
 			try {
@@ -71,6 +77,15 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				Log.e(getString(R.string.log_tag_name),
 						"Erreur au chargement des incidents par le service", e);
 				return null;
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(List<IncidentModel> result) {
+			super.onPostExecute(result);
+			
+			if(this.callback != null) {
+				this.callback.dataChanged(result);
 			}
 		}
 	}
@@ -303,6 +318,11 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	private IncidentsTransportsBackgroundServiceBinder mBinder;
 
+	/**
+	 * Dernière mise à jour des données
+	 */
+	private long lastTimeUpdate;
+
 	@Override
 	public IBinder onBind(Intent arg0) {
 		return this.mBinder;
@@ -311,8 +331,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		
 		this.mBinder = new IncidentsTransportsBackgroundServiceBinder(this);
 		this.urlService = SERVICE_URL_BASE_PRODUCTION;
+		this.lastTimeUpdate = 0;
 	}
 
 	@Override
@@ -394,7 +416,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 					+ " " + TAG_SERVICE,
 					"Envoi d'une requête au ContentProvider");
 			Cursor c = cr.query(Uri.withAppendedPath(
-					Uri.parse(DefaultContentProvider.CONTENT_URI),
+					DefaultContentProvider.CONTENT_URI,
 					DefaultContentProvider.LIGNES_URI), projection, selection,
 					null, null);
 
@@ -419,36 +441,63 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	/**
 	 * Retourne les incidents en cours, du provider ou du service si les données sont expirées
-	 * @param scope Le scope des incidents voulus (jour, heure, minute)
+	 * @param scope Le scope des incidents (jour, heure, minute)
 	 * @return La liste des incidents
 	 * @throws ParseException 
 	 * @throws JSONException 
 	 * @throws IOException 
 	 */
 	private List<IncidentModel> getIncidentsEnCoursFromProviderOrService(String scope) throws IOException, JSONException, ParseException {
-		boolean shouldUpdate = true;
+		boolean shouldUpdate;
 
-		List<IncidentModel> incidentsService;
-		ContentResolver cr = getContentResolver();
+		List<IncidentModel> incidentsService = null;
+		
 
 		Uri uriContentProvider = Uri.withAppendedPath(
-				Uri.parse(DefaultContentProvider.CONTENT_URI),
+				DefaultContentProvider.CONTENT_URI,
 				DefaultContentProvider.INCIDENTS_URI);
+		ContentResolver cr = getContentResolver();
 
+		shouldUpdate = lastTimeUpdate == 0 || (lastTimeUpdate + 10 * 60 * 1000 < System.currentTimeMillis());
 		if (shouldUpdate) {
 			incidentsService = getIncidentsEnCoursFromService(scope);
-
+			
+			// Suppression des anciens incidents		
 			cr.delete(uriContentProvider, null, null);
 			
+			// Ajout des nouveaux
+			String[] projectionIdLigne = new String[] { LigneBDDHelper.NOM_TABLE + "." + LigneBDDHelper._ID };
+			String selection = LigneBDDHelper.COL_NOM_LIGNE;
+			String[] selectionArgs;
+			int ligneId = 0;
 			for (IncidentModel incidentService : incidentsService) {
+				selectionArgs = new String[] { incidentService.getLigne().getNumLigne() };
+				
+				Cursor c = cr.query(Uri.withAppendedPath(DefaultContentProvider.CONTENT_URI, DefaultContentProvider.LIGNES_URI), projectionIdLigne, selection, selectionArgs, null);
+				if(c.moveToFirst()) {
+					ligneId = c.getInt(LigneBDDHelper.NUM_COL_ID);
+				}				
+				c.close();
+				
 				ContentValues cvIncident = IncidentsBDDHelper
-						.getContentValues(incidentService);
+						.getContentValues(incidentService, ligneId);
 				cr.insert(uriContentProvider, cvIncident);
 			}
+			
+			lastTimeUpdate = System.currentTimeMillis();
 		}
-
-		getContentResolver().notifyChange(uriContentProvider, null);
-		return null;
+		else {
+			Cursor cIncidentsDB = cr.query(uriContentProvider, null, null, null, null);
+			if(cIncidentsDB.moveToFirst()) {
+				incidentsService = new ArrayList<IncidentModel>();
+				while(cIncidentsDB.moveToNext()) {
+					incidentsService.add(IncidentsBDDHelper.getIncidentModelFromCursor(cIncidentsDB));
+				}
+			}		
+			cIncidentsDB.close();
+		}
+		
+		return incidentsService;
 	}
 
 	/**
@@ -466,7 +515,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				LigneBDDHelper.COL_IS_FAVORIS };
 
 		Cursor c = cr.query(Uri.withAppendedPath(
-				Uri.parse(DefaultContentProvider.CONTENT_URI),
+				DefaultContentProvider.CONTENT_URI,
 				DefaultContentProvider.FAVORIS_URI), projection, null, null,
 				null);
 
@@ -611,7 +660,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	public void startGetIncidentsAsync(
 			String scope,
 			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
-		new LoadIncidentsAsyncTask().execute(scope);
+		new LoadIncidentsAsyncTask(callback).execute(scope);
 	}
 
 	@Override

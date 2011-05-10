@@ -188,7 +188,23 @@ public class IncidentModel {
 	 *            the voteMinus to set
 	 */
 	public void addVoteMinus() {
-		this.voteMinus++;
+		this.voteMinus += 3;
+	}
+
+	public void setLigne(LigneModelService ligne) {
+		this.ligne = ligne;
+	}
+
+	public void setVotePlus(int votePlus) {
+		this.votePlus = votePlus;
+	}
+
+	public void setVoteMinus(int voteMinus) {
+		this.voteMinus = voteMinus;
+	}
+
+	public void setVoteEnded(int voteEnded) {
+		this.voteEnded = voteEnded;
 	}
 
 	/**

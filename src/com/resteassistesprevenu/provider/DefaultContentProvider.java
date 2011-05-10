@@ -17,8 +17,6 @@ import com.resteassistesprevenu.R;
 /**
  * Provider fournissant les données contenues dans la base
  * 
- * @author Arnaud
- * 
  */
 public class DefaultContentProvider extends ContentProvider {
 	private final static String TAG_PROVIDER = "DefaultContentProvider";
@@ -31,7 +29,7 @@ public class DefaultContentProvider extends ContentProvider {
 	/**
 	 * URI du provider
 	 */
-	public static final String CONTENT_URI = "content://" + PROVIDER_NAME;
+	public static final Uri CONTENT_URI = Uri.parse("content://" + PROVIDER_NAME);
 
 	/**
 	 * URI pour les types de lignes
@@ -148,7 +146,7 @@ public class DefaultContentProvider extends ContentProvider {
 		}
 
 		if (rowId > 0) {
-			Uri uriNewIncident = Uri.parse(CONTENT_URI);
+			Uri uriNewIncident = CONTENT_URI;
 			uriNewIncident = Uri.withAppendedPath(uriNewIncident, INCIDENTS_URI
 					+ "/" + rowId);
 
