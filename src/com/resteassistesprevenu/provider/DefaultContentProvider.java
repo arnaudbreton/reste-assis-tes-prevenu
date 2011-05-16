@@ -196,12 +196,15 @@ public class DefaultContentProvider extends ContentProvider {
 		case INCIDENTS:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération incidents");
-			qb.setTables(String.format("%s INNER JOIN %s ON (%s.%s=%s.%s)",
-					IncidentsBDDHelper.NOM_TABLE, LigneBDDHelper.NOM_TABLE,
+			qb.setTables(String.format("(%s INNER JOIN %s %s ON (%s.%s=%s.%s)) %s INNER JOIN %s ON (%s.%s=%s.%s)",
+					IncidentsBDDHelper.NOM_TABLE, LigneBDDHelper.NOM_TABLE, "L1",
 					IncidentsBDDHelper.NOM_TABLE,
-					IncidentsBDDHelper.COL_ID_LIGNE, LigneBDDHelper.NOM_TABLE,
-					LigneBDDHelper._ID));
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
+					IncidentsBDDHelper.COL_ID_LIGNE, "L1",
+					LigneBDDHelper._ID,
+					"L2",  TypeLigneBDDHelper.NOM_TABLE,
+					"L2", LigneBDDHelper.COL_ID_TYPE_LIGNE,
+					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper._ID
+					));
 			break;
 		}
 

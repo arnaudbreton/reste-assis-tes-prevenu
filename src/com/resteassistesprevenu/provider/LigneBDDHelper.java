@@ -22,6 +22,6 @@ public final class LigneBDDHelper implements BaseColumns {
 	public static final int NUM_COL_IS_FAVORIS = 3; 
 	
 	public static LigneModel cursorToLigneModel(Cursor c) {
-		return new LigneModel(c.getInt(NUM_COL_ID), c.getString(c.getColumnIndex(TypeLigneBDDHelper.TYPE_LIGNE)), c.getString(NUM_COL_NOM_LIGNE), c.getInt(NUM_COL_IS_FAVORIS) == 0 ? false : true);
+		return new LigneModel(c.getInt(NUM_COL_ID), c.getString(c.getColumnIndex(TypeLigneBDDHelper.NOM_TABLE)), c.getString(NUM_COL_NOM_LIGNE), c.getInt(NUM_COL_IS_FAVORIS) == 0 ? false : true);
 	}
 }

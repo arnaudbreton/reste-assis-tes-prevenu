@@ -367,7 +367,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				+ TAG_SERVICE, "Début récupération type lignes");
 
 		ContentResolver cr = getContentResolver();
-		String[] projection = new String[] { TypeLigneBDDHelper.TYPE_LIGNE };
+		String[] projection = new String[] { TypeLigneBDDHelper.NOM_TABLE };
 
 		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Envoi d'une requête au service");
@@ -382,11 +382,14 @@ public class IncidentsTransportsBackgroundService extends Service implements
 						+ " " + TAG_SERVICE,
 						"Ajout de la ligne : "
 								+ c.getString(c
-										.getColumnIndex(TypeLigneBDDHelper.TYPE_LIGNE)));
+										.getColumnIndex(TypeLigneBDDHelper.NOM_TABLE)));
 				lignes.add(c.getString(c
-						.getColumnIndex(TypeLigneBDDHelper.TYPE_LIGNE)));
+						.getColumnIndex(TypeLigneBDDHelper.NOM_TABLE)));
 			} while (c.moveToNext());
 		}
+		
+		c.close();
+		
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Fin récupération type lignes");
 		return lignes;
@@ -403,7 +406,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
 				LigneBDDHelper.NOM_TABLE.concat(".".concat(LigneBDDHelper._ID)),
-				TypeLigneBDDHelper.TYPE_LIGNE, LigneBDDHelper.COL_NOM_LIGNE,
+				TypeLigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_NOM_LIGNE,
 				LigneBDDHelper.COL_IS_FAVORIS };
 
 		String selection = null;
@@ -430,6 +433,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 					lignes.add(ligne);
 				} while (c.moveToNext());
 			}
+			
+			c.close();
 			Log.i(getApplicationContext().getString(R.string.log_tag_name)
 					+ " " + TAG_SERVICE, "Fin récupération lignes");
 
@@ -511,7 +516,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
 				LigneBDDHelper.NOM_TABLE.concat(".".concat(LigneBDDHelper._ID)),
-				TypeLigneBDDHelper.TYPE_LIGNE, LigneBDDHelper.COL_NOM_LIGNE,
+				TypeLigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_NOM_LIGNE,
 				LigneBDDHelper.COL_IS_FAVORIS };
 
 		Cursor c = cr.query(Uri.withAppendedPath(
@@ -526,8 +531,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				Log.d(getApplicationContext().getString(R.string.log_tag_name)
 						+ " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
 				lignes.add(ligne);
-			} while (c.moveToNext());
+			} while (c.moveToNext());				
 		}
+		c.close();
+		
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Fin récupération des favoris");
 		return lignes;

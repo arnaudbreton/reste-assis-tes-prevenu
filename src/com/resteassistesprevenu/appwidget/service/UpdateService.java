@@ -75,22 +75,15 @@ public class UpdateService extends Service {
 
 						incidents.addAll(incidentsService);
 						
-						// Build the widget update for today
-						new TimerTask() {
-							
-							@Override
-							public void run() {
-								RemoteViews updateViews = buildUpdate();
-								
-								// Push update for this widget to the home screen
-								ComponentName thisWidget = new ComponentName(getApplicationContext(),
-										RASSTPWidgetProvider.class);
-								AppWidgetManager manager = AppWidgetManager.getInstance(getApplicationContext());
-								manager.updateAppWidget(thisWidget, updateViews);								
-							}
-						};
-					
-
+						// Build the widget update for today						
+						ComponentName thisWidget = new ComponentName(getApplicationContext(),
+								RASSTPWidgetProvider.class);
+						AppWidgetManager manager = AppWidgetManager.getInstance(getApplicationContext());
+						RemoteViews updateViews = buildUpdate();
+						manager.updateAppWidget(thisWidget, updateViews);			
+						
+						stopSelf();
+						
 						Log.i(getApplicationContext().getString(R.string.log_tag_name),
 								"Chargement des incidents réussi.");
 					} catch (Exception e) {

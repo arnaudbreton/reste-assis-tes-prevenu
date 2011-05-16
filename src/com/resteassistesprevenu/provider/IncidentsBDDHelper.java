@@ -36,11 +36,12 @@ public final class IncidentsBDDHelper implements BaseColumns {
 	/**
 	 * Retourne le contentvalues associé à l'incident
 	 * @param incident Le modèle d'incident
+	 * @param ligneId l'identifiant de la ligne
 	 * @return Un contentValues
 	 */
 	public static ContentValues getContentValues(IncidentModel incident, int ligneId) {
 		ContentValues cv = new ContentValues();
-		
+
 		cv.put(_ID, incident.getId());
 		cv.put(COL_RAISON, incident.getReason());
 		cv.put(COL_STATUT, incident.getStatut());
@@ -58,7 +59,7 @@ public final class IncidentsBDDHelper implements BaseColumns {
 		
 		incident.setId(c.getInt(NUM_COL_ID));
 		incident.setReason(c.getString(NUM_COL_RAISON));
-		incident.setLastModifiedTime(new Date(c.getLong(NUM_COL_LAST_MODIFIED_TIME)));
+		incident.setLastModifiedTime(new Date(c.getInt(NUM_COL_LAST_MODIFIED_TIME)));
 		incident.setStatut(c.getString(NUM_COL_STATUT));
 		incident.setVotePlus(c.getInt(NUM_COL_NB_VOTE_PLUS));
 		incident.setVoteMinus(c.getInt(NUM_COL_NB_VOTE_MINUS));
