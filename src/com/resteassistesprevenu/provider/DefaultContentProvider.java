@@ -208,7 +208,7 @@ public class DefaultContentProvider extends ContentProvider {
 			break;
 		}
 
-		Cursor c = qb.query(db, projection, selection, null, null, null,
+		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null,
 				sortOrder);
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 

@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 
 import com.resteassistesprevenu.model.IncidentModel;
-import com.resteassistesprevenu.model.LigneModelService;
 
 /**
  * Description des colonnes de la table des incidents
@@ -65,7 +64,7 @@ public final class IncidentsBDDHelper implements BaseColumns {
 		incident.setVoteMinus(c.getInt(NUM_COL_NB_VOTE_MINUS));
 		incident.setVoteEnded(c.getInt(NUM_COL_NB_VOTE_ENDED));
 
-		incident.setLigne(new LigneModelService("RER", "A"));
+		incident.setLigne(LigneBDDHelper.cursorToLigneModel(c));
 		
 		return incident;
 	}

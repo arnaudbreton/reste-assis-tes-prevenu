@@ -11,5 +11,7 @@
 		android:layout_height="wrap_content" android:src="@drawable/ic_add"
 		android:background="@null" android:layout_gravity="center_vertical" />
 
-	<include android:id="@+id/incidentItemView" layout="@layout/incident_item_view" android:layout_gravity="center_vertical"/>
+	<include android:id="@+id/incidentItemView" layout="@layout/incident_item_view_widget" android:layout_gravity="center_vertical"/>
+	<TextView android:id="@+id/txtAucunIncident" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textColor="#000000"
+	android:text="@string/msg_no_incident" android:layout_gravity="center_vertical" android:paddingLeft="20dip"/>
 </LinearLayout>

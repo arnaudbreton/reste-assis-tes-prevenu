@@ -56,6 +56,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		IIncidentsTransportsBackgroundService {
 	private static final String TAG_SERVICE = "IncidentsTransportsBackgroundService";
 
+	private static final Object lockObject = new Object();
 	/**
 	 * AsyncTask de récupération des incidents
 	 * 
@@ -406,7 +407,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
 				LigneBDDHelper.NOM_TABLE.concat(".".concat(LigneBDDHelper._ID)),
-				TypeLigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_NOM_LIGNE,
+				TypeLigneBDDHelper.COL_TYPE_LIGNE, LigneBDDHelper.COL_NOM_LIGNE,
 				LigneBDDHelper.COL_IS_FAVORIS };
 
 		String selection = null;
@@ -454,52 +455,54 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private List<IncidentModel> getIncidentsEnCoursFromProviderOrService(String scope) throws IOException, JSONException, ParseException {
 		boolean shouldUpdate;
-
-		List<IncidentModel> incidentsService = null;
 		
+		List<IncidentModel> incidentsService = null;		
 
 		Uri uriContentProvider = Uri.withAppendedPath(
 				DefaultContentProvider.CONTENT_URI,
 				DefaultContentProvider.INCIDENTS_URI);
 		ContentResolver cr = getContentResolver();
 
-		shouldUpdate = lastTimeUpdate == 0 || (lastTimeUpdate + 10 * 60 * 1000 < System.currentTimeMillis());
-		if (shouldUpdate) {
-			incidentsService = getIncidentsEnCoursFromService(scope);
-			
-			// Suppression des anciens incidents		
-			cr.delete(uriContentProvider, null, null);
-			
-			// Ajout des nouveaux
-			String[] projectionIdLigne = new String[] { LigneBDDHelper.NOM_TABLE + "." + LigneBDDHelper._ID };
-			String selection = LigneBDDHelper.COL_NOM_LIGNE;
-			String[] selectionArgs;
-			int ligneId = 0;
-			for (IncidentModel incidentService : incidentsService) {
-				selectionArgs = new String[] { incidentService.getLigne().getNumLigne() };
+		synchronized (lockObject) {
+			shouldUpdate = lastTimeUpdate == 0 || (lastTimeUpdate + 60 * 1000 < System.currentTimeMillis());
+			if (shouldUpdate) {
+				incidentsService = getIncidentsEnCoursFromService(scope);
 				
-				Cursor c = cr.query(Uri.withAppendedPath(DefaultContentProvider.CONTENT_URI, DefaultContentProvider.LIGNES_URI), projectionIdLigne, selection, selectionArgs, null);
-				if(c.moveToFirst()) {
-					ligneId = c.getInt(LigneBDDHelper.NUM_COL_ID);
-				}				
-				c.close();
+				// Suppression des anciens incidents		
+				cr.delete(uriContentProvider, null, null);
 				
-				ContentValues cvIncident = IncidentsBDDHelper
-						.getContentValues(incidentService, ligneId);
-				cr.insert(uriContentProvider, cvIncident);
-			}
-			
-			lastTimeUpdate = System.currentTimeMillis();
-		}
-		else {
-			Cursor cIncidentsDB = cr.query(uriContentProvider, null, null, null, null);
-			if(cIncidentsDB.moveToFirst()) {
-				incidentsService = new ArrayList<IncidentModel>();
-				while(cIncidentsDB.moveToNext()) {
-					incidentsService.add(IncidentsBDDHelper.getIncidentModelFromCursor(cIncidentsDB));
+				// Ajout dews nouveaux
+				String[] projectionIdLigne = new String[] { LigneBDDHelper.NOM_TABLE + "." + LigneBDDHelper._ID };
+				String selection = LigneBDDHelper.COL_NOM_LIGNE;
+				String[] selectionArgs;
+				int ligneId = 0;
+				for (IncidentModel incidentService : incidentsService) {
+					selectionArgs = new String[] { incidentService.getLigne().getNumLigne() };
+					
+					Cursor c = cr.query(Uri.withAppendedPath(DefaultContentProvider.CONTENT_URI, DefaultContentProvider.LIGNES_URI), projectionIdLigne, selection, selectionArgs, null);
+					if(c.moveToFirst()) {
+						ligneId = c.getInt(LigneBDDHelper.NUM_COL_ID);
+					}				
+					c.close();
+					
+					ContentValues cvIncident = IncidentsBDDHelper
+							.getContentValues(incidentService, ligneId);
+					cr.insert(uriContentProvider, cvIncident);
 				}
+				
+				lastTimeUpdate = System.currentTimeMillis();
+			}
+			else {
+				Cursor cIncidentsDB = cr.query(uriContentProvider, null, null, null, null);			
+				incidentsService = new ArrayList<IncidentModel>();
+				
+				if(cIncidentsDB.moveToFirst()) {				
+					while(cIncidentsDB.moveToNext()) {
+						incidentsService.add(IncidentsBDDHelper.getIncidentModelFromCursor(cIncidentsDB));
+					}
+				}		
+				cIncidentsDB.close();
 			}		
-			cIncidentsDB.close();
 		}
 		
 		return incidentsService;
@@ -720,6 +723,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		} else {
 			this.urlService = SERVICE_URL_BASE_PRE_PRODUCTION;
 		}
+		
+		lastTimeUpdate = 0;
 	}
 
 	@Override
