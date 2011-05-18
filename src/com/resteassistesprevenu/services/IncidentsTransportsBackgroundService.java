@@ -57,6 +57,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	private static final String TAG_SERVICE = "IncidentsTransportsBackgroundService";
 
 	private static final Object lockObject = new Object();
+
 	/**
 	 * AsyncTask de récupération des incidents
 	 * 
@@ -64,28 +65,31 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	private class LoadIncidentsAsyncTask extends
 			AsyncTask<String, Void, List<IncidentModel>> {
 
-		private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback; 
-		
-		public LoadIncidentsAsyncTask(IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
+		private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback;
+
+		public LoadIncidentsAsyncTask(
+				IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
 			this.callback = callback;
 		}
-		
+
 		@Override
 		protected List<IncidentModel> doInBackground(String... params) {
 			try {
-				return getIncidentsEnCoursFromProviderOrService(params[0]);
+				synchronized (lockObject) {
+					return getIncidentsEnCoursFromProviderOrService(params[0]);
+				}
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
 						"Erreur au chargement des incidents par le service", e);
 				return null;
 			}
 		}
-		
+
 		@Override
 		protected void onPostExecute(List<IncidentModel> result) {
 			super.onPostExecute(result);
-			
-			if(this.callback != null) {
+
+			if (this.callback != null) {
 				this.callback.dataChanged(result);
 			}
 		}
@@ -332,7 +336,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
+
 		this.mBinder = new IncidentsTransportsBackgroundServiceBinder(this);
 		this.urlService = SERVICE_URL_BASE_PRODUCTION;
 		this.lastTimeUpdate = 0;
@@ -388,9 +392,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 						.getColumnIndex(TypeLigneBDDHelper.NOM_TABLE)));
 			} while (c.moveToNext());
 		}
-		
+
 		c.close();
-		
+
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Fin récupération type lignes");
 		return lignes;
@@ -406,9 +410,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				+ TAG_SERVICE, "Début récupération lignes");
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
-				LigneBDDHelper.NOM_TABLE.concat(".".concat(LigneBDDHelper._ID)),
-				TypeLigneBDDHelper.COL_TYPE_LIGNE, LigneBDDHelper.COL_NOM_LIGNE,
-				LigneBDDHelper.COL_IS_FAVORIS };
+				LigneBDDHelper.ID,
+				TypeLigneBDDHelper.COL_TYPE_LIGNE,
+				LigneBDDHelper.COL_NOM_LIGNE, LigneBDDHelper.COL_IS_FAVORIS };
 
 		String selection = null;
 		if (!typeLigne.equals("")) {
@@ -434,7 +438,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 					lignes.add(ligne);
 				} while (c.moveToNext());
 			}
-			
+
 			c.close();
 			Log.i(getApplicationContext().getString(R.string.log_tag_name)
 					+ " " + TAG_SERVICE, "Fin récupération lignes");
@@ -446,65 +450,87 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	}
 
 	/**
-	 * Retourne les incidents en cours, du provider ou du service si les données sont expirées
-	 * @param scope Le scope des incidents (jour, heure, minute)
+	 * Retourne les incidents en cours, du provider ou du service si les données
+	 * sont expirées
+	 * 
+	 * @param scope
+	 *            Le scope des incidents (jour, heure, minute)
 	 * @return La liste des incidents
-	 * @throws ParseException 
-	 * @throws JSONException 
-	 * @throws IOException 
+	 * @throws ParseException
+	 * @throws JSONException
+	 * @throws IOException
 	 */
-	private List<IncidentModel> getIncidentsEnCoursFromProviderOrService(String scope) throws IOException, JSONException, ParseException {
+	private List<IncidentModel> getIncidentsEnCoursFromProviderOrService(
+			String scope) throws IOException, JSONException, ParseException {
 		boolean shouldUpdate;
-		
-		List<IncidentModel> incidentsService = null;		
+
+		List<IncidentModel> incidentsService = null;
 
 		Uri uriContentProvider = Uri.withAppendedPath(
 				DefaultContentProvider.CONTENT_URI,
 				DefaultContentProvider.INCIDENTS_URI);
 		ContentResolver cr = getContentResolver();
 
-		synchronized (lockObject) {
-			shouldUpdate = lastTimeUpdate == 0 || (lastTimeUpdate + 60 * 1000 < System.currentTimeMillis());
-			if (shouldUpdate) {
-				incidentsService = getIncidentsEnCoursFromService(scope);
-				
-				// Suppression des anciens incidents		
-				cr.delete(uriContentProvider, null, null);
-				
-				// Ajout dews nouveaux
-				String[] projectionIdLigne = new String[] { LigneBDDHelper.NOM_TABLE + "." + LigneBDDHelper._ID };
-				String selection = LigneBDDHelper.COL_NOM_LIGNE;
-				String[] selectionArgs;
-				int ligneId = 0;
-				for (IncidentModel incidentService : incidentsService) {
-					selectionArgs = new String[] { incidentService.getLigne().getNumLigne() };
-					
-					Cursor c = cr.query(Uri.withAppendedPath(DefaultContentProvider.CONTENT_URI, DefaultContentProvider.LIGNES_URI), projectionIdLigne, selection, selectionArgs, null);
-					if(c.moveToFirst()) {
-						ligneId = c.getInt(LigneBDDHelper.NUM_COL_ID);
-					}				
-					c.close();
-					
-					ContentValues cvIncident = IncidentsBDDHelper
-							.getContentValues(incidentService, ligneId);
-					cr.insert(uriContentProvider, cvIncident);
+		shouldUpdate = lastTimeUpdate == 0
+				|| (lastTimeUpdate + 60 * 1000 < System.currentTimeMillis());
+		if (shouldUpdate) {
+			incidentsService = getIncidentsEnCoursFromService(scope);
+
+			// Suppression des anciens incidents
+			cr.delete(uriContentProvider, null, null);
+
+			// Ajout des nouveaux incidents
+			String[] projectionIdLigne = new String[] { LigneBDDHelper.ID };
+
+			String[] selectionArgs;
+			int ligneId = 0;
+			for (IncidentModel incidentService : incidentsService) {
+				selectionArgs = new String[] { incidentService.getLigne()
+						.getNumLigne() };
+
+				Cursor c = cr.query(Uri.withAppendedPath(
+						DefaultContentProvider.CONTENT_URI,
+						DefaultContentProvider.LIGNES_URI), projectionIdLigne,
+						 LigneBDDHelper.COL_NOM_LIGNE.concat("=?"), selectionArgs, null);
+				if (c.moveToFirst()) {
+					ligneId = c.getInt(c.getColumnIndex(LigneBDDHelper.ID));
 				}
-				
-				lastTimeUpdate = System.currentTimeMillis();
+				c.close();
+
+				ContentValues cvIncident = IncidentsBDDHelper.getContentValues(
+						incidentService, ligneId);
+				cr.insert(uriContentProvider, cvIncident);
 			}
-			else {
-				Cursor cIncidentsDB = cr.query(uriContentProvider, null, null, null, null);			
-				incidentsService = new ArrayList<IncidentModel>();
-				
-				if(cIncidentsDB.moveToFirst()) {				
-					while(cIncidentsDB.moveToNext()) {
-						incidentsService.add(IncidentsBDDHelper.getIncidentModelFromCursor(cIncidentsDB));
-					}
-				}		
-				cIncidentsDB.close();
-			}		
+
+			lastTimeUpdate = System.currentTimeMillis();
+		} else {
+			String[] projection = new String[] {
+					IncidentsBDDHelper.ID,
+					IncidentsBDDHelper.COL_RAISON,
+					IncidentsBDDHelper.COL_LAST_MODIFIED_TIME,
+					IncidentsBDDHelper.COL_STATUT,
+					IncidentsBDDHelper.COL_NB_VOTE_PLUS,
+					IncidentsBDDHelper.COL_NB_VOTE_MINUS,
+					IncidentsBDDHelper.COL_NB_VOTE_ENDED,
+					LigneBDDHelper.ID,
+					LigneBDDHelper.COL_NOM_LIGNE,
+					LigneBDDHelper.COL_IS_FAVORIS,
+					TypeLigneBDDHelper.COL_TYPE_LIGNE
+			};
+
+			Cursor cIncidentsDB = cr.query(uriContentProvider, projection,
+					null, null, null);
+			
+			incidentsService = new ArrayList<IncidentModel>();
+			if (cIncidentsDB.moveToFirst()) {
+				while (cIncidentsDB.moveToNext()) {
+					incidentsService.add(IncidentsBDDHelper
+							.getIncidentModelFromCursor(cIncidentsDB));
+				}
+			}
+			cIncidentsDB.close();
 		}
-		
+
 		return incidentsService;
 	}
 
@@ -518,7 +544,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				+ TAG_SERVICE, "Début récupération des favoris");
 		ContentResolver cr = getContentResolver();
 		String[] projection = new String[] {
-				LigneBDDHelper.NOM_TABLE.concat(".".concat(LigneBDDHelper._ID)),
+				LigneBDDHelper.ID,
 				TypeLigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_NOM_LIGNE,
 				LigneBDDHelper.COL_IS_FAVORIS };
 
@@ -534,10 +560,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				Log.d(getApplicationContext().getString(R.string.log_tag_name)
 						+ " " + TAG_SERVICE, "Ajout de la ligne : " + ligne);
 				lignes.add(ligne);
-			} while (c.moveToNext());				
+			} while (c.moveToNext());
 		}
 		c.close();
-		
+
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Fin récupération des favoris");
 		return lignes;
@@ -569,6 +595,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		request.setHeader("Accept", "application/json;charset=UTF-8");
 
 		String result = requestToService(request);
+		lastTimeUpdate = 0;
 		Log.d(getString(R.string.log_tag_name), "Résultat du serveur :"
 				+ result);
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
@@ -723,7 +750,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		} else {
 			this.urlService = SERVICE_URL_BASE_PRE_PRODUCTION;
 		}
-		
+
 		lastTimeUpdate = 0;
 	}
 

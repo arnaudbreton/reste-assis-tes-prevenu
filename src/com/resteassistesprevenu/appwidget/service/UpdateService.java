@@ -71,7 +71,10 @@ public class UpdateService extends Service {
 								"Début du chargement des incidents.");
 
 						incidents.clear();
-						incidents.addAll(incidentsService);
+						if(incidentsService != null) 
+						{
+							incidents.addAll(incidentsService);
+						}
 
 						ComponentName thisWidget = new ComponentName(
 								getApplicationContext(),

@@ -179,18 +179,18 @@ public class DefaultContentProvider extends ContentProvider {
 		case LIGNES:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération lignes");
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.idTypeLigne)");
 			break;
 		case LIGNES_ID:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération d'une ligne");
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
-			qb.appendWhere("lignes._id = " + uri.getPathSegments().get(1));
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.idTypeLigne)");
+			qb.appendWhere("lignes.idLigne = " + uri.getPathSegments().get(1));
 			break;
 		case FAVORIS:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération favoris");
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne._id)");
+			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.idTypeLigne)");
 			qb.appendWhere("isFavoris = 1");
 			break;
 		case INCIDENTS:
@@ -200,10 +200,10 @@ public class DefaultContentProvider extends ContentProvider {
 					IncidentsBDDHelper.NOM_TABLE, LigneBDDHelper.NOM_TABLE, "L1",
 					IncidentsBDDHelper.NOM_TABLE,
 					IncidentsBDDHelper.COL_ID_LIGNE, "L1",
-					LigneBDDHelper._ID,
+					LigneBDDHelper.ID,
 					"L2",  TypeLigneBDDHelper.NOM_TABLE,
 					"L2", LigneBDDHelper.COL_ID_TYPE_LIGNE,
-					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper._ID
+					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID
 					));
 			break;
 		}
@@ -226,7 +226,7 @@ public class DefaultContentProvider extends ContentProvider {
 					+ uri.getPathSegments().get(1));
 			count = this.dbHelper.getWritableDatabase().update(
 					LigneBDDHelper.NOM_TABLE, values,
-					LigneBDDHelper._ID + "=" + uri.getPathSegments().get(1),
+					LigneBDDHelper.ID + "=" + uri.getPathSegments().get(1),
 					selectionArgs);
 			break;
 		}
@@ -301,7 +301,7 @@ public class DefaultContentProvider extends ContentProvider {
 					R.string.req_create_table_terminus));
 
 			db.execSQL("CREATE TABLE " + IncidentsBDDHelper.NOM_TABLE + "("
-					+ IncidentsBDDHelper._ID + " INTEGER PRIMARY KEY,"
+					+ IncidentsBDDHelper.ID + " INTEGER PRIMARY KEY,"
 					+ IncidentsBDDHelper.COL_ID_LIGNE
 					+ " INTEGER REFERENCES lignes(_id),"
 					+ IncidentsBDDHelper.COL_RAISON + " VARCHAR NOT NULL,"
