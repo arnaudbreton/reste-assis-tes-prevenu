@@ -19,7 +19,7 @@ public interface IIncidentsTransportsBackgroundService {
 	/**
 	 * Récupération des incidents, asynchrone
 	 */
-	public void startGetIncidentsAsync(String scope, IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback);
+	public void startGetIncidentsAsync(String scope, boolean forceUpdate, IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback);
 	
 	/**
 	 * Récupération des type de lignes, asynchrone

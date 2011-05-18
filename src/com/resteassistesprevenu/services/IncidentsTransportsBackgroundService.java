@@ -66,17 +66,19 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			AsyncTask<String, Void, List<IncidentModel>> {
 
 		private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback;
+		private boolean forceUpdate;
 
-		public LoadIncidentsAsyncTask(
+		public LoadIncidentsAsyncTask(boolean forceUpdate,
 				IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
 			this.callback = callback;
+			this.forceUpdate = forceUpdate;
 		}
 
 		@Override
 		protected List<IncidentModel> doInBackground(String... params) {
 			try {
 				synchronized (lockObject) {
-					return getIncidentsEnCoursFromProviderOrService(params[0]);
+					return getIncidentsEnCoursFromProviderOrService(params[0], forceUpdate);
 				}
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
@@ -461,7 +463,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 * @throws IOException
 	 */
 	private List<IncidentModel> getIncidentsEnCoursFromProviderOrService(
-			String scope) throws IOException, JSONException, ParseException {
+			String scope, boolean forceUpdate) throws IOException, JSONException, ParseException {
 		boolean shouldUpdate;
 
 		List<IncidentModel> incidentsService = null;
@@ -471,9 +473,11 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				DefaultContentProvider.INCIDENTS_URI);
 		ContentResolver cr = getContentResolver();
 
-		shouldUpdate = lastTimeUpdate == 0
+		shouldUpdate = forceUpdate || lastTimeUpdate == 0
 				|| (lastTimeUpdate + 60 * 1000 < System.currentTimeMillis());
 		if (shouldUpdate) {
+			Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
+					+ TAG_SERVICE, "Chargement des incidents depuis le service");
 			incidentsService = getIncidentsEnCoursFromService(scope);
 
 			// Suppression des anciens incidents
@@ -504,6 +508,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 			lastTimeUpdate = System.currentTimeMillis();
 		} else {
+			Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
+					+ TAG_SERVICE, "Chargement des incidents depuis la base données");
 			String[] projection = new String[] {
 					IncidentsBDDHelper.ID,
 					IncidentsBDDHelper.COL_RAISON,
@@ -695,9 +701,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	@Override
 	public void startGetIncidentsAsync(
-			String scope,
+			String scope, boolean forceUpdate,
 			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
-		new LoadIncidentsAsyncTask(callback).execute(scope);
+		new LoadIncidentsAsyncTask(forceUpdate, callback).execute(scope);
 	}
 
 	@Override

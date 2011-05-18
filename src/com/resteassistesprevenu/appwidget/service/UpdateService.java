@@ -103,7 +103,7 @@ public class UpdateService extends Service {
 					handler.post(new Runnable() {
 						public void run() {
 							mBoundService.startGetIncidentsAsync(
-									IncidentModel.SCOPE_JOUR,
+									IncidentModel.SCOPE_JOUR, false,
 									getIncidentsEnCoursListener);
 						}
 					});

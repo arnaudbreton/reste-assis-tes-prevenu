@@ -171,7 +171,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 
 	@Override
 	protected void onStart() {
-		// TODO Auto-generated method stub
 		super.onStart();
 
 		this.conn = new ServiceIncidentConnection();
@@ -219,7 +218,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			@Override
 			public void onClick(View v) {
 				mModeChargement = ModeChargement.NORMAL;
-				startGetIncidentsFromServiceAsync();
+				startGetIncidentsFromServiceAsync(true);
 			}
 		});
 
@@ -242,7 +241,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					mCurrentScope = IncidentModel.SCOPE_JOUR;
 				}
 
-				startGetIncidentsFromServiceAsync();
+				startGetIncidentsFromServiceAsync(true);
 			}
 		});
 
@@ -255,7 +254,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					mCurrentScope = IncidentModel.SCOPE_HOUR;
 				}
 
-				startGetIncidentsFromServiceAsync();
+				startGetIncidentsFromServiceAsync(true);
 			}
 		});
 
@@ -268,7 +267,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					mCurrentScope = IncidentModel.SCOPE_MINUTE;
 				}
 
-				startGetIncidentsFromServiceAsync();
+				startGetIncidentsFromServiceAsync(true);
 			}
 		});
 
@@ -278,7 +277,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				mModeChargement = ModeChargement.IGNORER_FAVORIS;
 				mBtnIgnorerFavoris.setVisibility(View.GONE);
 
-				startGetIncidentsFromServiceAsync();
+				startGetIncidentsFromServiceAsync(false);
 			}
 		});
 	}
@@ -377,7 +376,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 							}
 
 							IncidentsEnCoursActivity.this
-									.startGetIncidentsFromServiceAsync();
+									.startGetIncidentsFromServiceAsync(true);
 						}
 
 						dialog.dismiss();
@@ -459,7 +458,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		this.mAdapter.notifyDataSetChanged();
 	}
 
-	private void startGetIncidentsFromServiceAsync() {
+	private void startGetIncidentsFromServiceAsync(boolean forceUpdate) {
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 				"Début chargement des incidents.");
 
@@ -475,7 +474,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					.show(IncidentsEnCoursActivity.this,
 							"",
 							getString(R.string.msg_incident_en_cours_list_loading_incidents));
-			this.mBoundService.startGetIncidentsAsync(mCurrentScope, getIncidentsEnCoursListener);
+			this.mBoundService.startGetIncidentsAsync(mCurrentScope, forceUpdate, getIncidentsEnCoursListener);
 		} else {
 			Toast.makeText(this,
 					R.string.msg_incident_en_cours_list_loading_incidents,
@@ -592,7 +591,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 								R.string.msg_vote_OK, Toast.LENGTH_SHORT)
 								.show();
 
-						startGetIncidentsFromServiceAsync();
+						startGetIncidentsFromServiceAsync(false);
 					} else {
 						Log.i(getString(R.string.log_tag_name) + " "
 								+ TAG_ACTIVITY, "Echec de la demande de vote.");
@@ -624,7 +623,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 								"Fin de chargement des favoris.");
 					}
 
-					startGetIncidentsFromServiceAsync();
+					startGetIncidentsFromServiceAsync(false);
 				}
 			};
 
