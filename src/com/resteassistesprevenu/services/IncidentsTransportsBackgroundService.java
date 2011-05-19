@@ -80,11 +80,17 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				synchronized (lockObject) {
 					return getIncidentsEnCoursFromProviderOrService(params[0], forceUpdate);
 				}
-			} catch (Exception e) {
+			} catch (IOException e) {
 				Log.e(getString(R.string.log_tag_name),
-						"Erreur au chargement des incidents par le service", e);
+						"Erreur de connexion au service", e);
 				return null;
 			}
+			catch(Exception e) {
+				Log.e(getString(R.string.log_tag_name),
+						"Erreur lors du chargement des incidents", e);
+				return null;
+			}
+			
 		}
 
 		@Override

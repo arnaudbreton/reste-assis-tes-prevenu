@@ -15,4 +15,12 @@ public class RASSTPWidgetProvider extends AppWidgetProvider {
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
 		context.startService(new Intent(context, UpdateService.class));
 	}
+	
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		if(intent.getAction().equals(UpdateService.ACTION_SHOW_PREC_INCIDENT)) {
+		}
+		
+		super.onReceive(context, intent);
+	}
 }

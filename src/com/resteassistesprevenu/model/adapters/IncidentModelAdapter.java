@@ -98,9 +98,7 @@ public class IncidentModelAdapter {
 	}
 
 	public static RemoteViews getIncidentRemoteView(Context context, RemoteViews v,
-			IncidentModel incident) {
-		//v = new RemoteViews(context.getPackageName(),
-				//R.layout.incident_item_view);
+			IncidentModel incident, int position) {
 
 		if (incident != null) {
 			int imageResource;
@@ -129,6 +127,8 @@ public class IncidentModelAdapter {
 			v.setTextViewText(R.id.txtHeureIncident,
 					("@" + new SimpleDateFormat("HH:mm").format(incident
 							.getLastModifiedTime())));
+			
+			v.setTextViewText(R.id.txtIndIncident, String.valueOf(position));
 
 			v.setTextViewText(R.id.txtNbVotePlus,
 					String.valueOf(incident.getVotePlus()));

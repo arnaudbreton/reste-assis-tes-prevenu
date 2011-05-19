@@ -30,6 +30,9 @@ import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBin
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 
 public class UpdateService extends Service {
+	public static final String ACTION_SHOW_PREC_INCIDENT = "ActionShowPrecIncident";
+	public static final String ACTION_SHOW_NEXT_INCIDENT = "ActionShowNextIncident";
+	
 	/**
 	 * Action à réaliser après chargement des incidents
 	 */
@@ -39,6 +42,8 @@ public class UpdateService extends Service {
 	 * Les incidents du service
 	 */
 	private List<IncidentModel> incidents;
+	
+	private int incidentIndex;
 
 	public UpdateService() {
 		this.incidents = new ArrayList<IncidentModel>();
@@ -71,8 +76,7 @@ public class UpdateService extends Service {
 								"Début du chargement des incidents.");
 
 						incidents.clear();
-						if(incidentsService != null) 
-						{
+						if (incidentsService != null) {
 							incidents.addAll(incidentsService);
 						}
 
@@ -164,17 +168,27 @@ public class UpdateService extends Service {
 				newIncidentPendingIntent);
 
 		if (this.incidents.size() > 0) {
-			int incidentIndex = (int)(Math.random() * (incidents.size()));
+			incidentIndex = (int) (Math.random() * (incidents.size()));
 			Log.d(getResources().getString(R.string.log_tag_name),
 					"Affichage de l'incident numéro " + incidentIndex);
 			IncidentModel incident = incidents.get(incidentIndex);
 			IncidentModelAdapter.getIncidentRemoteView(getApplicationContext(),
-					updateViews, incident);
+					updateViews, incident, incidentIndex + 1);
+
+			updateViews.setTextViewText(R.id.txtNbTotalIncidents,
+					String.valueOf(incidents.size() + 1));
+
+			Intent showPrecIncidentIntent = new Intent(
+					ACTION_SHOW_PREC_INCIDENT);
+			PendingIntent showPrecIncidentPendingIntent = PendingIntent
+					.getBroadcast(getApplicationContext(), 0,
+							showPrecIncidentIntent, 0);
+			updateViews.setOnClickPendingIntent(R.id.btnPrecIncident,
+					showPrecIncidentPendingIntent);
 			
 			updateViews.setViewVisibility(R.id.incidentItemView, View.VISIBLE);
 			updateViews.setViewVisibility(R.id.txtAucunIncident, View.GONE);
-		}
-		else {
+		} else {
 			updateViews.setViewVisibility(R.id.incidentItemView, View.GONE);
 			updateViews.setViewVisibility(R.id.txtAucunIncident, View.VISIBLE);
 		}
