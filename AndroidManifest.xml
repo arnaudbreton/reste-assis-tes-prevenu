@@ -45,6 +45,7 @@
 		<receiver android:name=".appwidget.provider.RASSTPWidgetProvider">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+				<action android:name="com.resteassistesprevenu.appwidget.service.UpdateService.ACTION_SHOW_PREC_INCIDENT" />
 			</intent-filter>
 			<meta-data android:name="android.appwidget.provider"
 				android:resource="@xml/rasstp_appwidget_info" />
@@ -52,7 +53,7 @@
 
 		<service android:name=".appwidget.service.UpdateService">
 			<intent-filter>
-				<action android:name=".UpdateService.ACTION" />
+				<action android:name=".ACTION_SHOW_PREC_INCIDENT" />
 			</intent-filter>
 		</service>
 

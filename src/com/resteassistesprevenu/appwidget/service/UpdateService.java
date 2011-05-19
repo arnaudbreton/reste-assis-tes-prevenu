@@ -30,9 +30,9 @@ import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBin
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 
 public class UpdateService extends Service {
-	public static final String ACTION_SHOW_PREC_INCIDENT = "ActionShowPrecIncident";
+	public static final String ACTION_SHOW_PREC_INCIDENT = "ACTION_SHOW_PREC_INCIDENT";
 	public static final String ACTION_SHOW_NEXT_INCIDENT = "ActionShowNextIncident";
-	
+
 	/**
 	 * Action à réaliser après chargement des incidents
 	 */
@@ -42,7 +42,7 @@ public class UpdateService extends Service {
 	 * Les incidents du service
 	 */
 	private List<IncidentModel> incidents;
-	
+
 	private int incidentIndex;
 
 	public UpdateService() {
@@ -102,7 +102,6 @@ public class UpdateService extends Service {
 			final Handler handler = new Handler();
 			Timer timer = new Timer();
 			timer.scheduleAtFixedRate(new TimerTask() {
-
 				public void run() {
 					handler.post(new Runnable() {
 						public void run() {
@@ -112,7 +111,7 @@ public class UpdateService extends Service {
 						}
 					});
 				}
-			}, 0, 10000);
+			}, 0, 20000);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -160,12 +159,12 @@ public class UpdateService extends Service {
 		updateViews.setOnClickPendingIntent(R.id.btnWidgetLogo,
 				incidentEnCoursPendingIntent);
 
-		Intent newIncidentIntent = new Intent(getApplicationContext(),
-				NewIncidentActivity.class);
-		PendingIntent newIncidentPendingIntent = PendingIntent.getActivity(
-				getApplicationContext(), 0, newIncidentIntent, 0);
-		updateViews.setOnClickPendingIntent(R.id.btnWidgetAddIncident,
-				newIncidentPendingIntent);
+//		Intent newIncidentIntent = new Intent(getApplicationContext(),
+//				NewIncidentActivity.class);
+//		PendingIntent newIncidentPendingIntent = PendingIntent.getActivity(
+//				getApplicationContext(), 0, newIncidentIntent, 0);
+//		updateViews.setOnClickPendingIntent(R.id.btnWidgetAddIncident,
+//				newIncidentPendingIntent);
 
 		if (this.incidents.size() > 0) {
 			incidentIndex = (int) (Math.random() * (incidents.size()));
@@ -178,14 +177,13 @@ public class UpdateService extends Service {
 			updateViews.setTextViewText(R.id.txtNbTotalIncidents,
 					String.valueOf(incidents.size() + 1));
 
-			Intent showPrecIncidentIntent = new Intent(
-					ACTION_SHOW_PREC_INCIDENT);
+			Intent showPrecIncidentIntent = new Intent(ACTION_SHOW_PREC_INCIDENT);
 			PendingIntent showPrecIncidentPendingIntent = PendingIntent
 					.getBroadcast(getApplicationContext(), 0,
 							showPrecIncidentIntent, 0);
 			updateViews.setOnClickPendingIntent(R.id.btnPrecIncident,
 					showPrecIncidentPendingIntent);
-			
+
 			updateViews.setViewVisibility(R.id.incidentItemView, View.VISIBLE);
 			updateViews.setViewVisibility(R.id.txtAucunIncident, View.GONE);
 		} else {

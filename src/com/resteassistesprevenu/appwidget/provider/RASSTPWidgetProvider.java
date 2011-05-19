@@ -17,8 +17,16 @@ public class RASSTPWidgetProvider extends AppWidgetProvider {
 	}
 	
 	@Override
+	public void onDisabled(Context context) {
+		super.onDisabled(context);
+		
+		context.stopService(new Intent(context, UpdateService.class));
+	}
+	
+	@Override
 	public void onReceive(Context context, Intent intent) {
 		if(intent.getAction().equals(UpdateService.ACTION_SHOW_PREC_INCIDENT)) {
+			//context.sendBroadcast(intent);
 		}
 		
 		super.onReceive(context, intent);
