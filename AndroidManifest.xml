@@ -51,11 +51,7 @@
 				android:resource="@xml/rasstp_appwidget_info" />
 		</receiver>
 
-		<service android:name=".appwidget.service.UpdateService">
-			<intent-filter>
-				<action android:name=".ACTION_SHOW_PREC_INCIDENT" />
-			</intent-filter>
-		</service>
+		<service android:name=".appwidget.service.UpdateService" />
 
 		<activity android:name=".appwidget.provider.RASSTPWidgetConfigureActivity">
 			<intent-filter>

@@ -4,30 +4,6 @@
 	<string name="ligne_prompt">Ligne :</string>
 	<string name="log_tag_name">ResteAssisTesPrevenu</string>
 
-	<string name="req_create_table_type_ligne">
-		CREATE TABLE type_ligne
-		(idTypeLigne INTEGER PRIMARY KEY
-		AUTOINCREMENT,
-		type_ligne
-		VARCHAR NOT NULL);
-	</string>
-	<string name="req_create_table_lignes">
-		CREATE TABLE lignes
-		(idLigne INTEGER PRIMARY KEY
-		AUTOINCREMENT,
-		nom VARCHAR NOT NULL,
-		id_type_ligne INTEGER REFERENCES
-		type_ligne(_id),
-		isFavoris INTEGER DEFAULT 0);
-	</string>
-	<string name="req_create_table_terminus">
-		CREATE TABLE terminus
-		(idTerminus INTEGER PRIMARY KEY
-		AUTOINCREMENT,
-		id_ligne INTEGER REFERENCES lignes(_id),
-		terminus
-		VARCHAR2 NOT NULL);
-	</string>
 	<string name="req_insert_type_ligne">
 		INSERT INTO type_ligne(type_ligne)
 		VALUES(\'RER\');
