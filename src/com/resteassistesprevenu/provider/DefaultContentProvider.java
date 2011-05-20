@@ -44,7 +44,7 @@ public class DefaultContentProvider extends ContentProvider {
 	/**
 	 * URI pour les lignes
 	 */
-	public static final String LIGNES_URI = "favoris";
+	public static final String LIGNES_URI = "lignes";
 
 	/**
 	 * URI pour les incidents
@@ -80,7 +80,7 @@ public class DefaultContentProvider extends ContentProvider {
 	/**
 	 * Identifiant de l'URI d'ajout des incidents
 	 */
-	private static final int INCIDENTS = 5;
+	private static final int INCIDENTS = 6;
 
 	private static final UriMatcher uriMatcher;
 	static {
@@ -179,19 +179,31 @@ public class DefaultContentProvider extends ContentProvider {
 		case LIGNES:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération lignes");
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.idTypeLigne)");
+			qb.setTables(String.format("%s INNER JOIN %s ON (%s.%s=%s.%s)",
+					LigneBDDHelper.NOM_TABLE,
+					TypeLigneBDDHelper.NOM_TABLE,
+					LigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_ID_TYPE_LIGNE,
+					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID));
 			break;
 		case LIGNES_ID:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération d'une ligne");
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.idTypeLigne)");
+			qb.setTables(String.format("%s INNER JOIN %s ON (%s.%s=%s.%s)",
+					LigneBDDHelper.NOM_TABLE,
+					TypeLigneBDDHelper.NOM_TABLE,
+					LigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_ID_TYPE_LIGNE,
+					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID));
 			qb.appendWhere("lignes.idLigne = " + uri.getPathSegments().get(1));
 			break;
 		case FAVORIS:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération favoris");
-			qb.setTables("lignes INNER JOIN type_ligne ON (lignes.id_type_ligne=type_ligne.idTypeLigne)");
-			qb.appendWhere("isFavoris = 1");
+			qb.setTables(String.format("%s INNER JOIN %s ON (%s.%s=%s.%s)",
+					LigneBDDHelper.NOM_TABLE,
+					TypeLigneBDDHelper.NOM_TABLE,
+					LigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_ID_TYPE_LIGNE,
+					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID));
+			qb.appendWhere(LigneBDDHelper.COL_IS_FAVORIS + " = 1");
 			break;
 		case INCIDENTS:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
@@ -286,34 +298,35 @@ public class DefaultContentProvider extends ContentProvider {
 		private void createTables(SQLiteDatabase db) {
 			Log.i(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début création de la base.");
-			db.execSQL(getContext().getString(
-					R.string.req_create_table_type_ligne));
 
-			Log.d(getContext().getString(R.string.log_tag_name) + " "
-					+ TAG_PROVIDER, "Exécution de la requête : "
-					+ getContext().getString(R.string.req_create_table_lignes));
-			db.execSQL(getContext().getString(R.string.req_create_table_lignes));
-			Log.d(getContext().getString(R.string.log_tag_name) + " "
-					+ TAG_PROVIDER, "Exécution de la requête : "
-					+ getContext()
-							.getString(R.string.req_create_table_terminus));
-			db.execSQL(getContext().getString(
-					R.string.req_create_table_terminus));
+			db.execSQL(String.format("CREATE TABLE %s"
+					+ "(%s INTEGER PRIMARY KEY AUTOINCREMENT,"
+					+ "%s VARCHAR NOT NULL);",
+					TypeLigneBDDHelper.NOM_TABLE,
+					TypeLigneBDDHelper.ID,
+					TypeLigneBDDHelper.COL_TYPE_LIGNE));
+	
+			db.execSQL(String.format("CREATE TABLE %s"
+			+ "(%s INTEGER PRIMARY KEY	AUTOINCREMENT,"
+			+ "%s VARCHAR NOT NULL,"
+			+ "%s INTEGER REFERENCES %s(%s),"
+			+ "%s INTEGER DEFAULT 0);", 
+			LigneBDDHelper.NOM_TABLE,
+			LigneBDDHelper.ID,
+			LigneBDDHelper.COL_NOM_LIGNE,
+			LigneBDDHelper.COL_ID_TYPE_LIGNE,
+			TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID,
+			LigneBDDHelper.COL_IS_FAVORIS));					
 
-			db.execSQL("CREATE TABLE " + IncidentsBDDHelper.NOM_TABLE + "("
-					+ IncidentsBDDHelper.ID + " INTEGER PRIMARY KEY,"
-					+ IncidentsBDDHelper.COL_ID_LIGNE
-					+ " INTEGER REFERENCES lignes(_id),"
-					+ IncidentsBDDHelper.COL_RAISON + " VARCHAR NOT NULL,"
-					+ IncidentsBDDHelper.COL_STATUT + " VARCHAR NOT NULL,"
-					+ IncidentsBDDHelper.COL_NB_VOTE_PLUS
-					+ " INTEGER NOT NULL,"
-					+ IncidentsBDDHelper.COL_NB_VOTE_MINUS
-					+ " INTEGER NOT NULL,"
-					+ IncidentsBDDHelper.COL_NB_VOTE_ENDED
-					+ " INTEGER NOT NULL,"
-					+ IncidentsBDDHelper.COL_LAST_MODIFIED_TIME
-					+ " DATE NOT NULL" + ");");
+			db.execSQL("CREATE TABLE %s ("
+					+ "%s INTEGER PRIMARY KEY,"
+					+ "%s INTEGER REFERENCES lignes(_id),"
+					+ "%s VARCHAR NOT NULL,"
+					+ "%s VARCHAR NOT NULL,"
+					+ "%s INTEGER NOT NULL,"
+					+ "%s INTEGER NOT NULL,"
+					+ "%s INTEGER NOT NULL,"
+					+ "%s DATE NOT NULL" + ");");
 
 			Log.i(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Fin création de la base.");

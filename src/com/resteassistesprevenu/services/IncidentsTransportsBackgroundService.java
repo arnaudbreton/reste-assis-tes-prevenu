@@ -68,7 +68,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback;
 		private boolean forceUpdate;
 
-		public LoadIncidentsAsyncTask(boolean forceUpdate,
+		public LoadIncidentsAsyncTask(
+				boolean forceUpdate,
 				IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
 			this.callback = callback;
 			this.forceUpdate = forceUpdate;
@@ -78,19 +79,19 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		protected List<IncidentModel> doInBackground(String... params) {
 			try {
 				synchronized (lockObject) {
-					return getIncidentsEnCoursFromProviderOrService(params[0], forceUpdate);
+					return getIncidentsEnCoursFromProviderOrService(params[0],
+							forceUpdate);
 				}
 			} catch (IOException e) {
 				Log.e(getString(R.string.log_tag_name),
 						"Erreur de connexion au service", e);
 				return null;
-			}
-			catch(Exception e) {
+			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
 						"Erreur lors du chargement des incidents", e);
 				return null;
 			}
-			
+
 		}
 
 		@Override
@@ -417,8 +418,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Début récupération lignes");
 		ContentResolver cr = getContentResolver();
-		String[] projection = new String[] {
-				LigneBDDHelper.ID,
+		String[] projection = new String[] { LigneBDDHelper.ID,
 				TypeLigneBDDHelper.COL_TYPE_LIGNE,
 				LigneBDDHelper.COL_NOM_LIGNE, LigneBDDHelper.COL_IS_FAVORIS };
 
@@ -426,7 +426,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		if (!typeLigne.equals("")) {
 			Log.d(getApplicationContext().getString(R.string.log_tag_name)
 					+ " " + TAG_SERVICE, "Ligne du type : " + typeLigne);
-			selection = "type_ligne = '" + typeLigne + "'";
+			selection = TypeLigneBDDHelper.COL_TYPE_LIGNE + " = '" + typeLigne + "'";
 
 			Log.d(getApplicationContext().getString(R.string.log_tag_name)
 					+ " " + TAG_SERVICE,
@@ -469,7 +469,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 * @throws IOException
 	 */
 	private List<IncidentModel> getIncidentsEnCoursFromProviderOrService(
-			String scope, boolean forceUpdate) throws IOException, JSONException, ParseException {
+			String scope, boolean forceUpdate) throws IOException,
+			JSONException, ParseException {
 		boolean shouldUpdate;
 
 		List<IncidentModel> incidentsService = null;
@@ -482,8 +483,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		shouldUpdate = forceUpdate || lastTimeUpdate == 0
 				|| (lastTimeUpdate + 60 * 1000 < System.currentTimeMillis());
 		if (shouldUpdate) {
-			Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
-					+ TAG_SERVICE, "Chargement des incidents depuis le service");
+			Log.d(getApplicationContext().getString(R.string.log_tag_name)
+					+ " " + TAG_SERVICE,
+					"Chargement des incidents depuis le service");
 			incidentsService = getIncidentsEnCoursFromService(scope);
 
 			// Suppression des anciens incidents
@@ -501,7 +503,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				Cursor c = cr.query(Uri.withAppendedPath(
 						DefaultContentProvider.CONTENT_URI,
 						DefaultContentProvider.LIGNES_URI), projectionIdLigne,
-						 LigneBDDHelper.COL_NOM_LIGNE.concat("=?"), selectionArgs, null);
+						LigneBDDHelper.COL_NOM_LIGNE.concat("=?"),
+						selectionArgs, null);
 				if (c.moveToFirst()) {
 					ligneId = c.getInt(c.getColumnIndex(LigneBDDHelper.ID));
 				}
@@ -514,25 +517,23 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 			lastTimeUpdate = System.currentTimeMillis();
 		} else {
-			Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
-					+ TAG_SERVICE, "Chargement des incidents depuis la base données");
-			String[] projection = new String[] {
-					IncidentsBDDHelper.ID,
+			Log.d(getApplicationContext().getString(R.string.log_tag_name)
+					+ " " + TAG_SERVICE,
+					"Chargement des incidents depuis la base données");
+			String[] projection = new String[] { IncidentsBDDHelper.ID,
 					IncidentsBDDHelper.COL_RAISON,
 					IncidentsBDDHelper.COL_LAST_MODIFIED_TIME,
 					IncidentsBDDHelper.COL_STATUT,
 					IncidentsBDDHelper.COL_NB_VOTE_PLUS,
 					IncidentsBDDHelper.COL_NB_VOTE_MINUS,
-					IncidentsBDDHelper.COL_NB_VOTE_ENDED,
-					LigneBDDHelper.ID,
+					IncidentsBDDHelper.COL_NB_VOTE_ENDED, LigneBDDHelper.ID,
 					LigneBDDHelper.COL_NOM_LIGNE,
 					LigneBDDHelper.COL_IS_FAVORIS,
-					TypeLigneBDDHelper.COL_TYPE_LIGNE
-			};
+					TypeLigneBDDHelper.COL_TYPE_LIGNE };
 
 			Cursor cIncidentsDB = cr.query(uriContentProvider, projection,
 					null, null, null);
-			
+
 			incidentsService = new ArrayList<IncidentModel>();
 			if (cIncidentsDB.moveToFirst()) {
 				while (cIncidentsDB.moveToNext()) {
@@ -555,8 +556,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Début récupération des favoris");
 		ContentResolver cr = getContentResolver();
-		String[] projection = new String[] {
-				LigneBDDHelper.ID,
+		String[] projection = new String[] { LigneBDDHelper.ID,
 				TypeLigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_NOM_LIGNE,
 				LigneBDDHelper.COL_IS_FAVORIS };
 
@@ -667,9 +667,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Mise à jour d'un favoris : " + ligne + " "
 				+ ligne.isFavoris());
-		cr.update(
-				Uri.parse(DefaultContentProvider.CONTENT_URI + "/favoris/"
-						+ ligne.getId()), editedValues, null, null);
+		cr.update(Uri.withAppendedPath(DefaultContentProvider.CONTENT_URI,
+				DefaultContentProvider.FAVORIS_URI + "/" + ligne.getId()), editedValues, null, null);
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Fin enregistrement d'un favoris");
 	}
@@ -707,7 +706,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 
 	@Override
 	public void startGetIncidentsAsync(
-			String scope, boolean forceUpdate,
+			String scope,
+			boolean forceUpdate,
 			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
 		new LoadIncidentsAsyncTask(forceUpdate, callback).execute(scope);
 	}
