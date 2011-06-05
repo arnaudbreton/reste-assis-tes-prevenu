@@ -44,6 +44,4 @@
 				android:text="Rapporter cet incident" />
 		</LinearLayout>
 	</LinearLayout>
-
-	<include android:id="@+id/adView" layout="@layout/ad_view" />
 </RelativeLayout>

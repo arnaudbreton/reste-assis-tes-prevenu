@@ -16,6 +16,4 @@
 			android:layout_height="wrap_content">
 		</ExpandableListView>
 	</LinearLayout>
-	
-	<include android:id="@+id/adView" layout="@layout/ad_view" />
 </RelativeLayout>

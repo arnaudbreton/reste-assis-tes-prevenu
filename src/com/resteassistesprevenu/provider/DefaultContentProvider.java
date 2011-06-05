@@ -318,7 +318,7 @@ public class DefaultContentProvider extends ContentProvider {
 			TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID,
 			LigneBDDHelper.COL_IS_FAVORIS));					
 
-			db.execSQL("CREATE TABLE %s ("
+			db.execSQL(String.format("CREATE TABLE %s ("
 					+ "%s INTEGER PRIMARY KEY,"
 					+ "%s INTEGER REFERENCES lignes(_id),"
 					+ "%s VARCHAR NOT NULL,"
@@ -326,7 +326,16 @@ public class DefaultContentProvider extends ContentProvider {
 					+ "%s INTEGER NOT NULL,"
 					+ "%s INTEGER NOT NULL,"
 					+ "%s INTEGER NOT NULL,"
-					+ "%s DATE NOT NULL" + ");");
+					+ "%s DATE NOT NULL" + ");",
+					IncidentsBDDHelper.NOM_TABLE,
+					IncidentsBDDHelper.ID,
+					IncidentsBDDHelper.COL_ID_LIGNE,
+					IncidentsBDDHelper.COL_RAISON,
+					IncidentsBDDHelper.COL_STATUT,
+					IncidentsBDDHelper.COL_NB_VOTE_PLUS,
+					IncidentsBDDHelper.COL_NB_VOTE_MINUS,
+					IncidentsBDDHelper.COL_NB_VOTE_ENDED,
+					IncidentsBDDHelper.COL_LAST_MODIFIED_TIME));
 
 			Log.i(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Fin création de la base.");

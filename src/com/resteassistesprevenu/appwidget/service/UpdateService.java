@@ -33,7 +33,7 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
 
 public class UpdateService extends Service {
 	public static final String ACTION_SHOW_PREC_INCIDENT = "com.resteassistesprevenu.appwidget.service.UpdateService.ACTION_SHOW_PREV_INCIDENT";
-	 public static final String ACTION_SHOW_NEXT_INCIDENT = "com.resteassistesprevenu.appwidget.service.UpdateService.ACTION_SHOW_NEXT_INCIDENT";
+	public static final String ACTION_SHOW_NEXT_INCIDENT = "com.resteassistesprevenu.appwidget.service.UpdateService.ACTION_SHOW_NEXT_INCIDENT";
 
 	/**
 	 * Action à réaliser après chargement des incidents
@@ -45,7 +45,7 @@ public class UpdateService extends Service {
 	 */
 	private static List<IncidentModel> incidents = new ArrayList<IncidentModel>();
 
-	private static int incidentIndex = 0;
+	private static int incidentIndex = -1;
 
 	/**
 	 * Connexion au service
@@ -58,26 +58,26 @@ public class UpdateService extends Service {
 	private IIncidentsTransportsBackgroundService mBoundService;
 
 	private static int mode = 0;
-	
+
 	private static final Object mLockObject = new Object();
-	
-    /**
-     * Lock used when maintaining queue of requested updates.
-     */
-    private static Object sLock = new Object();
 
-    /**
-     * Flag if there is an update thread already running. We only launch a new
-     * thread if one isn't already running.
-     */
-    private static boolean sThreadRunning = false;
+	/**
+	 * Lock used when maintaining queue of requested updates.
+	 */
+	private static Object sLock = new Object();
 
-    /**
-     * Internal queue of requested widget updates. You <b>must</b> access
-     * through {@link #requestUpdate(int[])} or {@link #getNextUpdate()} to make
-     * sure your access is correctly synchronized.
-     */
-    private static Queue<Integer> sAppWidgetIds = new LinkedList<Integer>();
+	/**
+	 * Flag if there is an update thread already running. We only launch a new
+	 * thread if one isn't already running.
+	 */
+	private static boolean sThreadRunning = false;
+
+	/**
+	 * Internal queue of requested widget updates. You <b>must</b> access
+	 * through {@link #requestUpdate(int[])} or {@link #getNextUpdate()} to make
+	 * sure your access is correctly synchronized.
+	 */
+	private static Queue<Integer> sAppWidgetIds = new LinkedList<Integer>();
 
 	private class ServiceIncidentConnection implements ServiceConnection {
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -96,21 +96,18 @@ public class UpdateService extends Service {
 								"Début du chargement des incidents.");
 
 						incidents.clear();
-						incidentIndex = 0;
 						if (incidentsService != null) {
 							incidents.addAll(incidentsService);
 						}
-						
-						while(hasMoreUpdates()) {
-							AppWidgetManager manager = AppWidgetManager
-									.getInstance(getApplicationContext());
-							RemoteViews updateViews = buildUpdate();
-							manager.updateAppWidget(getNextUpdate(), updateViews);
-							
-							Log.i(getApplicationContext().getString(
-									R.string.log_tag_name),
-									"Chargement des incidents réussi.");
-						}
+
+						showNextIncident();
+						//
+						// while (hasMoreUpdates()) {
+						//
+						// Log.i(getApplicationContext().getString(
+						// R.string.log_tag_name),
+						// "Chargement des incidents réussi.");
+						// }
 					} catch (Exception e) {
 						Log.e(getApplicationContext().getString(
 								R.string.log_tag_name),
@@ -131,7 +128,7 @@ public class UpdateService extends Service {
 						}
 					});
 				}
-			}, 0, 10000);
+			}, 0, 20000);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -162,48 +159,48 @@ public class UpdateService extends Service {
 		this.conn = null;
 	}
 
-	 /**
-     * Request updates for the given widgets. Will only queue them up, you are
-     * still responsible for starting a processing thread if needed, usually by
-     * starting the parent service.
-     */
-    public static void requestUpdate(int[] appWidgetIds) {
-        synchronized (sLock) {
-            for (int appWidgetId : appWidgetIds) {
-                sAppWidgetIds.add(appWidgetId);
-            }
-        }
-    }
-    
-    /**
-     * Peek if we have more updates to perform. This method is special because
-     * it assumes you're calling from the update thread, and that you will
-     * terminate if no updates remain. (It atomically resets
-     * {@link #sThreadRunning} when none remain to prevent race conditions.)
-     */
-    private static boolean hasMoreUpdates() {
-        synchronized (sLock) {
-            boolean hasMore = !sAppWidgetIds.isEmpty();
-            if (!hasMore) {
-                sThreadRunning = false;
-            }
-            return hasMore;
-        }
-    }
-    
-    /**
-     * Poll the next widget update in the queue.
-     */
-    private static int getNextUpdate() {
-        synchronized (sLock) {
-            if (sAppWidgetIds.peek() == null) {
-                return AppWidgetManager.INVALID_APPWIDGET_ID;
-            } else {
-                return sAppWidgetIds.poll();
-            }
-        }
-    }
-    
+	/**
+	 * Request updates for the given widgets. Will only queue them up, you are
+	 * still responsible for starting a processing thread if needed, usually by
+	 * starting the parent service.
+	 */
+	public static void requestUpdate(int[] appWidgetIds) {
+		synchronized (sLock) {
+			for (int appWidgetId : appWidgetIds) {
+				sAppWidgetIds.add(appWidgetId);
+			}
+		}
+	}
+
+	/**
+	 * Peek if we have more updates to perform. This method is special because
+	 * it assumes you're calling from the update thread, and that you will
+	 * terminate if no updates remain. (It atomically resets
+	 * {@link #sThreadRunning} when none remain to prevent race conditions.)
+	 */
+	private static boolean hasMoreUpdates() {
+		synchronized (sLock) {
+			boolean hasMore = !sAppWidgetIds.isEmpty();
+			if (!hasMore) {
+				sThreadRunning = false;
+			}
+			return hasMore;
+		}
+	}
+
+	/**
+	 * Poll the next widget update in the queue.
+	 */
+	private static int getNextUpdate() {
+		synchronized (sLock) {
+			if (sAppWidgetIds.peek() == null) {
+				return AppWidgetManager.INVALID_APPWIDGET_ID;
+			} else {
+				return sAppWidgetIds.poll();
+			}
+		}
+	}
+
 	/**
 	 * Build a widget update to show the current Wiktionary "Word of the day."
 	 * Will block until the online API returns.
@@ -221,7 +218,7 @@ public class UpdateService extends Service {
 		updateViews.setOnClickPendingIntent(R.id.btnWidgetLogo,
 				incidentEnCoursPendingIntent);
 
-		// Action vers l'écran d'ajout d'un incident 
+		// Action vers l'écran d'ajout d'un incident
 		Intent newIncidentIntent = new Intent(getApplicationContext(),
 				NewIncidentActivity.class);
 		PendingIntent newIncidentPendingIntent = PendingIntent.getActivity(
@@ -230,11 +227,6 @@ public class UpdateService extends Service {
 				newIncidentPendingIntent);
 
 		if (incidents.size() > 0) {
-			if (mode == 0) {
-				showNextIncident();
-			} else {
-				mode = 0;
-			}
 			Log.d(getResources().getString(R.string.log_tag_name),
 					"Affichage de l'incident numéro " + incidentIndex);
 			IncidentModel incident = incidents.get(incidentIndex);
@@ -252,7 +244,7 @@ public class UpdateService extends Service {
 							showPrecIncidentIntent, 0);
 			updateViews.setOnClickPendingIntent(R.id.btnPrecIncident,
 					showPrecIncidentPendingIntent);
-			
+
 			Intent showNextIncidentIntent = new Intent(getApplicationContext(),
 					RASSTPWidgetProvider.class);
 			showNextIncidentIntent.setAction(ACTION_SHOW_NEXT_INCIDENT);
@@ -278,36 +270,41 @@ public class UpdateService extends Service {
 		return null;
 	}
 
-	public static void showPrecIncident() {
-		new Thread() {
-			public void run() {
-				synchronized (mLockObject) {
-					if (incidentIndex - 1 >= 0) {
-						incidentIndex--;
-					} else {
-						incidentIndex = incidents.size();
-					}
+	// public void showPrecIncident() {
+	// new Thread() {
+	// public void run() {
+	// synchronized (mLockObject) {
+	// if (incidentIndex - 1 >= 0) {
+	// incidentIndex--;
+	// } else {
+	// incidentIndex = incidents.size();
+	// }
+	//
+	// mode = 1;
+	// }
+	// };
+	// }.start();
+	// }
 
-					mode = 1;
+	public void showNextIncident() {
+		synchronized (mLockObject) {
+			if (incidents.size() > 0) {
+				if (incidentIndex + 1 < incidents.size()) {
+					incidentIndex++;
+				} else {
+					incidentIndex = 0;
 				}
-			};
-		}.start();
-	}
-
-	public static void showNextIncident() {
-		new Thread() {
-			public void run() {
-				synchronized (mLockObject) {
-					if (incidentIndex + 1 < incidents.size()) {
-						incidentIndex++;
-					} else {
-						incidentIndex = 0;
-					}
-
-					mode = 1;			
-				}
-			};
-		}.start();
+			}
+			
+			ComponentName thisWidget = new ComponentName(
+					getApplicationContext(),
+					RASSTPWidgetProvider.class);
+			
+			AppWidgetManager manager = AppWidgetManager
+					.getInstance(getApplicationContext());
+			RemoteViews updateViews = buildUpdate();
+			manager.updateAppWidget(thisWidget, updateViews);
+		}
 	}
 
 };

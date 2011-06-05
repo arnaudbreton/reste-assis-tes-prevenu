@@ -80,8 +80,6 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 
 		this.isModified = false;
 		
-		startAd();
-
 		mBtnOK = (Button) findViewById(R.id.btnFavorisViewOK);
 		mExpandableListView = (ExpandableListView) findViewById(R.id.expandableFavorisView);
 		mAdapter = new FavorisExpandableListAdapter(FavorisActivity.this, mExpandableListView);

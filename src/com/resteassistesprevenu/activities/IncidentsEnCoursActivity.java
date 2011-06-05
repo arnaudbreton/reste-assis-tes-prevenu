@@ -205,8 +205,6 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 
 		this.mModeChargement = ModeChargement.NORMAL;
 
-		startAd();
-
 		this.mAdapter = new IncidentModelArrayAdapter(this,
 				R.id.listViewIncidentEnCours, this.incidentsServiceDisplay,
 				this);

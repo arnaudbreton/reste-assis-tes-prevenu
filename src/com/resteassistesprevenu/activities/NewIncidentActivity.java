@@ -141,8 +141,6 @@ public class NewIncidentActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_incident_view);
 
-		super.startAd();
-
 		this.lignes = new ArrayList<LigneModel>();
 		this.typeLignes = new ArrayList<String>();
 
