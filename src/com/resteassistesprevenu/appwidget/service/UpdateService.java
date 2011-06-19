@@ -27,14 +27,14 @@ import com.resteassistesprevenu.appwidget.provider.RASSTPWidgetProvider;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.IncidentModelAdapter;
-import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IBackgroundService;
+import com.resteassistesprevenu.services.BackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceFavorisModifiedListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceFavorisModifiedListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetFavorisListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetIncidentsEnCoursListener;
 
-public class UpdateService extends Service implements IIncidentsTransportsBackgroundServiceFavorisModifiedListener {
+public class UpdateService extends Service implements IBackgroundServiceFavorisModifiedListener {
 	/**
 	 * Tag pour les logs
 	 */
@@ -46,7 +46,7 @@ public class UpdateService extends Service implements IIncidentsTransportsBackgr
 	/**
 	 * Action à réaliser après chargement des incidents
 	 */
-	private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener getIncidentsEnCoursListener;
+	private IBackgroundServiceGetIncidentsEnCoursListener getIncidentsEnCoursListener;
 
 	/**
 	 * Les incidents du service
@@ -63,7 +63,7 @@ public class UpdateService extends Service implements IIncidentsTransportsBackgr
 	/**
 	 * Binder du service
 	 */
-	private IIncidentsTransportsBackgroundService mBoundService;
+	private IBackgroundService mBoundService;
 
 
 	private static final Object mLockObject = new Object();
@@ -91,7 +91,7 @@ public class UpdateService extends Service implements IIncidentsTransportsBackgr
 	/**
 	 * Listener de récupération des favoris
 	 */
-	private IIncidentsTransportsBackgroundServiceGetFavorisListener getFavorisListener;
+	private IBackgroundServiceGetFavorisListener getFavorisListener;
 
 	/**
 	 * Lignes favorites
@@ -106,7 +106,7 @@ public class UpdateService extends Service implements IIncidentsTransportsBackgr
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 					.getService();
 
-			getIncidentsEnCoursListener = new IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener() {
+			getIncidentsEnCoursListener = new IBackgroundServiceGetIncidentsEnCoursListener() {
 				@Override
 				public void dataChanged(List<IncidentModel> incidentsService) {
 					try {
@@ -145,7 +145,7 @@ public class UpdateService extends Service implements IIncidentsTransportsBackgr
 				}
 			};
 			
-			getFavorisListener = new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
+			getFavorisListener = new IBackgroundServiceGetFavorisListener() {
 				@Override
 				public void dataChanged(List<LigneModel> lignes) {
 					Log.i(getString(R.string.log_tag_name) + " " + TAG_SERVICE,
@@ -208,7 +208,7 @@ public class UpdateService extends Service implements IIncidentsTransportsBackgr
 		
 		getApplicationContext().bindService(
 				new Intent(getApplicationContext(),
-						IncidentsTransportsBackgroundService.class), conn,
+						BackgroundService.class), conn,
 				Context.BIND_AUTO_CREATE);
 	}
 

@@ -1,7 +1,7 @@
 package com.resteassistesprevenu.activities;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,31 +10,20 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.ExpandableListView;
 import android.widget.ListView;
 
 import com.resteassistesprevenu.R;
-import com.resteassistesprevenu.model.adapters.PlagesHorairesExpandableListAdapter;
-import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IBackgroundService;
+import com.resteassistesprevenu.services.BackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
 
-public class ParametrageActivity extends Activity {
+public class ParametrageActivity extends ListActivity {
 	/**
 	 * Tag pour les logs
 	 */
 	private static final String TAG_ACTIVITY = "ParametrageActivity";
-
-	/**
-	 * ExpandableView des plages horaires
-	 */
-	private ExpandableListView mExpPlagesHoraires;
-
-	/**
-	 * Adapteur pour les pages horaires
-	 */
-	private PlagesHorairesExpandableListAdapter mAdapter;
 
 	/**
 	 * Connexion au service
@@ -44,11 +33,16 @@ public class ParametrageActivity extends Activity {
 	/**
 	 * Binding au service
 	 */
-	private IIncidentsTransportsBackgroundService mBoundService;
-	
+	private IBackgroundService mBoundService;
+
 	private ListView mListViewParametres;
-	
-	private final static String[] listeParametres = {"Choix du serveur"};
+
+	private final static String[] listeParametres = {
+			"Plages horaires de synchronisation", "Choix du serveur" };
+
+	private static final int PLAGES_HORAIRES_SYNC = 0;
+
+	private static final int CHOIX_SERVEUR = 1;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -56,12 +50,22 @@ public class ParametrageActivity extends Activity {
 
 		setContentView(R.layout.parametrage_view);
 
-		mExpPlagesHoraires = (ExpandableListView) findViewById(R.id.expandablePlagesHorairesView);
+		getListView().setAdapter(new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, listeParametres));
+	}
 
-		mAdapter = new PlagesHorairesExpandableListAdapter(this, mExpPlagesHoraires);
-		
-		mListViewParametres = (ListView) findViewById(R.id.listViewParametres);
-		mListViewParametres.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,listeParametres));
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		switch (position) {
+		case PLAGES_HORAIRES_SYNC:
+			startActivity(new Intent(this, PlagesHorairesActivity.class));
+			break;
+		case CHOIX_SERVEUR:
+			chooseServeur();
+			break;
+		default:
+			break;
+		}
 	}
 
 	private void chooseServeur() {
@@ -108,7 +112,7 @@ public class ParametrageActivity extends Activity {
 								mBoundService.setProduction(true);
 							} else {
 								mBoundService.setProduction(false);
-							}					
+							}
 						}
 
 						dialog.dismiss();
@@ -126,7 +130,7 @@ public class ParametrageActivity extends Activity {
 
 		conn = new ParametrageServiceConnection();
 		bindService(new Intent(getApplicationContext(),
-				IncidentsTransportsBackgroundService.class), conn,
+				BackgroundService.class), conn,
 				Context.BIND_AUTO_CREATE);
 	}
 

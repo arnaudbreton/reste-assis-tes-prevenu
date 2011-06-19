@@ -5,6 +5,6 @@ package com.resteassistesprevenu.services.listeners;
  * @author Arnaud
  *
  */
-public interface IIncidentsTransportsBackgroundServiceReportNewIncidentListener {
+public interface IBackgroundServiceReportNewIncidentListener {
 	 public void dataChanged(String idNewIncident); 
 }

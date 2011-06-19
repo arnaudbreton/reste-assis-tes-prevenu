@@ -3,14 +3,14 @@ package com.resteassistesprevenu.services;
 import android.os.Binder;
 
 public class IncidentsTransportsBackgroundServiceBinder extends Binder {		  
-	    private IIncidentsTransportsBackgroundService service = null; 
+	    private IBackgroundService service = null; 
 	  
-	    public IncidentsTransportsBackgroundServiceBinder(IIncidentsTransportsBackgroundService service) { 
+	    public IncidentsTransportsBackgroundServiceBinder(IBackgroundService service) { 
 	        super(); 
 	        this.service = service; 
 	    } 
 	 
-	    public IIncidentsTransportsBackgroundService getService(){ 
+	    public IBackgroundService getService(){ 
 	        return service; 
 	    } 
 }

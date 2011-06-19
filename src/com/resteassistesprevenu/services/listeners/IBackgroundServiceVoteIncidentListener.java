@@ -5,6 +5,6 @@ package com.resteassistesprevenu.services.listeners;
  * @author Arnaud
  *
  */
-public interface IIncidentsTransportsBackgroundServiceVoteIncidentListener {
+public interface IBackgroundServiceVoteIncidentListener {
 	 public void dataChanged(boolean voteSent); 
 }

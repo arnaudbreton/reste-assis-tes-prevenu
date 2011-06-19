@@ -31,12 +31,12 @@ import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.IncidentModelArrayAdapter;
-import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IBackgroundService;
+import com.resteassistesprevenu.services.BackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetFavorisListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetIncidentsEnCoursListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceVoteIncidentListener;
 
 /**
  * Activité listant les incidents
@@ -73,7 +73,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	/**
 	 * Service
 	 */
-	private IIncidentsTransportsBackgroundService mBoundService;
+	private IBackgroundService mBoundService;
 
 	/**
 	 * Lignes favorites
@@ -149,17 +149,17 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 	/**
 	 * Listener de vote pour les incidents
 	 */
-	private IIncidentsTransportsBackgroundServiceVoteIncidentListener voteIncidentListener;
+	private IBackgroundServiceVoteIncidentListener voteIncidentListener;
 
 	/**
 	 * Listener de récupération des favoris
 	 */
-	private IIncidentsTransportsBackgroundServiceGetFavorisListener getFavorisListener;
+	private IBackgroundServiceGetFavorisListener getFavorisListener;
 
 	/**
 	 * Listener de récupération des incidents
 	 */
-	public IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener getIncidentsEnCoursListener;
+	public IBackgroundServiceGetIncidentsEnCoursListener getIncidentsEnCoursListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -175,7 +175,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 
 		this.conn = new ServiceIncidentConnection();
 		bindService(new Intent(getApplicationContext(),
-				IncidentsTransportsBackgroundService.class), this.conn,
+				BackgroundService.class), this.conn,
 				Context.BIND_AUTO_CREATE);
 	}
 
@@ -297,7 +297,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		case R.id.menu_parametrage:
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 					"Menu : paramétrage");
-			startActivity(new Intent(this, FavorisActivity.class));
+			startActivity(new Intent(this, ParametrageActivity.class));
 			return true;
 		case R.id.menu_favoris:
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
@@ -500,7 +500,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 					.getService();
 
-			getIncidentsEnCoursListener = new IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener() {
+			getIncidentsEnCoursListener = new IBackgroundServiceGetIncidentsEnCoursListener() {
 				@Override
 				public void dataChanged(List<IncidentModel> incidentsService) {
 					try {
@@ -545,7 +545,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				}
 			};
 
-			voteIncidentListener = new IIncidentsTransportsBackgroundServiceVoteIncidentListener() {
+			voteIncidentListener = new IBackgroundServiceVoteIncidentListener() {
 
 				@Override
 				public void dataChanged(boolean voteSent) {
@@ -569,7 +569,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 				}
 			};
 
-			getFavorisListener = new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
+			getFavorisListener = new IBackgroundServiceGetFavorisListener() {
 				@Override
 				public void dataChanged(List<LigneModel> lignes) {
 					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,

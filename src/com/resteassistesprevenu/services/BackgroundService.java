@@ -41,14 +41,15 @@ import com.resteassistesprevenu.provider.IncidentsBDDHelper;
 import com.resteassistesprevenu.provider.LigneBDDHelper;
 import com.resteassistesprevenu.provider.ParametrageBDDHelper;
 import com.resteassistesprevenu.provider.TypeLigneBDDHelper;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceFavorisModifiedListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetParametrageListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceFavorisModifiedListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetFavorisListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetIncidentsEnCoursListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetLignesListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetParametrageListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetTypeLignesListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceRegisterParametrageListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceReportNewIncidentListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceVoteIncidentListener;
 
 /**
  * Service de communication avec les WebServices et le ContentProvider
@@ -56,13 +57,13 @@ import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroun
  * @author Arnaud
  * 
  */
-public class IncidentsTransportsBackgroundService extends Service implements
-		IIncidentsTransportsBackgroundService {
+public class BackgroundService extends Service implements
+		IBackgroundService {
 	private static final String TAG_SERVICE = "IncidentsTransportsBackgroundService";
 
 	private static final Object lockObject = new Object();
 	
-	private List<IIncidentsTransportsBackgroundServiceFavorisModifiedListener> favorisModifiedListener;
+	private List<IBackgroundServiceFavorisModifiedListener> favorisModifiedListener;
 
 	/**
 	 * AsyncTask de récupération des incidents
@@ -71,12 +72,12 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	private class LoadIncidentsAsyncTask extends
 			AsyncTask<String, Void, List<IncidentModel>> {
 
-		private IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback;
+		private IBackgroundServiceGetIncidentsEnCoursListener callback;
 		private boolean forceUpdate;
 
 		public LoadIncidentsAsyncTask(
 				boolean forceUpdate,
-				IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
+				IBackgroundServiceGetIncidentsEnCoursListener callback) {
 			this.callback = callback;
 			this.forceUpdate = forceUpdate;
 		}
@@ -116,10 +117,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class LoadTypeLignesAsyncTask extends
 			AsyncTask<Void, Void, List<String>> {
-		private IIncidentsTransportsBackgroundServiceGetTypeLignesListener callback;
+		private IBackgroundServiceGetTypeLignesListener callback;
 
 		public LoadTypeLignesAsyncTask(
-				IIncidentsTransportsBackgroundServiceGetTypeLignesListener callback) {
+				IBackgroundServiceGetTypeLignesListener callback) {
 			this.callback = callback;
 		}
 
@@ -147,10 +148,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class LoadLignesAsyncTask extends
 			AsyncTask<String, Void, List<LigneModel>> {
-		private IIncidentsTransportsBackgroundServiceGetLignesListener callback;
+		private IBackgroundServiceGetLignesListener callback;
 
 		public LoadLignesAsyncTask(
-				IIncidentsTransportsBackgroundServiceGetLignesListener callback) {
+				IBackgroundServiceGetLignesListener callback) {
 			this.callback = callback;
 		}
 
@@ -184,10 +185,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class ReportIncidentAsyncTask extends
 			AsyncTask<String, Void, String> {
-		private IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback;
+		private IBackgroundServiceReportNewIncidentListener callback;
 
 		public ReportIncidentAsyncTask(
-				IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback) {
+				IBackgroundServiceReportNewIncidentListener callback) {
 			this.callback = callback;
 		}
 
@@ -215,10 +216,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class GetFavorisAsyncTask extends
 			AsyncTask<Void, Void, List<LigneModel>> {
-		private IIncidentsTransportsBackgroundServiceGetFavorisListener callback;
+		private IBackgroundServiceGetFavorisListener callback;
 
 		public GetFavorisAsyncTask(
-				IIncidentsTransportsBackgroundServiceGetFavorisListener callback) {
+				IBackgroundServiceGetFavorisListener callback) {
 			this.callback = callback;
 		}
 
@@ -276,13 +277,13 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	private class VoteIncidentAsyncTask extends
 			AsyncTask<IncidentAction, Void, Boolean> {
 
-		private IIncidentsTransportsBackgroundServiceVoteIncidentListener callback;
+		private IBackgroundServiceVoteIncidentListener callback;
 		private IncidentModel incident;
 		private IncidentAction action;
 
 		public VoteIncidentAsyncTask(
 				IncidentModel incident,
-				IIncidentsTransportsBackgroundServiceVoteIncidentListener callback) {
+				IBackgroundServiceVoteIncidentListener callback) {
 			this.incident = incident;
 			this.callback = callback;
 		}
@@ -332,10 +333,10 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	 */
 	private class GetParametreAsyncTask extends
 			AsyncTask<String, String, ParametreModel> {
-		private IIncidentsTransportsBackgroundServiceGetParametrageListener callback;
+		private IBackgroundServiceGetParametrageListener callback;
 
 		public GetParametreAsyncTask(
-				IIncidentsTransportsBackgroundServiceGetParametrageListener callback) {
+				IBackgroundServiceGetParametrageListener callback) {
 			this.callback = callback;
 		}
 
@@ -772,19 +773,19 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	public void startGetIncidentsAsync(
 			String scope,
 			boolean forceUpdate,
-			IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener callback) {
+			IBackgroundServiceGetIncidentsEnCoursListener callback) {
 		new LoadIncidentsAsyncTask(forceUpdate, callback).execute(scope);
 	}
 
 	@Override
 	public void startGetTypeLignesAsync(
-			IIncidentsTransportsBackgroundServiceGetTypeLignesListener callback) {
+			IBackgroundServiceGetTypeLignesListener callback) {
 		new LoadTypeLignesAsyncTask(callback).execute();
 	}
 
 	@Override
 	public void startGetLignesAsync(String typeLigne,
-			IIncidentsTransportsBackgroundServiceGetLignesListener callback) {
+			IBackgroundServiceGetLignesListener callback) {
 		new LoadLignesAsyncTask(callback).execute(typeLigne);
 	}
 
@@ -793,7 +794,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 			String typeLigne,
 			String numLigne,
 			String raison,
-			IIncidentsTransportsBackgroundServiceReportNewIncidentListener callback) {
+			IBackgroundServiceReportNewIncidentListener callback) {
 		new ReportIncidentAsyncTask(callback).execute(typeLigne, numLigne,
 				raison);
 	}
@@ -801,7 +802,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	@Override
 	public void startVoteIncident(IncidentModel incident,
 			IncidentAction action,
-			IIncidentsTransportsBackgroundServiceVoteIncidentListener callback) {
+			IBackgroundServiceVoteIncidentListener callback) {
 		new VoteIncidentAsyncTask(incident, callback).execute(action);
 	}
 
@@ -809,34 +810,42 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		new RegisterFavorisAsyncTask().execute(ligne);
 	}
 	
-	public void addFavorisModifiedListener(IIncidentsTransportsBackgroundServiceFavorisModifiedListener listener) {
+	public void addFavorisModifiedListener(IBackgroundServiceFavorisModifiedListener listener) {
 		if(this.favorisModifiedListener == null) {
-			this.favorisModifiedListener = new ArrayList<IIncidentsTransportsBackgroundServiceFavorisModifiedListener>();
+			this.favorisModifiedListener = new ArrayList<IBackgroundServiceFavorisModifiedListener>();
 		}
 		
 		this.favorisModifiedListener.add(listener);
 	}
 	
-	public void removeFavorisModifiedListener(IIncidentsTransportsBackgroundServiceFavorisModifiedListener listener) {
+	public void removeFavorisModifiedListener(IBackgroundServiceFavorisModifiedListener listener) {
 		if(this.favorisModifiedListener != null && this.favorisModifiedListener.contains(listener)) {
 			this.favorisModifiedListener.remove(listener);
 		}
 	}
 	
 	private void fireFavorisModified() {
-		for(IIncidentsTransportsBackgroundServiceFavorisModifiedListener listener : this.favorisModifiedListener) {
+		for(IBackgroundServiceFavorisModifiedListener listener : this.favorisModifiedListener) {
 			listener.favorisModified();
 		}
 	}
 
 	public void startGetFavorisAsync(
-			IIncidentsTransportsBackgroundServiceGetFavorisListener callback) {
+			IBackgroundServiceGetFavorisListener callback) {
 		new GetFavorisAsyncTask(callback).execute();
 	}
 	
 	public void startGetParametreAsync(
-			IIncidentsTransportsBackgroundServiceGetParametrageListener callback) {
+			IBackgroundServiceGetParametrageListener callback) {
 		new GetParametreAsyncTask(callback).execute();
+	}
+	
+	@Override
+	public void startRegisterParametreAsync(
+			String cle,
+			String valeur,
+			IBackgroundServiceRegisterParametrageListener callback) {
+		
 	}
 
 	@Override

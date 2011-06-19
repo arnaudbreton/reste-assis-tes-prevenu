@@ -27,13 +27,13 @@ import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.ImageNumLineSpinnerListAdapter;
 import com.resteassistesprevenu.model.adapters.ImageTypeLineSpinnerListAdapter;
-import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IBackgroundService;
+import com.resteassistesprevenu.services.BackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetFavorisListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetLignesListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetTypeLignesListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceReportNewIncidentListener;
 
 /**
  * Activité de déclaration d'un incident
@@ -50,7 +50,7 @@ public class NewIncidentActivity extends BaseActivity {
 	/**
 	 * Service
 	 */
-	private IIncidentsTransportsBackgroundService mBoundService;
+	private IBackgroundService mBoundService;
 
 	/**
 	 * Spinner contenant les types de ligne
@@ -114,22 +114,22 @@ public class NewIncidentActivity extends BaseActivity {
 	/**
 	 * Listener de récupération des types de ligne
 	 */
-	private IIncidentsTransportsBackgroundServiceGetTypeLignesListener getTypeLignesListener;
+	private IBackgroundServiceGetTypeLignesListener getTypeLignesListener;
 
 	/**
 	 * Listener de récupération des lignes
 	 */
-	private IIncidentsTransportsBackgroundServiceGetLignesListener getLignesListener;
+	private IBackgroundServiceGetLignesListener getLignesListener;
 
 	/**
 	 * Listener de récupération des favoris
 	 */
-	private IIncidentsTransportsBackgroundServiceGetFavorisListener getFavorisListener;
+	private IBackgroundServiceGetFavorisListener getFavorisListener;
 
 	/**
 	 * Listener de création d'un incident
 	 */
-	private IIncidentsTransportsBackgroundServiceReportNewIncidentListener reportNewIncidentListener;
+	private IBackgroundServiceReportNewIncidentListener reportNewIncidentListener;
 
 	/**
 	 * Indicateur de filtre par favoris
@@ -271,7 +271,7 @@ public class NewIncidentActivity extends BaseActivity {
 		"Début de lien au service.");
 		this.conn = new ServiceIncidentConnection();
 		bindService(
-				new Intent(this, IncidentsTransportsBackgroundService.class),
+				new Intent(this, BackgroundService.class),
 				this.conn, Context.BIND_AUTO_CREATE);
 	}
 
@@ -284,7 +284,7 @@ public class NewIncidentActivity extends BaseActivity {
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 					.getService();
 
-			getTypeLignesListener = new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
+			getTypeLignesListener = new IBackgroundServiceGetTypeLignesListener() {
 				@Override
 				public void dataChanged(List<String> data) {
 					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
@@ -300,7 +300,7 @@ public class NewIncidentActivity extends BaseActivity {
 			};
 			//mBoundService.addGetTypeLignesListener(getTypeLignesListener);
 
-			getFavorisListener = new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
+			getFavorisListener = new IBackgroundServiceGetFavorisListener() {
 				@Override
 				public void dataChanged(List<LigneModel> lignesData) {
 					// S'il existe des favoris, on les affiche
@@ -337,7 +337,7 @@ public class NewIncidentActivity extends BaseActivity {
 			};
 //			mBoundService.addGetFavorisListener(getFavorisListener);
 
-			getLignesListener = new IIncidentsTransportsBackgroundServiceGetLignesListener() {
+			getLignesListener = new IBackgroundServiceGetLignesListener() {
 				@Override
 				public void dataChanged(List<LigneModel> data) {
 					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
@@ -361,7 +361,7 @@ public class NewIncidentActivity extends BaseActivity {
 			};
 			//mBoundService.addGetLignesListener(getLignesListener);
 
-			reportNewIncidentListener = new IIncidentsTransportsBackgroundServiceReportNewIncidentListener() {
+			reportNewIncidentListener = new IBackgroundServiceReportNewIncidentListener() {
 				@Override
 				public void dataChanged(String idIncident) {
 					Log.i(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,

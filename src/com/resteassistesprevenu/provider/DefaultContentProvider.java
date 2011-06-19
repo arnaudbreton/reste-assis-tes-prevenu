@@ -384,7 +384,8 @@ public class DefaultContentProvider extends ContentProvider {
 			db.execSQL(String.format("CREATE TABLE %s ("
 					+ "%s INTEGER PRIMARY KEY,"
 					+ "%s VARCHAR NOT NULL,"
-					+ "%s VARCHAR NOT NULL,"+ ");",
+					+ "%s VARCHAR NOT NULL"
+					+ ");",
 					ParametrageBDDHelper.NOM_TABLE,
 					ParametrageBDDHelper.ID,
 					ParametrageBDDHelper.COL_CLE,

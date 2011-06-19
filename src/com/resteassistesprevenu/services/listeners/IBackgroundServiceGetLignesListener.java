@@ -5,10 +5,10 @@ import java.util.List;
 import com.resteassistesprevenu.model.LigneModel;
 
 /**
- * Listener pour la récupération des favoris
+ * Listener pour la récupération des lignes
  * @author Arnaud
  *
  */
-public interface IIncidentsTransportsBackgroundServiceGetFavorisListener {
+public interface IBackgroundServiceGetLignesListener {
 	 public void dataChanged(List<LigneModel> lignes); 
 }

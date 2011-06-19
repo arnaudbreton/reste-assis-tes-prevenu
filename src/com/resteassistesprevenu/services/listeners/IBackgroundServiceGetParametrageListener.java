@@ -7,6 +7,6 @@ import com.resteassistesprevenu.model.ParametreModel;
  * @author Arnaud
  *
  */
-public interface IIncidentsTransportsBackgroundServiceGetParametrageListener {
+public interface IBackgroundServiceGetParametrageListener {
 	 public void dataChanged(ParametreModel param); 
 }

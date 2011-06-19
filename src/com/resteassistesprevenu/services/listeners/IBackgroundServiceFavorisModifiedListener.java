@@ -1,5 +1,5 @@
 package com.resteassistesprevenu.services.listeners;
 
-public interface IIncidentsTransportsBackgroundServiceFavorisModifiedListener {
+public interface IBackgroundServiceFavorisModifiedListener {
 	public void favorisModified();
 }

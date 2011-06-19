@@ -19,11 +19,11 @@ import android.widget.Toast;
 import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.FavorisExpandableListAdapter;
-import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
-import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
+import com.resteassistesprevenu.services.IBackgroundService;
+import com.resteassistesprevenu.services.BackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
-import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetLignesListener;
+import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetTypeLignesListener;
 
 /**
  * Activité des favoris
@@ -36,7 +36,7 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 	/**
 	 * Service
 	 */
-	private IIncidentsTransportsBackgroundService mBoundService;
+	private IBackgroundService mBoundService;
 
 	/**
 	 * Adapteur favoris => ExpandableListView
@@ -66,12 +66,12 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 	/**
 	 * Listener de récupération des types de lignes
 	 */
-	private IIncidentsTransportsBackgroundServiceGetTypeLignesListener getTypeLignesListener;
+	private IBackgroundServiceGetTypeLignesListener getTypeLignesListener;
 	
 	/**
 	 * Listener de récupération des lignes
 	 */
-	private IIncidentsTransportsBackgroundServiceGetLignesListener getLignesListener;
+	private IBackgroundServiceGetLignesListener getLignesListener;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +97,7 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 		
 		conn = new IncidentServiceConnection();
 		bindService(new Intent(getApplicationContext(),
-				IncidentsTransportsBackgroundService.class), conn ,
+				BackgroundService.class), conn ,
 				Context.BIND_AUTO_CREATE);
 	}
 
@@ -136,7 +136,7 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 			mBoundService = ((IncidentsTransportsBackgroundServiceBinder) service)
 					.getService();
 
-			getTypeLignesListener = new IIncidentsTransportsBackgroundServiceGetTypeLignesListener() {
+			getTypeLignesListener = new IBackgroundServiceGetTypeLignesListener() {
 					@Override
 					public void dataChanged(List<String> data) {
 						Log.i(getString(R.string.log_tag_name) + " "
@@ -155,7 +155,7 @@ public class FavorisActivity extends BaseActivity implements OnChildClickListene
 				};
 //			mBoundService.addGetTypeLignesListener(getTypeLignesListener);
 
-			getLignesListener = new IIncidentsTransportsBackgroundServiceGetLignesListener() {
+			getLignesListener = new IBackgroundServiceGetLignesListener() {
 				@Override
 				public void dataChanged(List<LigneModel> lignesModel) {
 					Log.i(getString(R.string.log_tag_name) + " "

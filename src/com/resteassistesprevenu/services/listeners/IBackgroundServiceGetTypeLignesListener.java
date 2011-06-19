@@ -7,6 +7,6 @@ import java.util.List;
  * @author Arnaud
  *
  */
-public interface IIncidentsTransportsBackgroundServiceGetTypeLignesListener {
+public interface IBackgroundServiceGetTypeLignesListener {
 	 public void dataChanged(List<String> lignes); 
 }

@@ -9,6 +9,6 @@ import com.resteassistesprevenu.model.IncidentModel;
  * @author Arnaud
  *
  */
-public interface IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener {
+public interface IBackgroundServiceGetIncidentsEnCoursListener {
 	 public void dataChanged(List<IncidentModel> incidents); 
 }
