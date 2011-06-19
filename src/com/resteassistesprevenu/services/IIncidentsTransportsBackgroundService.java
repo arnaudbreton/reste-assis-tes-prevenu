@@ -3,9 +3,11 @@ package com.resteassistesprevenu.services;
 import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceFavorisModifiedListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetParametrageListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
@@ -51,10 +53,27 @@ public interface IIncidentsTransportsBackgroundService {
 	 */
 	public void startRegisterFavoris(LigneModel ligne);
 	
+	/**
+	 * Ajout d'un listener pour prévenir des modifications de favoris
+	 * @param listener
+	 */
+	public void addFavorisModifiedListener(IIncidentsTransportsBackgroundServiceFavorisModifiedListener listener);
+	
+	/**
+	 * Suppression d'un listener pour prévenir des modifications de favoris
+	 * @param listener
+	 */
+	public void removeFavorisModifiedListener(IIncidentsTransportsBackgroundServiceFavorisModifiedListener listener);
+	
 	/** 
 	 * Lecture des favoris, asynchrone.
 	 */
 	public void startGetFavorisAsync(IIncidentsTransportsBackgroundServiceGetFavorisListener callback);
+	
+	/**
+	 * Lecture d'un paramètre, asynchrone
+	 */
+	public void startGetParametreAsync(IIncidentsTransportsBackgroundServiceGetParametrageListener callback);
 
 	/**
 	 * Indique si le service pointe sur la production

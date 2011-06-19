@@ -294,10 +294,10 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
 				"Choix d'un menu");
 		switch (item.getItemId()) {
-		case R.id.menu_choose_serveur:
+		case R.id.menu_parametrage:
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-					"Menu : choix du serveur");
-			chooseServeur();
+					"Menu : paramétrage");
+			startActivity(new Intent(this, FavorisActivity.class));
 			return true;
 		case R.id.menu_favoris:
 			Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
@@ -353,38 +353,7 @@ public class IncidentsEnCoursActivity extends BaseActivity implements
 					}
 				});
 		builder.show();
-	}
-
-	private void chooseServeur() {
-		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-				"Début création AlertDialog choix du serveur");
-		final CharSequence[] items = { "Production", "Pré-Production" };
-		AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(
-				R.string.title_choose_serveur).setSingleChoiceItems(items,
-				mBoundService.isProduction() ? 0 : 1,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (mBoundService != null) {
-							if (which == 0) {
-								mBoundService.setProduction(true);
-							} else {
-								mBoundService.setProduction(false);
-							}
-
-							IncidentsEnCoursActivity.this
-									.startGetIncidentsFromServiceAsync(true);
-						}
-
-						dialog.dismiss();
-					}
-				});
-
-		Log.d(getString(R.string.log_tag_name) + " " + TAG_ACTIVITY,
-				"Affichage du choix du serveur");
-		builder.show();
-	}
+	}	
 
 	/**
 	 * @return the incidents

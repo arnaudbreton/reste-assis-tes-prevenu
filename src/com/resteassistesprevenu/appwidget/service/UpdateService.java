@@ -25,13 +25,21 @@ import com.resteassistesprevenu.activities.IncidentsEnCoursActivity;
 import com.resteassistesprevenu.activities.NewIncidentActivity;
 import com.resteassistesprevenu.appwidget.provider.RASSTPWidgetProvider;
 import com.resteassistesprevenu.model.IncidentModel;
+import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.adapters.IncidentModelAdapter;
 import com.resteassistesprevenu.services.IIncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundService;
 import com.resteassistesprevenu.services.IncidentsTransportsBackgroundServiceBinder;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceFavorisModifiedListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 
-public class UpdateService extends Service {
+public class UpdateService extends Service implements IIncidentsTransportsBackgroundServiceFavorisModifiedListener {
+	/**
+	 * Tag pour les logs
+	 */
+	private static final String TAG_SERVICE = "Widget_UpdateService";
+
 	public static final String ACTION_SHOW_PREC_INCIDENT = "com.resteassistesprevenu.appwidget.service.UpdateService.ACTION_SHOW_PREV_INCIDENT";
 	public static final String ACTION_SHOW_NEXT_INCIDENT = "com.resteassistesprevenu.appwidget.service.UpdateService.ACTION_SHOW_NEXT_INCIDENT";
 
@@ -43,7 +51,7 @@ public class UpdateService extends Service {
 	/**
 	 * Les incidents du service
 	 */
-	private static List<IncidentModel> incidents = new ArrayList<IncidentModel>();
+	private List<IncidentModel> incidents;
 
 	private static int incidentIndex = -1;
 
@@ -57,7 +65,6 @@ public class UpdateService extends Service {
 	 */
 	private IIncidentsTransportsBackgroundService mBoundService;
 
-	private static int mode = 0;
 
 	private static final Object mLockObject = new Object();
 
@@ -71,6 +78,8 @@ public class UpdateService extends Service {
 	 * thread if one isn't already running.
 	 */
 	private static boolean sThreadRunning = false;
+	
+	private boolean firstTime;
 
 	/**
 	 * Internal queue of requested widget updates. You <b>must</b> access
@@ -78,6 +87,16 @@ public class UpdateService extends Service {
 	 * sure your access is correctly synchronized.
 	 */
 	private static Queue<Integer> sAppWidgetIds = new LinkedList<Integer>();
+
+	/**
+	 * Listener de récupération des favoris
+	 */
+	private IIncidentsTransportsBackgroundServiceGetFavorisListener getFavorisListener;
+
+	/**
+	 * Lignes favorites
+	 */
+	private List<LigneModel> lignesFavoris;
 
 	private class ServiceIncidentConnection implements ServiceConnection {
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -97,7 +116,17 @@ public class UpdateService extends Service {
 
 						incidents.clear();
 						if (incidentsService != null) {
-							incidents.addAll(incidentsService);
+							if(lignesFavoris != null && lignesFavoris.size() != 0) {
+								for(IncidentModel incident : incidentsService) {
+									if(lignesFavoris.contains(incident.getLigne()))
+									{
+										incidents.add(incident);
+									}							
+								}
+							}
+							else {
+								incidents.addAll(incidentsService);
+							}
 						}
 
 						showNextIncident();
@@ -115,20 +144,50 @@ public class UpdateService extends Service {
 					}
 				}
 			};
+			
+			getFavorisListener = new IIncidentsTransportsBackgroundServiceGetFavorisListener() {
+				@Override
+				public void dataChanged(List<LigneModel> lignes) {
+					Log.i(getString(R.string.log_tag_name) + " " + TAG_SERVICE,
+							"Retour de demande de chargement des favoris.");
 
-			final Handler handler = new Handler();
-			Timer timer = new Timer();
-			timer.scheduleAtFixedRate(new TimerTask() {
-				public void run() {
-					handler.post(new Runnable() {
-						public void run() {
-							mBoundService.startGetIncidentsAsync(
-									IncidentModel.SCOPE_HOUR, false,
-									getIncidentsEnCoursListener);
-						}
-					});
+					if (lignesFavoris != null) {
+						lignesFavoris.clear();
+					}
+
+					if (lignes != null && lignes.size() > 0) {
+						Log.d(getString(R.string.log_tag_name) + " "
+								+ TAG_SERVICE,
+								"Chargement de " + lignes.size() + " favoris.");
+						lignesFavoris = new ArrayList<LigneModel>();
+						lignesFavoris.addAll(lignes);
+						Log.d(getString(R.string.log_tag_name) + " "
+								+ TAG_SERVICE,
+								"Fin de chargement des favoris.");
+					}
+
+					if(firstTime) {
+						final Handler handler = new Handler();
+						Timer timer = new Timer();
+						timer.scheduleAtFixedRate(new TimerTask() {
+							public void run() {
+								handler.post(new Runnable() {
+									public void run() {
+										mBoundService.startGetIncidentsAsync(
+												IncidentModel.SCOPE_HOUR, false,
+												getIncidentsEnCoursListener);
+									}
+								});
+							}
+						}, 0, 20000);
+						
+						firstTime = false;
+					}
 				}
-			}, 0, 20000);
+			};
+
+			mBoundService.addFavorisModifiedListener(UpdateService.this);
+			mBoundService.startGetFavorisAsync(getFavorisListener);	
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -143,6 +202,10 @@ public class UpdateService extends Service {
 		Log.d(getResources().getString(R.string.log_tag_name),
 				"UpdateService : onStart()");
 		this.conn = new ServiceIncidentConnection();
+		
+		incidents  = new ArrayList<IncidentModel>();
+		firstTime = true;
+		
 		getApplicationContext().bindService(
 				new Intent(getApplicationContext(),
 						IncidentsTransportsBackgroundService.class), conn,
@@ -236,23 +299,25 @@ public class UpdateService extends Service {
 			updateViews.setTextViewText(R.id.txtNbTotalIncidents,
 					String.valueOf(incidents.size()));
 
-			Intent showPrecIncidentIntent = new Intent(getApplicationContext(),
-					RASSTPWidgetProvider.class);
-			showPrecIncidentIntent.setAction(ACTION_SHOW_PREC_INCIDENT);
-			PendingIntent showPrecIncidentPendingIntent = PendingIntent
-					.getBroadcast(getApplicationContext(), 0,
-							showPrecIncidentIntent, 0);
-			updateViews.setOnClickPendingIntent(R.id.btnPrecIncident,
-					showPrecIncidentPendingIntent);
-
-			Intent showNextIncidentIntent = new Intent(getApplicationContext(),
-					RASSTPWidgetProvider.class);
-			showNextIncidentIntent.setAction(ACTION_SHOW_NEXT_INCIDENT);
-			PendingIntent showNextIncidentPendingIntent = PendingIntent
-					.getBroadcast(getApplicationContext(), 0,
-							showNextIncidentIntent, 0);
-			updateViews.setOnClickPendingIntent(R.id.btnNextIncident,
-					showNextIncidentPendingIntent);
+			// Intent showPrecIncidentIntent = new
+			// Intent(getApplicationContext(),
+			// RASSTPWidgetProvider.class);
+			// showPrecIncidentIntent.setAction(ACTION_SHOW_PREC_INCIDENT);
+			// PendingIntent showPrecIncidentPendingIntent = PendingIntent
+			// .getBroadcast(getApplicationContext(), 0,
+			// showPrecIncidentIntent, 0);
+			// updateViews.setOnClickPendingIntent(R.id.btnPrecIncident,
+			// showPrecIncidentPendingIntent);
+			//
+			// Intent showNextIncidentIntent = new
+			// Intent(getApplicationContext(),
+			// RASSTPWidgetProvider.class);
+			// showNextIncidentIntent.setAction(ACTION_SHOW_NEXT_INCIDENT);
+			// PendingIntent showNextIncidentPendingIntent = PendingIntent
+			// .getBroadcast(getApplicationContext(), 0,
+			// showNextIncidentIntent, 0);
+			// updateViews.setOnClickPendingIntent(R.id.btnNextIncident,
+			// showNextIncidentPendingIntent);
 
 			updateViews.setViewVisibility(R.id.incidentItemView, View.VISIBLE);
 			updateViews.setViewVisibility(R.id.txtAucunIncident, View.GONE);
@@ -295,16 +360,23 @@ public class UpdateService extends Service {
 					incidentIndex = 0;
 				}
 			}
-			
+
 			ComponentName thisWidget = new ComponentName(
-					getApplicationContext(),
-					RASSTPWidgetProvider.class);
-			
+					getApplicationContext(), RASSTPWidgetProvider.class);
+
 			AppWidgetManager manager = AppWidgetManager
 					.getInstance(getApplicationContext());
 			RemoteViews updateViews = buildUpdate();
 			manager.updateAppWidget(thisWidget, updateViews);
 		}
+	}
+
+	@Override
+	public void favorisModified() {
+		if(this.mBoundService != null) {
+			this.mBoundService.startGetFavorisAsync(getFavorisListener);
+		}
+		
 	}
 
 };

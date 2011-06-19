@@ -143,8 +143,8 @@
 	<!-- Valeurs pour l'ajout d'incident -->
 	<string name="title_filter_lines">Filtrer les lignes :</string>
 
-	<!-- Valeur pour le menu "Choix du serveur" -->
-	<string name="title_choose_serveur">Choix du serveur</string>
+	<!-- Valeur pour le menu "Paramètres" -->
+	<string name="title_parametrage">Paramètres</string>
 
 	<!-- Valeurs pour le menu Favoris -->
 	<string name="title_menu_favoris">Mes Lignes</string>
@@ -199,7 +199,7 @@
 	</string>
 
 	<!-- Valeurs pour le menu "Voter" -->
-	<string name="title_menu_voter">Voter</string>
+	<string name="title_menu_voter">Voter pour l\'application</string>
 	<string name="title_alert_voter">Voter pour l\'application</string>
 	<string name="msg_voter">
 		Si vous aimez cette application, n\'oubliez pas

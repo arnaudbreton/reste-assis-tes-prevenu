@@ -50,6 +50,11 @@ public class DefaultContentProvider extends ContentProvider {
 	 * URI pour les incidents
 	 */
 	public static final String INCIDENTS_URI = "incidents";
+	
+	/**
+	 * URI pour le paramétrage
+	 */
+	public static final String PARAMETRAGE_URI = "parametrage";
 
 	/**
 	 * Identifiant de l'URL de récupération des types de ligne
@@ -81,6 +86,11 @@ public class DefaultContentProvider extends ContentProvider {
 	 * Identifiant de l'URI d'ajout des incidents
 	 */
 	private static final int INCIDENTS = 6;
+	
+	/**
+	 * Identifiant de l'URI de récuparation du paramétrage
+	 */
+	private static final int PARAMETRAGE_ID = 7;
 
 	private static final UriMatcher uriMatcher;
 	static {
@@ -91,6 +101,7 @@ public class DefaultContentProvider extends ContentProvider {
 		uriMatcher.addURI(PROVIDER_NAME, LIGNES_URI, LIGNES);
 		uriMatcher.addURI(PROVIDER_NAME, LIGNES_URI.concat("/#"), LIGNES_ID);
 		uriMatcher.addURI(PROVIDER_NAME, INCIDENTS_URI, INCIDENTS);
+		uriMatcher.addURI(PROVIDER_NAME, PARAMETRAGE_URI.concat("/#"), PARAMETRAGE_ID);
 	}
 
 	/**
@@ -108,6 +119,8 @@ public class DefaultContentProvider extends ContentProvider {
 					+ TAG_PROVIDER, "Début de suppression des incidents");
 			nbRowDeleted = this.dbHelper.getWritableDatabase().delete(
 					IncidentsBDDHelper.NOM_TABLE, whereClause, whereArgs);
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, String.format("%s incidents supprimés", nbRowDeleted));
 			break;
 		}
 
@@ -136,21 +149,34 @@ public class DefaultContentProvider extends ContentProvider {
 	public Uri insert(Uri uri, ContentValues values) {
 		long rowId = 0;
 
+		Uri uriNewLine = CONTENT_URI;
+		
 		switch (uriMatcher.match(uri)) {
 		case INCIDENTS:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début d'insertion de nouveaux incidents");
 			rowId = this.dbHelper.getWritableDatabase().insert(
 					IncidentsBDDHelper.NOM_TABLE, null, values);
+			
+			if (rowId > 0) {
+				uriNewLine = Uri.withAppendedPath(uriNewLine, INCIDENTS_URI
+						+ "/" + rowId);
+			}
+			
 			break;
-		}
-
-		if (rowId > 0) {
-			Uri uriNewIncident = CONTENT_URI;
-			uriNewIncident = Uri.withAppendedPath(uriNewIncident, INCIDENTS_URI
-					+ "/" + rowId);
-
-			return uriNewIncident;
+		case PARAMETRAGE_ID:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début d'insertion d'un paramètre");
+			rowId = this.dbHelper.getWritableDatabase().insert(
+					ParametrageBDDHelper.NOM_TABLE, null, values);
+			if (rowId > 0) {
+				uriNewLine = Uri.withAppendedPath(uriNewLine, PARAMETRAGE_URI
+						+ "/" + rowId);
+			}
+		}	
+		
+		if(rowId > 0) {
+			return uriNewLine;
 		}
 
 		throw new SQLException("Erreur à l'insertion :  " + uri);
@@ -160,8 +186,8 @@ public class DefaultContentProvider extends ContentProvider {
 	public boolean onCreate() {
 		Context context = getContext();
 		this.dbHelper = new DatabaseHelper(context);
-		this.ratpDB = dbHelper.getWritableDatabase();
-		return (this.ratpDB == null) ? false : true;
+		this.rasstpDB = dbHelper.getWritableDatabase();
+		return (this.rasstpDB == null) ? false : true;
 	}
 
 	@Override
@@ -218,7 +244,12 @@ public class DefaultContentProvider extends ContentProvider {
 					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID
 					));
 			break;
-		}
+		case PARAMETRAGE_ID:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début récupération paramétrage");
+			qb.setTables(String.format("%s", ParametrageBDDHelper.NOM_TABLE));
+			qb.appendWhere(ParametrageBDDHelper.COL_CLE + uri.getPathSegments().get(1));
+		}		
 
 		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null,
 				sortOrder);
@@ -241,6 +272,15 @@ public class DefaultContentProvider extends ContentProvider {
 					LigneBDDHelper.ID + "=" + uri.getPathSegments().get(1),
 					selectionArgs);
 			break;
+		case PARAMETRAGE_ID:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début mise d'un paramètre : "
+					+ uri.getPathSegments().get(1));
+			count = this.dbHelper.getWritableDatabase().update(
+					ParametrageBDDHelper.NOM_TABLE, values,
+					ParametrageBDDHelper.COL_CLE + "=" + uri.getPathSegments().get(1),
+					selectionArgs);
+			break;
 		}
 
 		getContext().getContentResolver().notifyChange(uri, null);
@@ -248,7 +288,7 @@ public class DefaultContentProvider extends ContentProvider {
 		return count;
 	}
 
-	private SQLiteDatabase ratpDB;
+	private SQLiteDatabase rasstpDB;
 
 	/**
 	 * Nom de la base
@@ -299,6 +339,7 @@ public class DefaultContentProvider extends ContentProvider {
 			Log.i(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début création de la base.");
 
+			// Création de la table des types de lignes
 			db.execSQL(String.format("CREATE TABLE %s"
 					+ "(%s INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "%s VARCHAR NOT NULL);",
@@ -306,6 +347,7 @@ public class DefaultContentProvider extends ContentProvider {
 					TypeLigneBDDHelper.ID,
 					TypeLigneBDDHelper.COL_TYPE_LIGNE));
 	
+			// Création de la table des lignes
 			db.execSQL(String.format("CREATE TABLE %s"
 			+ "(%s INTEGER PRIMARY KEY	AUTOINCREMENT,"
 			+ "%s VARCHAR NOT NULL,"
@@ -318,6 +360,7 @@ public class DefaultContentProvider extends ContentProvider {
 			TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID,
 			LigneBDDHelper.COL_IS_FAVORIS));					
 
+			// Création de la table des incidents
 			db.execSQL(String.format("CREATE TABLE %s ("
 					+ "%s INTEGER PRIMARY KEY,"
 					+ "%s INTEGER REFERENCES lignes(_id),"
@@ -337,6 +380,16 @@ public class DefaultContentProvider extends ContentProvider {
 					IncidentsBDDHelper.COL_NB_VOTE_ENDED,
 					IncidentsBDDHelper.COL_LAST_MODIFIED_TIME));
 
+			// Création de la table paramétrage
+			db.execSQL(String.format("CREATE TABLE %s ("
+					+ "%s INTEGER PRIMARY KEY,"
+					+ "%s VARCHAR NOT NULL,"
+					+ "%s VARCHAR NOT NULL,"+ ");",
+					ParametrageBDDHelper.NOM_TABLE,
+					ParametrageBDDHelper.ID,
+					ParametrageBDDHelper.COL_CLE,
+					ParametrageBDDHelper.COL_VALEUR));
+			
 			Log.i(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Fin création de la base.");
 		}

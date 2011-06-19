@@ -35,13 +35,17 @@ import com.resteassistesprevenu.R;
 import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
+import com.resteassistesprevenu.model.ParametreModel;
 import com.resteassistesprevenu.provider.DefaultContentProvider;
 import com.resteassistesprevenu.provider.IncidentsBDDHelper;
 import com.resteassistesprevenu.provider.LigneBDDHelper;
+import com.resteassistesprevenu.provider.ParametrageBDDHelper;
 import com.resteassistesprevenu.provider.TypeLigneBDDHelper;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceFavorisModifiedListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetIncidentsEnCoursListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetLignesListener;
+import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetParametrageListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceGetTypeLignesListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceReportNewIncidentListener;
 import com.resteassistesprevenu.services.listeners.IIncidentsTransportsBackgroundServiceVoteIncidentListener;
@@ -57,6 +61,8 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	private static final String TAG_SERVICE = "IncidentsTransportsBackgroundService";
 
 	private static final Object lockObject = new Object();
+	
+	private List<IIncidentsTransportsBackgroundServiceFavorisModifiedListener> favorisModifiedListener;
 
 	/**
 	 * AsyncTask de récupération des incidents
@@ -246,6 +252,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		protected Void doInBackground(LigneModel... params) {
 			try {
 				registerFavoris(params[0]);
+				fireFavorisModified();
 			} catch (Exception e) {
 				Log.e(getString(R.string.log_tag_name),
 						"Erreur lors de l'enregistrement du favoris "
@@ -315,6 +322,38 @@ public class IncidentsTransportsBackgroundService extends Service implements
 				}
 			}
 
+			this.callback.dataChanged(result);
+		}
+	}
+	
+	/**
+	 * AsyncTask de récupération des favoris
+	 * 
+	 */
+	private class GetParametreAsyncTask extends
+			AsyncTask<String, String, ParametreModel> {
+		private IIncidentsTransportsBackgroundServiceGetParametrageListener callback;
+
+		public GetParametreAsyncTask(
+				IIncidentsTransportsBackgroundServiceGetParametrageListener callback) {
+			this.callback = callback;
+		}
+
+		@Override
+		protected ParametreModel doInBackground(String... params) {
+			try {
+				return getParametrageFromProvider(params[0]);
+			} catch (Exception e) {
+				Log.e(getString(R.string.log_tag_name),
+						"Erreur lors du chargement des favoris par le service",
+						e);
+				return null;
+			}
+		}	
+
+		@Override
+		protected void onPostExecute(ParametreModel result) {
+			super.onPostExecute(result);
 			this.callback.dataChanged(result);
 		}
 	}
@@ -509,7 +548,7 @@ public class IncidentsTransportsBackgroundService extends Service implements
 					ligneId = c.getInt(c.getColumnIndex(LigneBDDHelper.ID));
 				}
 				c.close();
-
+				
 				ContentValues cvIncident = IncidentsBDDHelper.getContentValues(
 						incidentService, ligneId);
 				cr.insert(uriContentProvider, cvIncident);
@@ -535,11 +574,9 @@ public class IncidentsTransportsBackgroundService extends Service implements
 					null, null, null);
 
 			incidentsService = new ArrayList<IncidentModel>();
-			if (cIncidentsDB.moveToFirst()) {
-				while (cIncidentsDB.moveToNext()) {
-					incidentsService.add(IncidentsBDDHelper
-							.getIncidentModelFromCursor(cIncidentsDB));
-				}
+			while (cIncidentsDB.moveToNext()) {
+				incidentsService.add(IncidentsBDDHelper
+						.getIncidentModelFromCursor(cIncidentsDB));
 			}
 			cIncidentsDB.close();
 		}
@@ -672,6 +709,33 @@ public class IncidentsTransportsBackgroundService extends Service implements
 		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
 				+ TAG_SERVICE, "Fin enregistrement d'un favoris");
 	}
+	
+	/**
+	 * Récupération d'un paramètre
+	 * @param string Nom du paramètre
+	 * @return La valeur du paramètre, null s'il n'existe pas
+	 */
+	private ParametreModel getParametrageFromProvider(String nomParam) {
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début récupération du paramètre " + nomParam);
+		
+		ContentResolver cr = getContentResolver();
+		String[] projection = new String[] { ParametrageBDDHelper.COL_CLE, ParametrageBDDHelper.COL_VALEUR };
+
+		Cursor c = cr.query(Uri.withAppendedPath(
+				DefaultContentProvider.CONTENT_URI,
+				DefaultContentProvider.PARAMETRAGE_URI), projection, null, null,
+				null);
+
+		ParametreModel param = ParametrageBDDHelper.cursorToParametreModel(c);
+
+		c.close();
+
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin récupération du paramètre " + nomParam);
+		
+		return param;
+	}
 
 	/**
 	 * Envoi d'une requête HTTP au serveur
@@ -744,10 +808,35 @@ public class IncidentsTransportsBackgroundService extends Service implements
 	public void startRegisterFavoris(LigneModel ligne) {
 		new RegisterFavorisAsyncTask().execute(ligne);
 	}
+	
+	public void addFavorisModifiedListener(IIncidentsTransportsBackgroundServiceFavorisModifiedListener listener) {
+		if(this.favorisModifiedListener == null) {
+			this.favorisModifiedListener = new ArrayList<IIncidentsTransportsBackgroundServiceFavorisModifiedListener>();
+		}
+		
+		this.favorisModifiedListener.add(listener);
+	}
+	
+	public void removeFavorisModifiedListener(IIncidentsTransportsBackgroundServiceFavorisModifiedListener listener) {
+		if(this.favorisModifiedListener != null && this.favorisModifiedListener.contains(listener)) {
+			this.favorisModifiedListener.remove(listener);
+		}
+	}
+	
+	private void fireFavorisModified() {
+		for(IIncidentsTransportsBackgroundServiceFavorisModifiedListener listener : this.favorisModifiedListener) {
+			listener.favorisModified();
+		}
+	}
 
 	public void startGetFavorisAsync(
 			IIncidentsTransportsBackgroundServiceGetFavorisListener callback) {
 		new GetFavorisAsyncTask(callback).execute();
+	}
+	
+	public void startGetParametreAsync(
+			IIncidentsTransportsBackgroundServiceGetParametrageListener callback) {
+		new GetParametreAsyncTask(callback).execute();
 	}
 
 	@Override

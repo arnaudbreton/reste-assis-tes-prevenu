@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:id="@+id/menu_favoris" android:title="@string/title_menu_favoris"
 		android:icon="@drawable/ic_menu_star" />
-	<item android:id="@+id/menu_choose_serveur" android:title="@string/title_choose_serveur"
+	<item android:id="@+id/menu_parametrage" android:title="@string/title_parametrage"
 		android:icon="@android:drawable/ic_menu_preferences" />
 	<item android:id="@+id/menu_about" android:title="@string/title_menu_about" android:icon="@android:drawable/ic_menu_help"/>
 	<item android:id="@+id/menu_voter" android:title="@string/title_menu_voter" android:icon="@drawable/ic_menu_invite"/>
