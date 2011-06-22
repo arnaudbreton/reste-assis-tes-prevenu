@@ -29,7 +29,8 @@ public class DefaultContentProvider extends ContentProvider {
 	/**
 	 * URI du provider
 	 */
-	public static final Uri CONTENT_URI = Uri.parse("content://" + PROVIDER_NAME);
+	public static final Uri CONTENT_URI = Uri.parse("content://"
+			+ PROVIDER_NAME);
 
 	/**
 	 * URI pour les types de lignes
@@ -50,11 +51,16 @@ public class DefaultContentProvider extends ContentProvider {
 	 * URI pour les incidents
 	 */
 	public static final String INCIDENTS_URI = "incidents";
-	
+
 	/**
 	 * URI pour le paramétrage
 	 */
 	public static final String PARAMETRAGE_URI = "parametrage";
+
+	/**
+	 * URI pour les plages horaires
+	 */
+	public static final String PLAGES_HORAIRES_URI = "parametrage";
 
 	/**
 	 * Identifiant de l'URL de récupération des types de ligne
@@ -86,11 +92,21 @@ public class DefaultContentProvider extends ContentProvider {
 	 * Identifiant de l'URI d'ajout des incidents
 	 */
 	private static final int INCIDENTS = 6;
-	
+
 	/**
 	 * Identifiant de l'URI de récuparation du paramétrage
 	 */
-	private static final int PARAMETRAGE_ID = 7;
+	private static final int PARAMETRAGE = 7;
+
+	/**
+	 * Identifiant de l'URI de récuparation des plages horaires
+	 */
+	private static final int PLAGES_HORAIRES = 8;
+
+	/**
+	 * Identifiant de l'URI de récuparation d'une plage horaire
+	 */
+	private static final int PLAGES_HORAIRES_ID = 9;
 
 	private static final UriMatcher uriMatcher;
 	static {
@@ -101,7 +117,11 @@ public class DefaultContentProvider extends ContentProvider {
 		uriMatcher.addURI(PROVIDER_NAME, LIGNES_URI, LIGNES);
 		uriMatcher.addURI(PROVIDER_NAME, LIGNES_URI.concat("/#"), LIGNES_ID);
 		uriMatcher.addURI(PROVIDER_NAME, INCIDENTS_URI, INCIDENTS);
-		uriMatcher.addURI(PROVIDER_NAME, PARAMETRAGE_URI.concat("/#"), PARAMETRAGE_ID);
+		uriMatcher.addURI(PROVIDER_NAME, PARAMETRAGE_URI.concat("/#"),
+				PARAMETRAGE);
+		uriMatcher.addURI(PROVIDER_NAME, PLAGES_HORAIRES_URI, PLAGES_HORAIRES);
+		uriMatcher.addURI(PROVIDER_NAME, PLAGES_HORAIRES_URI.concat("/#"),
+				PLAGES_HORAIRES_ID);
 	}
 
 	/**
@@ -120,7 +140,8 @@ public class DefaultContentProvider extends ContentProvider {
 			nbRowDeleted = this.dbHelper.getWritableDatabase().delete(
 					IncidentsBDDHelper.NOM_TABLE, whereClause, whereArgs);
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
-					+ TAG_PROVIDER, String.format("%s incidents supprimés", nbRowDeleted));
+					+ TAG_PROVIDER,
+					String.format("%s incidents supprimés", nbRowDeleted));
 			break;
 		}
 
@@ -150,21 +171,21 @@ public class DefaultContentProvider extends ContentProvider {
 		long rowId = 0;
 
 		Uri uriNewLine = CONTENT_URI;
-		
+
 		switch (uriMatcher.match(uri)) {
 		case INCIDENTS:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début d'insertion de nouveaux incidents");
 			rowId = this.dbHelper.getWritableDatabase().insert(
 					IncidentsBDDHelper.NOM_TABLE, null, values);
-			
+
 			if (rowId > 0) {
 				uriNewLine = Uri.withAppendedPath(uriNewLine, INCIDENTS_URI
 						+ "/" + rowId);
 			}
-			
+
 			break;
-		case PARAMETRAGE_ID:
+		case PARAMETRAGE:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début d'insertion d'un paramètre");
 			rowId = this.dbHelper.getWritableDatabase().insert(
@@ -173,9 +194,19 @@ public class DefaultContentProvider extends ContentProvider {
 				uriNewLine = Uri.withAppendedPath(uriNewLine, PARAMETRAGE_URI
 						+ "/" + rowId);
 			}
-		}	
-		
-		if(rowId > 0) {
+
+		case PLAGES_HORAIRES_ID:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début d'insertion d'une plage");
+			rowId = this.dbHelper.getWritableDatabase().insert(
+					PlagesHorairesBDDHelper.NOM_TABLE, null, values);
+			if (rowId > 0) {
+				uriNewLine = Uri.withAppendedPath(uriNewLine, PARAMETRAGE_URI
+						+ "/" + rowId);
+			}
+		}
+
+		if (rowId > 0) {
 			return uriNewLine;
 		}
 
@@ -206,8 +237,7 @@ public class DefaultContentProvider extends ContentProvider {
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération lignes");
 			qb.setTables(String.format("%s INNER JOIN %s ON (%s.%s=%s.%s)",
-					LigneBDDHelper.NOM_TABLE,
-					TypeLigneBDDHelper.NOM_TABLE,
+					LigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.NOM_TABLE,
 					LigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_ID_TYPE_LIGNE,
 					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID));
 			break;
@@ -215,8 +245,7 @@ public class DefaultContentProvider extends ContentProvider {
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération d'une ligne");
 			qb.setTables(String.format("%s INNER JOIN %s ON (%s.%s=%s.%s)",
-					LigneBDDHelper.NOM_TABLE,
-					TypeLigneBDDHelper.NOM_TABLE,
+					LigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.NOM_TABLE,
 					LigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_ID_TYPE_LIGNE,
 					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID));
 			qb.appendWhere("lignes.idLigne = " + uri.getPathSegments().get(1));
@@ -225,8 +254,7 @@ public class DefaultContentProvider extends ContentProvider {
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération favoris");
 			qb.setTables(String.format("%s INNER JOIN %s ON (%s.%s=%s.%s)",
-					LigneBDDHelper.NOM_TABLE,
-					TypeLigneBDDHelper.NOM_TABLE,
+					LigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.NOM_TABLE,
 					LigneBDDHelper.NOM_TABLE, LigneBDDHelper.COL_ID_TYPE_LIGNE,
 					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID));
 			qb.appendWhere(LigneBDDHelper.COL_IS_FAVORIS + " = 1");
@@ -234,25 +262,33 @@ public class DefaultContentProvider extends ContentProvider {
 		case INCIDENTS:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération incidents");
-			qb.setTables(String.format("(%s INNER JOIN %s %s ON (%s.%s=%s.%s)) %s INNER JOIN %s ON (%s.%s=%s.%s)",
-					IncidentsBDDHelper.NOM_TABLE, LigneBDDHelper.NOM_TABLE, "L1",
-					IncidentsBDDHelper.NOM_TABLE,
-					IncidentsBDDHelper.COL_ID_LIGNE, "L1",
-					LigneBDDHelper.ID,
-					"L2",  TypeLigneBDDHelper.NOM_TABLE,
-					"L2", LigneBDDHelper.COL_ID_TYPE_LIGNE,
-					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID
-					));
+			qb.setTables(String
+					.format("(%s INNER JOIN %s %s ON (%s.%s=%s.%s)) %s INNER JOIN %s ON (%s.%s=%s.%s)",
+							IncidentsBDDHelper.NOM_TABLE,
+							LigneBDDHelper.NOM_TABLE, "L1",
+							IncidentsBDDHelper.NOM_TABLE,
+							IncidentsBDDHelper.COL_ID_LIGNE, "L1",
+							LigneBDDHelper.ID, "L2",
+							TypeLigneBDDHelper.NOM_TABLE, "L2",
+							LigneBDDHelper.COL_ID_TYPE_LIGNE,
+							TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID));
 			break;
-		case PARAMETRAGE_ID:
+		case PARAMETRAGE:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Début récupération paramétrage");
 			qb.setTables(String.format("%s", ParametrageBDDHelper.NOM_TABLE));
-			qb.appendWhere(ParametrageBDDHelper.COL_CLE + uri.getPathSegments().get(1));
-		}		
+			qb.appendWhere(ParametrageBDDHelper.COL_CLE
+					+ uri.getPathSegments().get(1));
+			break;
+		case PLAGES_HORAIRES:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début récupération plages horaires");
+			qb.setTables(String.format("%s", PlagesHorairesBDDHelper.NOM_TABLE));
+			break;
+		}
 
-		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null,
-				sortOrder);
+		Cursor c = qb.query(db, projection, selection, selectionArgs, null,
+				null, sortOrder);
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 
 		return c;
@@ -272,14 +308,25 @@ public class DefaultContentProvider extends ContentProvider {
 					LigneBDDHelper.ID + "=" + uri.getPathSegments().get(1),
 					selectionArgs);
 			break;
-		case PARAMETRAGE_ID:
+		case PARAMETRAGE:
 			Log.d(getContext().getString(R.string.log_tag_name) + " "
-					+ TAG_PROVIDER, "Début mise d'un paramètre : "
+					+ TAG_PROVIDER, "Début mise à jour d'un paramètre : "
 					+ uri.getPathSegments().get(1));
 			count = this.dbHelper.getWritableDatabase().update(
-					ParametrageBDDHelper.NOM_TABLE, values,
-					ParametrageBDDHelper.COL_CLE + "=" + uri.getPathSegments().get(1),
-					selectionArgs);
+					ParametrageBDDHelper.NOM_TABLE,
+					values,
+					ParametrageBDDHelper.COL_CLE + "="
+							+ uri.getPathSegments().get(1), selectionArgs);
+			break;
+		case PLAGES_HORAIRES_ID:
+			Log.d(getContext().getString(R.string.log_tag_name) + " "
+					+ TAG_PROVIDER, "Début mise à jour d'une plage horaire : "
+					+ uri.getPathSegments().get(1));
+			count = this.dbHelper.getWritableDatabase().update(
+					PlagesHorairesBDDHelper.NOM_TABLE,
+					values,
+					PlagesHorairesBDDHelper.ID + "="
+							+ uri.getPathSegments().get(1), selectionArgs);
 			break;
 		}
 
@@ -342,36 +389,27 @@ public class DefaultContentProvider extends ContentProvider {
 			// Création de la table des types de lignes
 			db.execSQL(String.format("CREATE TABLE %s"
 					+ "(%s INTEGER PRIMARY KEY AUTOINCREMENT,"
-					+ "%s VARCHAR NOT NULL);",
-					TypeLigneBDDHelper.NOM_TABLE,
-					TypeLigneBDDHelper.ID,
-					TypeLigneBDDHelper.COL_TYPE_LIGNE));
-	
+					+ "%s VARCHAR NOT NULL);", TypeLigneBDDHelper.NOM_TABLE,
+					TypeLigneBDDHelper.ID, TypeLigneBDDHelper.COL_TYPE_LIGNE));
+
 			// Création de la table des lignes
 			db.execSQL(String.format("CREATE TABLE %s"
-			+ "(%s INTEGER PRIMARY KEY	AUTOINCREMENT,"
-			+ "%s VARCHAR NOT NULL,"
-			+ "%s INTEGER REFERENCES %s(%s),"
-			+ "%s INTEGER DEFAULT 0);", 
-			LigneBDDHelper.NOM_TABLE,
-			LigneBDDHelper.ID,
-			LigneBDDHelper.COL_NOM_LIGNE,
-			LigneBDDHelper.COL_ID_TYPE_LIGNE,
-			TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID,
-			LigneBDDHelper.COL_IS_FAVORIS));					
+					+ "(%s INTEGER PRIMARY KEY	AUTOINCREMENT,"
+					+ "%s VARCHAR NOT NULL," + "%s INTEGER REFERENCES %s(%s),"
+					+ "%s INTEGER DEFAULT 0);", LigneBDDHelper.NOM_TABLE,
+					LigneBDDHelper.ID, LigneBDDHelper.COL_NOM_LIGNE,
+					LigneBDDHelper.COL_ID_TYPE_LIGNE,
+					TypeLigneBDDHelper.NOM_TABLE, TypeLigneBDDHelper.ID,
+					LigneBDDHelper.COL_IS_FAVORIS));
 
 			// Création de la table des incidents
 			db.execSQL(String.format("CREATE TABLE %s ("
 					+ "%s INTEGER PRIMARY KEY,"
 					+ "%s INTEGER REFERENCES lignes(_id),"
-					+ "%s VARCHAR NOT NULL,"
-					+ "%s VARCHAR NOT NULL,"
-					+ "%s INTEGER NOT NULL,"
-					+ "%s INTEGER NOT NULL,"
-					+ "%s INTEGER NOT NULL,"
-					+ "%s DATE NOT NULL" + ");",
-					IncidentsBDDHelper.NOM_TABLE,
-					IncidentsBDDHelper.ID,
+					+ "%s VARCHAR NOT NULL," + "%s VARCHAR NOT NULL,"
+					+ "%s INTEGER NOT NULL," + "%s INTEGER NOT NULL,"
+					+ "%s INTEGER NOT NULL," + "%s DATE NOT NULL" + ");",
+					IncidentsBDDHelper.NOM_TABLE, IncidentsBDDHelper.ID,
 					IncidentsBDDHelper.COL_ID_LIGNE,
 					IncidentsBDDHelper.COL_RAISON,
 					IncidentsBDDHelper.COL_STATUT,
@@ -382,15 +420,28 @@ public class DefaultContentProvider extends ContentProvider {
 
 			// Création de la table paramétrage
 			db.execSQL(String.format("CREATE TABLE %s ("
-					+ "%s INTEGER PRIMARY KEY,"
-					+ "%s VARCHAR NOT NULL,"
-					+ "%s VARCHAR NOT NULL"
-					+ ");",
-					ParametrageBDDHelper.NOM_TABLE,
-					ParametrageBDDHelper.ID,
+					+ "%s INTEGER PRIMARY KEY," + "%s VARCHAR NOT NULL,"
+					+ "%s VARCHAR NOT NULL" + ");",
+					ParametrageBDDHelper.NOM_TABLE, ParametrageBDDHelper.ID,
 					ParametrageBDDHelper.COL_CLE,
 					ParametrageBDDHelper.COL_VALEUR));
 			
+
+			// Création de la table plages_horaires
+			db.execSQL(String.format("CREATE TABLE %s ("
+					+ "%s INTEGER PRIMARY KEY,"
+					+ "%s INTEGER NOT NULL"
+					+ "%s INTEGER NOT NULL"
+					+ "%s INTEGER NOT NULL"
+					+ "%s INTEGER NOT NULL"
+					+ ");",
+					PlagesHorairesBDDHelper.NOM_TABLE, 
+					ParametrageBDDHelper.ID,
+					PlagesHorairesBDDHelper.COL_HEURE_DEBUT,
+					PlagesHorairesBDDHelper.COL_MINUTE_DEBUT,
+					PlagesHorairesBDDHelper.COL_HEURE_FIN,
+					PlagesHorairesBDDHelper.COL_MINUTE_FIN));
+
 			Log.i(getContext().getString(R.string.log_tag_name) + " "
 					+ TAG_PROVIDER, "Fin création de la base.");
 		}

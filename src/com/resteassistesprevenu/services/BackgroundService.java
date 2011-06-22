@@ -36,10 +36,12 @@ import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
 import com.resteassistesprevenu.model.ParametreModel;
+import com.resteassistesprevenu.model.PlageHoraireModel;
 import com.resteassistesprevenu.provider.DefaultContentProvider;
 import com.resteassistesprevenu.provider.IncidentsBDDHelper;
 import com.resteassistesprevenu.provider.LigneBDDHelper;
 import com.resteassistesprevenu.provider.ParametrageBDDHelper;
+import com.resteassistesprevenu.provider.PlagesHorairesBDDHelper;
 import com.resteassistesprevenu.provider.TypeLigneBDDHelper;
 import com.resteassistesprevenu.services.listeners.IBackgroundServiceFavorisModifiedListener;
 import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetFavorisListener;
@@ -356,6 +358,33 @@ public class BackgroundService extends Service implements
 		protected void onPostExecute(ParametreModel result) {
 			super.onPostExecute(result);
 			this.callback.dataChanged(result);
+		}
+	}
+	
+	/**
+	 * AsyncTask d'enregistrement d'un favoris
+	 * 
+	 */
+	private class RegisterPlagesHorairesAsyncTask extends
+			AsyncTask<PlageHoraireModel, Void, Void> {
+		
+		@Override
+		protected Void doInBackground(PlageHoraireModel... params) {
+			try {
+				registerPlageHoraire(params[0]);
+			} catch (Exception e) {
+				Log.e(getString(R.string.log_tag_name),
+						"Erreur lors de l'enregistrement d'une plage horaire "
+								+ params[0], e);
+			}
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			// fireReportNewIncidentChanged(result);
 		}
 	}
 
@@ -737,7 +766,57 @@ public class BackgroundService extends Service implements
 		
 		return param;
 	}
+	
+	/**
+	 * Insertion ou mise à jour d'un paramètre
+	 * 
+	 * @param ligne
+	 *            La ligne à mettre à jour
+	 */
+	public void registerParametre(ParametreModel param) {
+		ContentResolver cr = getContentResolver();
+		ContentValues editedValues = new ContentValues();
 
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début enregistrement d'un paramètre");
+		
+		editedValues.put(ParametrageBDDHelper.COL_CLE, param.getKey());
+		editedValues.put(ParametrageBDDHelper.COL_VALEUR, param.getValue());
+		
+		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Mise à jour d'un paramètre : " + param);
+		
+		cr.update(Uri.withAppendedPath(DefaultContentProvider.CONTENT_URI,
+				DefaultContentProvider.PARAMETRAGE_URI + "/" + param.getKey()), editedValues, null, null);
+		
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin enregistrement d'un favoris");
+	}
+
+	/**
+	 * Insertion ou mise à jour d'une plage horaire
+	 * 
+	 * @param plage La plage horaire
+	 */
+	public void registerPlageHoraire(PlageHoraireModel plage) {
+		ContentResolver cr = getContentResolver();
+		ContentValues editedValues = new ContentValues();
+
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Début enregistrement d'un paramètre");
+		
+		editedValues = PlagesHorairesBDDHelper.plageHoraireModelToCursor(plage);
+		
+		Log.d(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Mise à jour d'une plage horaire : " + plage);
+		
+		cr.insert(Uri.withAppendedPath(DefaultContentProvider.CONTENT_URI,
+				DefaultContentProvider.PARAMETRAGE_URI), editedValues, null, null);
+		
+		Log.i(getApplicationContext().getString(R.string.log_tag_name) + " "
+				+ TAG_SERVICE, "Fin enregistrement d'un favoris");
+	}
+	
 	/**
 	 * Envoi d'une requête HTTP au serveur
 	 * 
@@ -845,7 +924,12 @@ public class BackgroundService extends Service implements
 			String cle,
 			String valeur,
 			IBackgroundServiceRegisterParametrageListener callback) {
-		
+	//	new RegisterParametreAsyncTask(callback).execute(cle, valeur);
+	}
+	
+	@Override
+	public void startRegisterPlageHoraireAsync(PlageHoraireModel plage) {
+		new RegisterPlagesHorairesAsyncTask.execute(plage);
 	}
 
 	@Override

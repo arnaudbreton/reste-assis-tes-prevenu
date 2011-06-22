@@ -19,4 +19,20 @@ public class PlageHoraireModel {
 	public String toString() {		
 		return String.format("%d:%d - %d:%d", heureDebut,minuteDebut,heureFin,minuteFin);
 	}
+
+	public int getHeureDebut() {
+		return heureDebut;
+	}
+
+	public int getMinuteDebut() {
+		return minuteDebut;
+	}
+
+	public int getHeureFin() {
+		return heureFin;
+	}
+
+	public int getMinuteFin() {
+		return minuteFin;
+	}
 }

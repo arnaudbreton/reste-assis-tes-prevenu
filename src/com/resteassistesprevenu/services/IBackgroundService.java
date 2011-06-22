@@ -3,6 +3,7 @@ package com.resteassistesprevenu.services;
 import com.resteassistesprevenu.model.IncidentAction;
 import com.resteassistesprevenu.model.IncidentModel;
 import com.resteassistesprevenu.model.LigneModel;
+import com.resteassistesprevenu.model.PlageHoraireModel;
 import com.resteassistesprevenu.services.listeners.IBackgroundServiceFavorisModifiedListener;
 import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetFavorisListener;
 import com.resteassistesprevenu.services.listeners.IBackgroundServiceGetIncidentsEnCoursListener;
@@ -80,6 +81,12 @@ public interface IBackgroundService {
 	 * Enregistrement d'un paramètre, asynchrone
 	 */
 	public void startRegisterParametreAsync(String cle, String valeur, IBackgroundServiceRegisterParametrageListener callback);
+	
+	/**
+	 * Enregistrement ou mise à jour d'une plage horaire, asynchrone
+	 * @param plage
+	 */
+	void startRegisterPlageHoraireAsync(PlageHoraireModel plage);
 
 	/**
 	 * Indique si le service pointe sur la production
